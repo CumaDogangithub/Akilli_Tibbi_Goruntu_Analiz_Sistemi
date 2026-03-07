@@ -43,7 +43,7 @@ Projenin kapsamını, hedeflerini ve beklenen sonuçlarını detaylı bir şekil
   | **US4** | Doktor | Analiz sonucunu PDF olarak indirmek istiyorum. | Hastanın dosyasına eklemek ve diğer uzmanlarla paylaşmak için. |
   | **US5** | Akademisyen | Modelin performans metriklerini (ROC eğrisi, Confusion Matrix) görmek istiyorum. | Sistemin tıbbi güvenilirliğini doğrulamak için. |
   
-  > **Hazırlayan (Scrum Master):** Cuma Doğan
+  > **Hazırlayan :** Cuma Doğan
 
 ### 🛠️ 3. Teknoloji Araştırması ve Seçimi
 Proje için uygun olan görüntü işleme kütüphanelerini (örneğin OpenCV, scikit-image) ve yapay zeka/makine öğrenimi framework'lerini (örneğin TensorFlow, PyTorch) araştırın ve karşılaştırın. Seçim nedenlerinizi açıklayın.
