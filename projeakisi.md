@@ -14,6 +14,7 @@ Projenin kapsamını, hedeflerini ve beklenen sonuçlarını detaylı bir şekil
 
 ### 📊 2. Gereksinim Toplama ve Analizi
 
+---
 
   Akıllı Tıbbi Görüntü Analiz Sistemi'nin temel olarak hangi işlevleri yerine getirmesi gerektiği, kalite standartları ve kullanıcı ihtiyaçları aşağıda detaylandırılmıştır.
   
