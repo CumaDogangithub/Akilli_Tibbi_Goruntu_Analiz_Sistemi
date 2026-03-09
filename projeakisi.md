@@ -14,6 +14,59 @@ Bu belge, projenin ilk sprint'i (geliştirme döngüsü) kapsamında yapılacak 
 
 Projenin kapsamını, hedeflerini ve beklenen sonuçlarını detaylı bir şekilde tanımlayın. Tıbbi görüntü analizinde hangi sorunlara çözüm getirileceğini belirtin.
 
+## 📌 1. Proje Vizyonu ve Kapsamı
+Bu proje, derin öğrenme ve bilgisayarlı görü tekniklerini kullanarak tıbbi görüntülerin (X-ray, MRI, CT) analizini otomatize eden bir karar destek sistemidir. Amacımız, radyologların teşhis sürecini hızlandırmak ve hata payını minimize etmektir.
+
+---
+
+### 🔍 Kapsam
+- **Girdi:** DICOM formatındaki tıbbi görüntüler.
+- **İşlem:** OpenCV ile ön işleme ve TensorFlow/Keras tabanlı derin öğrenme modelleri ile analiz.
+- **Çıktı:** Hastalık tespiti, anomali bölgelerinin işaretlenmesi ve Flask tabanlı web arayüzünde raporlama.
+
+---
+
+## ⚠️ 2. Çözüm Getirilen Problemler
+Geleneksel teşhis süreçlerinde karşılaşılan ve bu projenin odaklandığı temel sorunlar:
+* **Zaman Baskısı:** Acil servislerdeki yoğunluk nedeniyle görüntülerin hızlıca önceliklendirilmesi ihtiyacı.
+* **İnsan Kaynaklı Hatalar:** Uzun mesai saatleri sonrası oluşan dikkat dağınıklığını yapay zeka desteğiyle dengelemek.
+* **Veri Karmaşıklığı:** DICOM verilerinin ham halde yorumlanmasının zorluğu ve standardize edilmemiş görüntü kaliteleri.
+
+---
+
+## 🎯 3. Temel Hedefler ve Başarı Kriterleri (KPI)
+Projenin teknik ve işlevsel hedefleri şunlardır:
+
+| Hedef | Açıklama | Başarı Metriği |
+| :--- | :--- | :--- |
+| **Yüksek Doğruluk** | Modelin hastalıkları doğru teşhis etmesi | %90+ Accuracy / %85+ F1-Score |
+| **Hızlı İşleme** | Görüntü analiz süresinin optimize edilmesi | Görüntü başına < 5 Saniye |
+| **Kullanılabilirlik** | Doktorların kolayca kullanabileceği bir arayüz | Modern ve Responsive Web UI |
+| **Veri Uyumluluğu** | Farklı cihazlardan gelen DICOM verilerinin okunması | %100 DICOM Standart Uyumu |
+
+---
+
+## 🛠️ 4. Teknoloji Yığını (Tech Stack)
+Proje kapsamında kullanılacak temel araçlar:
+* **Dil:** Python 3.x
+* **Yapay Zeka:** TensorFlow, Keras
+* **Görüntü İşleme:** OpenCV, Pydicom
+* **Backend:** Flask
+* **Versiyon Kontrol:** Git & GitHub
+
+---
+
+## 📦 5. Teslim Edilecek Modüller
+Haftalık planlama dahilinde geliştirilecek temel bileşenler:
+1.  ✅ **Görüntü Ön İşleme Modülü:** Gürültü giderme ve kontrast iyileştirme.
+2.  ✅ **Hastalık Tespit Algoritmaları:** CNN tabanlı sınıflandırma modelleri.
+3.  ✅ **Web Arayüzü:** Dosya yükleme ve sonuç görüntüleme ekranları.
+4.  ✅ **Raporlama Sistemi:** Analiz sonuçlarının PDF formatında dökümü.
+5.  ✅ **Performans Raporları:** Model eğitim ve test metrikleri dökümantasyonu.
+
+---
+
+> 👨‍💻 **Hazırlayan:** Nihal Eylül İL
 
 ### 📊 2. Gereksinim Toplama ve Analizi
 
