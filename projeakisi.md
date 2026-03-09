@@ -147,7 +147,7 @@ Pneumonia Görüntü Sayısı: 3875
 Toplam Başlangıç Verisi: 5216
 
 ---
----
+
 ### 🛠️ 2. Görüntü Ön İşleme Pipeline (Kod Blokları)
 Aşağıdaki fonksiyonlar kullanılarak tüm görüntüler standart bir formata getirilmiştir:
 ````python
@@ -171,7 +171,7 @@ def preprocess_image(image_path):
     return img_normalized
 ````
 ---
----
+
 ### 📈 3. Veri Artırma ve Dengeleme (Data Augmentation)
 Veri setindeki NORMAL ve PNEUMONIA sınıfları arasındaki sayısal uçurumu gidermek için sentetik veri üretimi yapılmıştır. Özellikle azınlık sınıf olan sağlıklı akciğer röntgenleri üzerinde şu işlemler uygulanmıştır:
 
@@ -187,7 +187,7 @@ Rotation: Rastgele küçük açılı döndürmelerle modelin farklı açılardan
 
   
 ---
----
+
 ### 🖼️ 4. Ön İşleme Çıktıları
 Aşağıdaki görselde, ham görüntünün (Raw) işlendikten sonraki (Processed - 224x224, Grayscale, CLAHE) hali karşılaştırmalı olarak sunulmuştur.
 
