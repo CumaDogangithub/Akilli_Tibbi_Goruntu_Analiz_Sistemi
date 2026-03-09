@@ -134,7 +134,64 @@ Sistem Doğrulaması: Hazırlanan test.py betiği ile kütüphanelerin çalışm
   > 👨‍💻 **Hazırlayan:** Esmanur Ulu
 
 ### 🖼️ 5. Veri Seti İncelemesi ve Ön İşleme
+---
+---
+Bu aşamada, veri setinin derinlemesine analizi yapılmış ve model eğitimine hazırlık için kritik ön işleme (preprocessing) adımları tamamlanmıştır.
+### 📊 1. Veri Seti İnceleme ve Dağılım
+Veri setindeki sınıfların dengesiz olduğu (Imbalanced Data) tespit edilmiştir. Modelin "Pneumonia" (Zatürre) sınıfına yanlılık göstermemesi için veriler analiz edilmiştir.
+
+Normal Görüntü Sayısı: 1341
+
+Pneumonia Görüntü Sayısı: 3875
+
+Toplam Başlangıç Verisi: 5216
 
 ---
 ---
-Kullanılacak tıbbi görüntü veri setlerini (örneğin, akciğer tomografisi, MR görüntüleri) inceleyin. Veri formatlarını, boyutlarını ve olası ön işleme ihtiyaçlarını (gürültü giderme, normalizasyon) belirleyin.
+### 🛠️ 2. Görüntü Ön İşleme Pipeline (Kod Blokları)
+Aşağıdaki fonksiyonlar kullanılarak tüm görüntüler standart bir formata getirilmiştir:
+````python
+import cv2
+import numpy as np
+
+def preprocess_image(image_path):
+    # 1. Grayscale Dönüşümü: Gereksiz renk bilgisinden kurtulma
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    
+    # 2. Resizing: Tüm resimleri 224x224 boyutuna sabitleme
+    img_resized = cv2.resize(img, (224, 224))
+    
+    # 3. CLAHE (Kontrast Artırma): Akciğer dokusundaki detayları belirginleştirme
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    img_final = clahe.apply(img_resized)
+    
+    # 4. Normalization: Piksel değerlerini [0, 1] arasına çekme
+    img_normalized = img_final / 255.0
+    
+    return img_normalized
+````
+---
+---
+### 📈 3. Veri Artırma ve Dengeleme (Data Augmentation)
+Veri setindeki NORMAL ve PNEUMONIA sınıfları arasındaki sayısal uçurumu gidermek için sentetik veri üretimi yapılmıştır. Özellikle azınlık sınıf olan sağlıklı akciğer röntgenleri üzerinde şu işlemler uygulanmıştır:
+
+Horizontal Flip: Görüntüler yatay eksende aynalanarak varyasyon artırıldı.
+
+Rotation: Rastgele küçük açılı döndürmelerle modelin farklı açılardan gelen röntgenleri tanıması sağlandı.
+
+  | Sınıf | Başlangıç | İşlem Sonrası |
+  | :--- | :--- | :--- | 
+  | NORMAL | 1341 | 2682 | 
+  | PNEUMONIA | 3875 | 3875 | 
+  | TOPLAM | 5216 | 6557 |
+
+  
+---
+---
+### 🖼️ 4. Ön İşleme Çıktıları
+Aşağıdaki görselde, ham görüntünün (Raw) işlendikten sonraki (Processed - 224x224, Grayscale, CLAHE) hali karşılaştırmalı olarak sunulmuştur.
+
+<img width="946" height="464" alt="processed_comparison png" src="https://github.com/user-attachments/assets/3c1dd9cd-aadd-4f3e-8daf-1494c15f223d" />
+
+
+> 👩🏻‍💻 **Hazırlayan:** Elif İkra Çakmak 
