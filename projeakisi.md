@@ -11,12 +11,7 @@ Bu belge, projenin ilk sprint'i (geliştirme döngüsü) kapsamında yapılacak 
 ### 🎯 1. Proje Tanımı ve Hedef Belirleme
 
 ---
-
-Projenin kapsamını, hedeflerini ve beklenen sonuçlarını detaylı bir şekilde tanımlayın. Tıbbi görüntü analizinde hangi sorunlara çözüm getirileceğini belirtin.
-
-## 📌 1. Proje Vizyonu ve Kapsamı
 Bu proje, derin öğrenme ve bilgisayarlı görü tekniklerini kullanarak tıbbi görüntülerin (X-ray, MRI, CT) analizini otomatize eden bir karar destek sistemidir. Amacımız, radyologların teşhis sürecini hızlandırmak ve hata payını minimize etmektir.
-
 ---
 
 ### 🔍 Kapsam
