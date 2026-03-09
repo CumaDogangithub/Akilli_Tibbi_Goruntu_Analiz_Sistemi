@@ -11,6 +11,8 @@ Bu belge, projenin ilk sprint'i (geliştirme döngüsü) kapsamında yapılacak 
 ### 🎯 1. Proje Tanımı ve Hedef Belirleme
 
 ---
+---
+
 Bu proje, derin öğrenme ve bilgisayarlı görü tekniklerini kullanarak tıbbi görüntülerin (X-ray, MRI, CT) analizini otomatize eden bir karar destek sistemidir. Amacımız, radyologların teşhis sürecini hızlandırmak ve hata payını minimize etmektir.
 ---
 
@@ -66,6 +68,7 @@ Haftalık planlama dahilinde geliştirilecek temel bileşenler:
 ### 📊 2. Gereksinim Toplama ve Analizi
 
 ---
+---
 
   Akıllı Tıbbi Görüntü Analiz Sistemi'nin temel olarak hangi işlevleri yerine getirmesi gerektiği, kalite standartları ve kullanıcı ihtiyaçları aşağıda detaylandırılmıştır.
   
@@ -102,17 +105,36 @@ Haftalık planlama dahilinde geliştirilecek temel bileşenler:
 ### 🛠️ 3. Teknoloji Araştırması ve Seçimi
 
 ---
+---
 
 Proje için uygun olan görüntü işleme kütüphanelerini (örneğin OpenCV, scikit-image) ve yapay zeka/makine öğrenimi framework'lerini (örneğin TensorFlow, PyTorch) araştırın ve karşılaştırın. Seçim nedenlerinizi açıklayın.
 
 ### 💻 4. Geliştirme Ortamı Kurulumu
 
 ---
+---
 
-Gerekli yazılım geliştirme araçlarını (IDE, derleyiciler, kütüphaneler) ve sürüm kontrol sistemini (Git) kurun ve yapılandırın. Ekip üyelerinin erişebileceği bir ortak geliştirme ortamı oluşturun.
+🛠️ Teknik Konfigürasyon ve Yapılanlar:
+İzole Çalışma Ortamı: Proje bağımlılıklarının çakışmaması adına Python 3.12 tabanlı venv (Virtual Environment) kurulumu gerçekleştirildi.
+
+Kütüphane Entegrasyonu: Tıbbi görüntü analizinde kullanılacak temel paketler başarıyla yüklendi:
+
+TensorFlow: Derin öğrenme modellerinin eğitimi ve çalıştırılması için.
+
+OpenCV: Görüntü işleme ve ön işleme algoritmaları için.
+
+PyDicom: DICOM formatındaki tıbbi verilerin standartlara uygun okunması için.
+
+Flask: Sistemin web tabanlı arayüz entegrasyonu için.
+
+Sürüm Kontrol Sistemi: Git konfigürasyonları (global e-posta ve isim ayarları) tamamlanarak stabil bir repo yapısı oluşturuldu.
+
+Sistem Doğrulaması: Hazırlanan test.py betiği ile kütüphanelerin çalışma durumları ve versiyon uyumlulukları terminal üzerinden teyit edildi.
+
+  > 👨‍💻 **Hazırlayan:** Esmanur Ulu
 
 ### 🖼️ 5. Veri Seti İncelemesi ve Ön İşleme
 
 ---
-
+---
 Kullanılacak tıbbi görüntü veri setlerini (örneğin, akciğer tomografisi, MR görüntüleri) inceleyin. Veri formatlarını, boyutlarını ve olası ön işleme ihtiyaçlarını (gürültü giderme, normalizasyon) belirleyin.
