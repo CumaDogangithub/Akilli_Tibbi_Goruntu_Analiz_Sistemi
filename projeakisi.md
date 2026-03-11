@@ -107,7 +107,44 @@ Haftalık planlama dahilinde geliştirilecek temel bileşenler:
 ---
 ---
 
-Proje için uygun olan görüntü işleme kütüphanelerini (örneğin OpenCV, scikit-image) ve yapay zeka/makine öğrenimi framework'lerini (örneğin TensorFlow, PyTorch) araştırın ve karşılaştırın. Seçim nedenlerinizi açıklayın.
+ATGAS projesinin yüksek doğruluk ve hızlı işlem hedeflerine ulaşabilmesi için kullanılacak kütüphaneler ve framework'ler titizlikle analiz edilmiştir. Yapılan araştırmalar sonucunda seçilen teknolojiler ve bu seçimlerin nedenleri aşağıda karşılaştırmalı olarak sunulmuştur.
+
+### 🧠 1. Yapay Zeka ve Derin Öğrenme Framework Karşılaştırması
+
+Tıbbi görüntülerin (X-ray, MRI, CT) analizi için en popüler iki kütüphane olan **TensorFlow** ve **PyTorch** incelenmiştir.
+
+| Özellik | **TensorFlow / Keras** | **PyTorch** |
+| :--- | :--- | :--- |
+| **Öğrenme Eğrisi** | Keras API sayesinde oldukça hızlı ve kolay. | Daha çok Pythonik, orta seviye zorlukta. |
+| **Üretim (Deployment)** | TFX ve Flask entegrasyonu ile çok güçlü. | TorchServe ile gelişmiş olsa da daha karmaşık. |
+| **Topluluk ve Destek** | Endüstride ve tıbbi projelerde yaygın kullanım. | Akademik araştırmalarda daha yaygın. |
+| **Model Kaynakları** | Pre-trained medikal modeller (ResNet, MobileNet) bolca mevcut. | Araştırma odaklı yeni modeller hızlı yayınlanıyor. |
+
+> **Karar:** Projemizde **TensorFlow & Keras** seçilmiştir. Nedeni, Keras'ın hızlı prototipleme imkanı sunması, kapsamlı dökümantasyonu ve modelin Flask tabanlı web arayüzüne (Production environment) sorunsuz entegre edilebilmesidir.
+
+### 🖼️ 2. Görüntü İşleme Kütüphanesi Karşılaştırması
+
+Tıbbi görüntülerin ön işlemesi (gürültü giderme, CLAHE, boyutlandırma) için **OpenCV** ve **scikit-image** karşılaştırılmıştır.
+
+* **OpenCV:** C++ tabanlı olduğu için çok hızlıdır. Tıbbi görüntülerde ihtiyaç duyduğumuz gerçek zamanlıya yakın işleme performansı için idealdir. DICOM verilerinin pydicom ile okunmasından sonra matris manipülasyonu için en güçlü araçtır.
+* **scikit-image:** Daha çok bilimsel analizler ve filtreler üzerine odaklanmıştır. Kullanımı kolaydır ancak yüksek boyutlu tıbbi verilerin seri işlenmesinde OpenCV kadar yüksek performans sunmamaktadır.
+
+> **Karar:** Performans kriterimiz olan **"Görüntü başına < 5 saniye"** hedefini garantilemek amacıyla hız ve verimlilik odağıyla **OpenCV** tercih edilmiştir.
+
+### 📁 3. Veri Uyumluluğu ve Standartlar
+
+* **PyDicom:** Tıbbi görüntüleme standardı olan DICOM dosyalarındaki meta verileri (hasta bilgileri, cihaz ayarları) kayıpsız okumak ve pikselleri yapay zeka modeline beslemek için vazgeçilmez bir araç olarak sisteme dahil edilmiştir.
+* **Flask:** Projenin web tabanlı arayüzünde model tahminlerini doktora sunmak için en hafif ve esnek çözüm olduğu için seçilmiştir.
+
+### ✅ Seçimlerin Proje Hedeflerine Etkisi
+
+* **Doğruluk:** TensorFlow'un sunduğu gelişmiş optimizasyon algoritmaları ile **%90+ accuracy** hedeflenmektedir.
+* **Hız:** OpenCV'nin verimli bellek yönetimi sayesinde analiz süresi **5 saniyenin altında** tutulacaktır.
+* **Güvenilirlik:** Seçilen kütüphanelerin geniş topluluk desteği, geliştirme sürecindeki olası hataların hızlıca çözülmesini sağlayacaktır.
+
+---
+
+> 👨‍💻 **Hazırlayan:** Ozan Diyar Ay
 
 ### 💻 4. Geliştirme Ortamı Kurulumu
 
