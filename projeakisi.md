@@ -11,12 +11,9 @@ Bu belge, projenin ilk sprint'i (geliştirme döngüsü) kapsamında yapılacak 
 ### 🎯 1. Proje Tanımı ve Hedef Belirleme
 
 ---
+---
 
-Projenin kapsamını, hedeflerini ve beklenen sonuçlarını detaylı bir şekilde tanımlayın. Tıbbi görüntü analizinde hangi sorunlara çözüm getirileceğini belirtin.
-
-## 📌 1. Proje Vizyonu ve Kapsamı
 Bu proje, derin öğrenme ve bilgisayarlı görü tekniklerini kullanarak tıbbi görüntülerin (X-ray, MRI, CT) analizini otomatize eden bir karar destek sistemidir. Amacımız, radyologların teşhis sürecini hızlandırmak ve hata payını minimize etmektir.
-
 ---
 
 ### 🔍 Kapsam
@@ -71,6 +68,7 @@ Haftalık planlama dahilinde geliştirilecek temel bileşenler:
 ### 📊 2. Gereksinim Toplama ve Analizi
 
 ---
+---
 
   Akıllı Tıbbi Görüntü Analiz Sistemi'nin temel olarak hangi işlevleri yerine getirmesi gerektiği, kalite standartları ve kullanıcı ihtiyaçları aşağıda detaylandırılmıştır.
   
@@ -107,17 +105,130 @@ Haftalık planlama dahilinde geliştirilecek temel bileşenler:
 ### 🛠️ 3. Teknoloji Araştırması ve Seçimi
 
 ---
+---
 
-Proje için uygun olan görüntü işleme kütüphanelerini (örneğin OpenCV, scikit-image) ve yapay zeka/makine öğrenimi framework'lerini (örneğin TensorFlow, PyTorch) araştırın ve karşılaştırın. Seçim nedenlerinizi açıklayın.
+ATGAS projesinin yüksek doğruluk ve hızlı işlem hedeflerine ulaşabilmesi için kullanılacak kütüphaneler ve framework'ler titizlikle analiz edilmiştir. Yapılan araştırmalar sonucunda seçilen teknolojiler ve bu seçimlerin nedenleri aşağıda karşılaştırmalı olarak sunulmuştur.
+
+### 🧠 1. Yapay Zeka ve Derin Öğrenme Framework Karşılaştırması
+
+Tıbbi görüntülerin (X-ray, MRI, CT) analizi için en popüler iki kütüphane olan **TensorFlow** ve **PyTorch** incelenmiştir.
+
+| Özellik | **TensorFlow / Keras** | **PyTorch** |
+| :--- | :--- | :--- |
+| **Öğrenme Eğrisi** | Keras API sayesinde oldukça hızlı ve kolay. | Daha çok Pythonik, orta seviye zorlukta. |
+| **Üretim (Deployment)** | TFX ve Flask entegrasyonu ile çok güçlü. | TorchServe ile gelişmiş olsa da daha karmaşık. |
+| **Topluluk ve Destek** | Endüstride ve tıbbi projelerde yaygın kullanım. | Akademik araştırmalarda daha yaygın. |
+| **Model Kaynakları** | Pre-trained medikal modeller (ResNet, MobileNet) bolca mevcut. | Araştırma odaklı yeni modeller hızlı yayınlanıyor. |
+
+> **Karar:** Projemizde **TensorFlow & Keras** seçilmiştir. Nedeni, Keras'ın hızlı prototipleme imkanı sunması, kapsamlı dökümantasyonu ve modelin Flask tabanlı web arayüzüne (Production environment) sorunsuz entegre edilebilmesidir.
+
+### 🖼️ 2. Görüntü İşleme Kütüphanesi Karşılaştırması
+
+Tıbbi görüntülerin ön işlemesi (gürültü giderme, CLAHE, boyutlandırma) için **OpenCV** ve **scikit-image** karşılaştırılmıştır.
+
+* **OpenCV:** C++ tabanlı olduğu için çok hızlıdır. Tıbbi görüntülerde ihtiyaç duyduğumuz gerçek zamanlıya yakın işleme performansı için idealdir. DICOM verilerinin pydicom ile okunmasından sonra matris manipülasyonu için en güçlü araçtır.
+* **scikit-image:** Daha çok bilimsel analizler ve filtreler üzerine odaklanmıştır. Kullanımı kolaydır ancak yüksek boyutlu tıbbi verilerin seri işlenmesinde OpenCV kadar yüksek performans sunmamaktadır.
+
+> **Karar:** Performans kriterimiz olan **"Görüntü başına < 5 saniye"** hedefini garantilemek amacıyla hız ve verimlilik odağıyla **OpenCV** tercih edilmiştir.
+
+### 📁 3. Veri Uyumluluğu ve Standartlar
+
+* **PyDicom:** Tıbbi görüntüleme standardı olan DICOM dosyalarındaki meta verileri (hasta bilgileri, cihaz ayarları) kayıpsız okumak ve pikselleri yapay zeka modeline beslemek için vazgeçilmez bir araç olarak sisteme dahil edilmiştir.
+* **Flask:** Projenin web tabanlı arayüzünde model tahminlerini doktora sunmak için en hafif ve esnek çözüm olduğu için seçilmiştir.
+
+### ✅ Seçimlerin Proje Hedeflerine Etkisi
+
+* **Doğruluk:** TensorFlow'un sunduğu gelişmiş optimizasyon algoritmaları ile **%90+ accuracy** hedeflenmektedir.
+* **Hız:** OpenCV'nin verimli bellek yönetimi sayesinde analiz süresi **5 saniyenin altında** tutulacaktır.
+* **Güvenilirlik:** Seçilen kütüphanelerin geniş topluluk desteği, geliştirme sürecindeki olası hataların hızlıca çözülmesini sağlayacaktır.
+
+---
+
+> 👨‍💻 **Hazırlayan:** Ozan Diyar Ay
 
 ### 💻 4. Geliştirme Ortamı Kurulumu
 
 ---
+---
 
-Gerekli yazılım geliştirme araçlarını (IDE, derleyiciler, kütüphaneler) ve sürüm kontrol sistemini (Git) kurun ve yapılandırın. Ekip üyelerinin erişebileceği bir ortak geliştirme ortamı oluşturun.
+🛠️ Teknik Konfigürasyon ve Yapılanlar:
+İzole Çalışma Ortamı: Proje bağımlılıklarının çakışmaması adına Python 3.12 tabanlı venv (Virtual Environment) kurulumu gerçekleştirildi.
+
+Kütüphane Entegrasyonu: Tıbbi görüntü analizinde kullanılacak temel paketler başarıyla yüklendi:
+
+TensorFlow: Derin öğrenme modellerinin eğitimi ve çalıştırılması için.
+
+OpenCV: Görüntü işleme ve ön işleme algoritmaları için.
+
+PyDicom: DICOM formatındaki tıbbi verilerin standartlara uygun okunması için.
+
+Flask: Sistemin web tabanlı arayüz entegrasyonu için.
+
+Sürüm Kontrol Sistemi: Git konfigürasyonları (global e-posta ve isim ayarları) tamamlanarak stabil bir repo yapısı oluşturuldu.
+
+Sistem Doğrulaması: Hazırlanan test.py betiği ile kütüphanelerin çalışma durumları ve versiyon uyumlulukları terminal üzerinden teyit edildi.
+
+  > 👨‍💻 **Hazırlayan:** Esmanur Ulu
 
 ### 🖼️ 5. Veri Seti İncelemesi ve Ön İşleme
+---
+---
+Bu aşamada, veri setinin derinlemesine analizi yapılmış ve model eğitimine hazırlık için kritik ön işleme (preprocessing) adımları tamamlanmıştır.
+### 📊 1. Veri Seti İnceleme ve Dağılım
+Veri setindeki sınıfların dengesiz olduğu (Imbalanced Data) tespit edilmiştir. Modelin "Pneumonia" (Zatürre) sınıfına yanlılık göstermemesi için veriler analiz edilmiştir.
+
+Normal Görüntü Sayısı: 1341
+
+Pneumonia Görüntü Sayısı: 3875
+
+Toplam Başlangıç Verisi: 5216
 
 ---
 
-Kullanılacak tıbbi görüntü veri setlerini (örneğin, akciğer tomografisi, MR görüntüleri) inceleyin. Veri formatlarını, boyutlarını ve olası ön işleme ihtiyaçlarını (gürültü giderme, normalizasyon) belirleyin.
+### 🛠️ 2. Görüntü Ön İşleme Pipeline (Kod Blokları)
+Aşağıdaki fonksiyonlar kullanılarak tüm görüntüler standart bir formata getirilmiştir:
+````python
+import cv2
+import numpy as np
+
+def preprocess_image(image_path):
+    # 1. Grayscale Dönüşümü: Gereksiz renk bilgisinden kurtulma
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    
+    # 2. Resizing: Tüm resimleri 224x224 boyutuna sabitleme
+    img_resized = cv2.resize(img, (224, 224))
+    
+    # 3. CLAHE (Kontrast Artırma): Akciğer dokusundaki detayları belirginleştirme
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    img_final = clahe.apply(img_resized)
+    
+    # 4. Normalization: Piksel değerlerini [0, 1] arasına çekme
+    img_normalized = img_final / 255.0
+    
+    return img_normalized
+````
+---
+
+### 📈 3. Veri Artırma ve Dengeleme (Data Augmentation)
+Veri setindeki NORMAL ve PNEUMONIA sınıfları arasındaki sayısal uçurumu gidermek için sentetik veri üretimi yapılmıştır. Özellikle azınlık sınıf olan sağlıklı akciğer röntgenleri üzerinde şu işlemler uygulanmıştır:
+
+Horizontal Flip: Görüntüler yatay eksende aynalanarak varyasyon artırıldı.
+
+Rotation: Rastgele küçük açılı döndürmelerle modelin farklı açılardan gelen röntgenleri tanıması sağlandı.
+
+  | Sınıf | Başlangıç | İşlem Sonrası |
+  | :--- | :--- | :--- | 
+  | NORMAL | 1341 | 2682 | 
+  | PNEUMONIA | 3875 | 3875 | 
+  | TOPLAM | 5216 | 6557 |
+
+  
+---
+
+### 🖼️ 4. Ön İşleme Çıktıları
+Aşağıdaki görselde, ham görüntünün (Raw) işlendikten sonraki (Processed - 224x224, Grayscale, CLAHE) hali karşılaştırmalı olarak sunulmuştur.
+
+<img width="946" height="464" alt="processed_comparison png" src="https://github.com/user-attachments/assets/3c1dd9cd-aadd-4f3e-8daf-1494c15f223d" />
+
+
+> 👩🏻‍💻 **Hazırlayan:** Elif İkra Çakmak 
