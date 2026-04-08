@@ -1,3 +1,7 @@
+"""
+ Frontend İçin Çıktı Formatı Düzenlendi
+"""
+
 import os
 # --- 🛡️ KRİTİK HATA KALKANI ---
 os.environ['TF_XLA_FLAGS'] = '--tf_xla_auto_jit=0 --tf_xla_cpu_global_jit=0'
@@ -197,3 +201,4 @@ class AtgasAnalizMotoru:
 
         except Exception as e:
             return {"durum": "hata", "mesaj": str(e)}
+
