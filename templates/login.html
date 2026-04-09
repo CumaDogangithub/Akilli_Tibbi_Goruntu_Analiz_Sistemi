@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#404751",
+                        "on-secondary-fixed": "#141c25",
+                        "on-secondary": "#29313a",
+                        "tertiary-fixed-dim": "#ffb595",
+                        "tertiary": "#ffb595",
+                        "surface-tint": "#b0c6ff",
+                        "surface-container-high": "#262a31",
+                        "on-background": "#dfe2eb",
+                        "on-primary-fixed": "#001945",
+                        "secondary-fixed-dim": "#bfc7d3",
+                        "on-primary-container": "#fffdff",
+                        "tertiary-container": "#c74f00",
+                        "inverse-on-surface": "#2d3137",
+                        "surface-variant": "#31353c",
+                        "on-tertiary-container": "#fffcff",
+                        "on-secondary-container": "#b1b9c5",
+                        "secondary-container": "#424a54",
+                        "outline": "#8c90a0",
+                        "on-tertiary": "#571e00",
+                        "surface": "#10141a",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#c2c6d7",
+                        "outline-variant": "#424654",
+                        "background": "#10141a",
+                        "surface-container-highest": "#31353c",
+                        "error": "#ffb4ab",
+                        "surface-container": "#1c2026",
+                        "surface-dim": "#10141a",
+                        "surface-container-low": "#181c22",
+                        "primary-container": "#1c6ef2",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "on-surface": "#dfe2eb",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface-bright": "#353940",
+                        "on-primary": "#002c6f",
+                        "inverse-surface": "#dfe2eb",
+                        "on-tertiary-fixed": "#351000",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "inverse-primary": "#0058cc",
+                        "secondary-fixed": "#dbe3ef",
+                        "on-primary-fixed-variant": "#00419c",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "secondary": "#bfc7d3",
+                        "surface-container-lowest": "#0a0e14",
+                        "primary-fixed": "#d9e2ff",
+                        "primary": "#b0c6ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #0D1117;
+            background-image: radial-gradient(#30363D 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+    <link href="/static/css/style.css" rel="stylesheet"/>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+<!-- Login Container -->
+<div class="w-full max-w-[480px] bg-[#161B22] border border-[#30363D] rounded-xl overflow-hidden shadow-[0px_20px_40px_rgba(0,0,0,0.5)]">
+<div class="p-10 space-y-8">
+<!-- Brand Section -->
+<div class="text-center space-y-1">
+<h1 class="text-[48px] font-black text-[#1c6ef2] tracking-tighter leading-none">ATGAS</h1>
+<p class="text-[13px] text-[#7D8590] font-medium tracking-wide">Akıllı Tıbbi Görüntü Analiz Sistemi</p>
+</div>
+<!-- Divider -->
+<div class="h-[1px] w-full bg-[#1c6ef2]/30"></div>
+<!-- Form Header -->
+<div>
+<h2 class="text-[20px] font-bold text-[#E6EDF3] tracking-tight">Sisteme Giriş Yap</h2>
+</div>
+<!-- Login Form -->
+<form action="/login" class="space-y-6" method="post">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="block text-[0.875rem] font-semibold text-[#E6EDF3]/80" for="email">E-posta Adresi</label>
+<div class="relative">
+<input class="w-full bg-[#0D1117] border-[#30363D] border text-[#dfe2eb] px-4 py-3 rounded-lg focus:ring-1 focus:ring-[#1c6ef2] focus:border-[#1c6ef2] focus:outline-none transition-all placeholder:text-[#484f58]" id="email" name="email" placeholder="demo" type="text" value="{{ entered_email }}"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<label class="block text-[0.875rem] font-semibold text-[#E6EDF3]/80" for="password">Şifre</label>
+<div class="relative">
+<input class="w-full bg-[#0D1117] border-[#30363D] border text-[#dfe2eb] px-4 py-3 rounded-lg focus:ring-1 focus:ring-[#1c6ef2] focus:border-[#1c6ef2] focus:outline-none transition-all placeholder:text-[#484f58]" id="password" name="password" placeholder="demo" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-[#7D8590] hover:text-[#dfe2eb] transition-colors" type="button">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">visibility</span>
+</button>
+</div>
+</div>
+<!-- Error Message -->
+{% if login_error %}
+<div class="flex items-center gap-2 text-[#E24B4A] text-[0.8125rem] font-medium mt-[-0.5rem]">
+<span class="material-symbols-outlined text-[16px]">error</span>
+<span>Geçersiz e-posta veya şifre. Lütfen tekrar deneyin.</span>
+</div>
+{% endif %}
+<!-- Options -->
+<div class="flex items-center justify-between">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input checked="" class="w-4 h-4 rounded border-[#30363D] bg-[#0D1117] text-[#1c6ef2] focus:ring-offset-[#161B22] focus:ring-[#1c6ef2]" type="checkbox"/>
+<span class="text-[0.8125rem] text-[#7D8590] group-hover:text-[#dfe2eb] transition-colors">Beni Hatırla</span>
+</label>
+<a class="text-[0.8125rem] text-[#1c6ef2] font-semibold hover:underline decoration-2 underline-offset-4" href="#">Şifremi Unuttum?</a>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-gradient-to-br from-[#1c6ef2] to-[#1258c7] text-white font-bold py-3.5 rounded-lg shadow-lg hover:shadow-[#1c6ef2]/20 active:scale-[0.98] transition-all text-[0.9375rem]" type="submit">
+                    Giriş Yap
+                </button>
+</form>
+<!-- Warning Box -->
+<div class="bg-red-500/5 border-l-4 border-[#E24B4A] p-4 rounded-r-lg flex gap-3">
+<span class="material-symbols-outlined text-[#E24B4A] flex-shrink-0" style="font-variation-settings: 'FILL' 1;">warning</span>
+<p class="text-[0.8125rem] leading-[150%] text-[#7D8590]">
+                    Bu sistem yalnızca <span class="text-[#dfe2eb] font-semibold">yetkili sağlık personeline</span> açıktır. Yetkisiz erişim girişimleri kayıt altına alınmaktadır.
+                </p>
+</div>
+</div>
+<!-- Footer Decoration -->
+<div class="h-1 w-full bg-gradient-to-r from-transparent via-[#1c6ef2]/50 to-transparent"></div>
+</div>
+<!-- Decorative Image / Backdrop (Hidden but described for consistency) -->
+<div class="fixed inset-0 -z-10 opacity-10 pointer-events-none">
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-[#1c6ef2] rounded-full blur-[120px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-red-900 rounded-full blur-[100px]"></div>
+</div>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/scanner.js"></script>
+</body></html>
