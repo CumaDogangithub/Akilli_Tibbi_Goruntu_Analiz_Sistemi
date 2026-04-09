@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATGAS - Raporlarım</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#571e00",
+                        "inverse-surface": "#dfe2eb",
+                        "background": "#10141a",
+                        "inverse-on-surface": "#2d3137",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "on-background": "#dfe2eb",
+                        "secondary": "#bfc7d3",
+                        "on-secondary-fixed": "#141c25",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-tertiary-container": "#fffcff",
+                        "on-primary-container": "#fffdff",
+                        "on-surface": "#dfe2eb",
+                        "on-primary-fixed": "#001945",
+                        "surface-dim": "#10141a",
+                        "surface-container": "#1c2026",
+                        "surface-container-low": "#181c22",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-container-high": "#262a31",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#bfc7d3",
+                        "surface-container-highest": "#31353c",
+                        "on-primary": "#002c6f",
+                        "tertiary-container": "#c74f00",
+                        "surface-variant": "#31353c",
+                        "tertiary": "#ffb595",
+                        "secondary-container": "#424a54",
+                        "on-primary-fixed-variant": "#00419c",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface-bright": "#353940",
+                        "on-secondary-fixed-variant": "#404751",
+                        "surface-container-lowest": "#0a0e14",
+                        "outline-variant": "#424654",
+                        "on-secondary": "#29313a",
+                        "surface": "#10141a",
+                        "primary": "#b0c6ff",
+                        "surface-tint": "#b0c6ff",
+                        "inverse-primary": "#0058cc",
+                        "primary-container": "#1c6ef2",
+                        "on-secondary-container": "#b1b9c5",
+                        "outline": "#8c90a0",
+                        "on-surface-variant": "#c2c6d7",
+                        "tertiary-fixed-dim": "#ffb595",
+                        "secondary-fixed": "#dbe3ef",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#d9e2ff",
+                        "status-success": "#61AF64",
+                        "status-warning": "#EFB429",
+                        "status-danger": "#E24B4A"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #10141a;
+            color: #dfe2eb;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <link href="/static/css/style.css" rel="stylesheet"/>
+</head>
+<body class="antialiased">
+<aside class="fixed left-0 top-0 h-full w-[240px] z-40 bg-[#181c22] dark:bg-slate-900 shadow-[20px_0px_40px_rgba(0,0,0,0.4)] flex flex-col justify-between py-6 px-4">
+<div class="space-y-8">
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Ana Panel</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined" data-icon="biotech">biotech</span>
+<span>Yeni Tarama</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white font-semibold border-r-4 border-[#1c6ef2] bg-[#262a31] font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span>Raporlarım</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span>Tarama Ara</span>
+</a>
+</nav>
+</div>
+<div class="space-y-1 border-t border-white/5 pt-6">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span>Profilim</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Çıkış Yap</span>
+</a>
+</div>
+</aside>
+<header class="fixed top-0 right-0 left-[240px] h-[64px] z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-8 w-full">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-black text-[#1c6ef2] tracking-tighter">ATGAS</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 border-r border-white/10 pr-6">
+<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity" data-icon="settings">settings</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-[0.875rem] font-bold text-white">Dr. Ahmet Yılmaz</p>
+<p class="text-[0.6875rem] text-[#1c6ef2] font-medium uppercase tracking-wider">Onkoloji</p>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-white/10">
+<img alt="Dr. Ahmet Yılmaz" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9D15pqCR_GCMoaJ81obQy_5JUbZPMzzYNhVkvYF-QADwXn4B3fNT4tzxGVq9h0UdIfsn5GOtPCSdSBGsjEQH_KHXxmwCP7jFk_l5nMX4D3r5TLGPufcXURs4PondUASV8ZzywhSCzLVJ3fOqjT9DgXzppBkUl8aLhGHyn6jhj-Fow_MFd7cntJXgj3rXTj4C9bTLlHJUDhrPh5ULmlwjDQ8Wt2gqvD1dvSTvPdcw2tnLlyzBDjBJPodAkRiEtixsw5vyMTppa3SJh"/>
+</div>
+</div>
+</div>
+</header>
+<main class="ml-[240px] pt-24 px-8 pb-12">
+<div class="mb-10">
+<h2 class="text-[1.75rem] font-bold text-white tracking-[-2%]">Raporlarım</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+<div class="bg-surface-container-low p-6 rounded-xl border-b-4 border-transparent hover:bg-surface-container-high transition-all">
+<p class="text-label-sm text-slate-400 font-medium mb-1">Toplam Rapor</p>
+<h3 class="text-4xl font-bold text-white">247</h3>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-b-4 border-[#1C6EF2] hover:bg-surface-container-high transition-all">
+<p class="text-label-sm text-slate-400 font-medium mb-1">Kaydedildi</p>
+<h3 class="text-4xl font-bold text-white">198</h3>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-b-4 border-[#EFB429] hover:bg-surface-container-high transition-all">
+<p class="text-label-sm text-slate-400 font-medium mb-1">Taslak</p>
+<h3 class="text-4xl font-bold text-white">44</h3>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-b-4 border-[#E24B4A] hover:bg-surface-container-high transition-all">
+<p class="text-label-sm text-slate-400 font-medium mb-1">Anomali</p>
+<h3 class="text-4xl font-bold text-white">89</h3>
+</div>
+</div>
+<div class="space-y-6 mb-8">
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-lg bg-[#1c6ef2] text-white text-sm font-medium">Tümü</button>
+<button class="px-4 py-2 rounded-lg bg-[#21262D] border border-[#30363D] text-[#7D8590] text-sm font-medium hover:text-white hover:border-[#8c90a0] transition-colors">MR</button>
+<button class="px-4 py-2 rounded-lg bg-[#21262D] border border-[#30363D] text-[#7D8590] text-sm font-medium hover:text-white hover:border-[#8c90a0] transition-colors">CT</button>
+<button class="px-4 py-2 rounded-lg bg-[#21262D] border border-[#30363D] text-[#7D8590] text-sm font-medium hover:text-white hover:border-[#8c90a0] transition-colors">X-Ray</button>
+<button class="px-4 py-2 rounded-lg bg-[#21262D] border border-[#30363D] text-[#7D8590] text-sm font-medium hover:text-white hover:border-[#8c90a0] transition-colors">Kritik</button>
+<button class="px-4 py-2 rounded-lg bg-[#21262D] border border-[#30363D] text-[#7D8590] text-sm font-medium hover:text-white hover:border-[#8c90a0] transition-colors">Taslak</button>
+</div>
+</div>
+<section class="bg-surface-container-low rounded-2xl overflow-hidden shadow-xl">
+<div class="px-8 py-6 border-b border-white/5">
+<h3 class="text-lg font-bold text-white">Raporlar</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="text-slate-400 text-[0.6875rem] font-bold uppercase tracking-widest border-b border-white/5">
+<th class="px-8 py-4">Tarama ID</th>
+<th class="px-8 py-4">Tip</th>
+<th class="px-8 py-4">Tahmin Sonucu</th>
+<th class="px-8 py-4">Doğruluk</th>
+<th class="px-8 py-4">Seviye</th>
+<th class="px-8 py-4">Durum</th>
+<th class="px-8 py-4">Tarih</th>
+<th class="px-8 py-4 text-center">—</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5" id="reports-table-tbody">
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300">TRK-20240107-001</td>
+<td class="px-8 py-4"><span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded">MR</span></td>
+<td class="px-8 py-4 text-sm font-semibold text-white">Glioblastom Multiforme</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-success" style="width: 94.7%;"></div>
+</div>
+<span class="text-xs font-bold text-status-success">%94.7</span>
+</div>
+</td>
+<td class="px-8 py-4"><span class="px-2 py-0.5 rounded text-[0.6875rem] font-bold bg-status-danger/10 text-status-danger border border-status-danger/20">Kritik</span></td>
+<td class="px-8 py-4"><span class="flex items-center gap-1.5 text-xs text-status-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>Kaydedildi</span></td>
+<td class="px-8 py-4 text-xs text-slate-400">07.01.2026</td>
+<td class="px-8 py-4 text-center"><a class="text-[#1C6EF2] font-semibold text-sm hover:underline inline-flex items-center gap-1" href="#">Aç <i class="fi fi-rr-arrow-small-right"></i></a></td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300">TRK-20240106-003</td>
+<td class="px-8 py-4"><span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded">CT</span></td>
+<td class="px-8 py-4 text-sm font-semibold text-white">Pnömoni</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-warning" style="width: 87.2%;"></div>
+</div>
+<span class="text-xs font-bold text-status-warning">%87.2</span>
+</div>
+</td>
+<td class="px-8 py-4"><span class="px-2 py-0.5 rounded text-[0.6875rem] font-bold bg-status-warning/10 text-status-warning border border-status-warning/20">Orta</span></td>
+<td class="px-8 py-4"><span class="flex items-center gap-1.5 text-xs text-status-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>Kaydedildi</span></td>
+<td class="px-8 py-4 text-xs text-slate-400">06.01.2026</td>
+<td class="px-8 py-4 text-center"><a class="text-[#1C6EF2] font-semibold text-sm hover:underline inline-flex items-center gap-1" href="#">Aç <i class="fi fi-rr-arrow-small-right"></i></a></td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300">TRK-20240106-001</td>
+<td class="px-8 py-4"><span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded">X-Ray</span></td>
+<td class="px-8 py-4 text-sm font-semibold text-white">Temiz</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-success" style="width: 96.1%;"></div>
+</div>
+<span class="text-xs font-bold text-status-success">%96.1</span>
+</div>
+</td>
+<td class="px-8 py-4"><span class="px-2 py-0.5 rounded text-[0.6875rem] font-bold bg-status-success/10 text-status-success border border-status-success/20">Temiz</span></td>
+<td class="px-8 py-4"><span class="flex items-center gap-1.5 text-xs text-status-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>Kaydedildi</span></td>
+<td class="px-8 py-4 text-xs text-slate-400">06.01.2026</td>
+<td class="px-8 py-4 text-center"><a class="text-[#1C6EF2] font-semibold text-sm hover:underline inline-flex items-center gap-1" href="#">Aç <i class="fi fi-rr-arrow-small-right"></i></a></td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300">TRK-20240105-002</td>
+<td class="px-8 py-4"><span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded">MR</span></td>
+<td class="px-8 py-4 text-sm font-semibold text-white">Menenjiyom</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-warning" style="width: 82.4%;"></div>
+</div>
+<span class="text-xs font-bold text-status-warning">%82.4</span>
+</div>
+</td>
+<td class="px-8 py-4"><span class="px-2 py-0.5 rounded text-[0.6875rem] font-bold bg-status-warning/10 text-status-warning border border-status-warning/20">Orta</span></td>
+<td class="px-8 py-4"><span class="flex items-center gap-1.5 text-xs text-status-warning font-medium"><span class="w-1.5 h-1.5 rounded-full bg-status-warning"></span>Taslak</span></td>
+<td class="px-8 py-4 text-xs text-slate-400">05.01.2026</td>
+<td class="px-8 py-4 text-center"><a class="text-[#1C6EF2] font-semibold text-sm hover:underline inline-flex items-center gap-1" href="#">Aç <i class="fi fi-rr-arrow-small-right"></i></a></td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300">TRK-20240105-001</td>
+<td class="px-8 py-4"><span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded">CT</span></td>
+<td class="px-8 py-4 text-sm font-semibold text-white">Pulmoner Emboli</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-success" style="width: 91.8%;"></div>
+</div>
+<span class="text-xs font-bold text-status-success">%91.8</span>
+</div>
+</td>
+<td class="px-8 py-4"><span class="px-2 py-0.5 rounded text-[0.6875rem] font-bold bg-status-danger/10 text-status-danger border border-status-danger/20">Kritik</span></td>
+<td class="px-8 py-4"><span class="flex items-center gap-1.5 text-xs text-status-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>Kaydedildi</span></td>
+<td class="px-8 py-4 text-xs text-slate-400">05.01.2026</td>
+<td class="px-8 py-4 text-center"><a class="text-[#1C6EF2] font-semibold text-sm hover:underline inline-flex items-center gap-1" href="#">Aç <i class="fi fi-rr-arrow-small-right"></i></a></td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300">TRK-20240104-004</td>
+<td class="px-8 py-4"><span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded">X-Ray</span></td>
+<td class="px-8 py-4 text-sm font-semibold text-white">Temiz</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-success" style="width: 97.3%;"></div>
+</div>
+<span class="text-xs font-bold text-status-success">%97.3</span>
+</div>
+</td>
+<td class="px-8 py-4"><span class="px-2 py-0.5 rounded text-[0.6875rem] font-bold bg-status-success/10 text-status-success border border-status-success/20">Temiz</span></td>
+<td class="px-8 py-4"><span class="flex items-center gap-1.5 text-xs text-status-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>Kaydedildi</span></td>
+<td class="px-8 py-4 text-xs text-slate-400">04.01.2026</td>
+<td class="px-8 py-4 text-center"><a class="text-[#1C6EF2] font-semibold text-sm hover:underline inline-flex items-center gap-1" href="#">Aç <i class="fi fi-rr-arrow-small-right"></i></a></td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300">TRK-20240104-002</td>
+<td class="px-8 py-4"><span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded">MR</span></td>
+<td class="px-8 py-4 text-sm font-semibold text-white">Serebral Enfarktüs</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-warning" style="width: 88.6%;"></div>
+</div>
+<span class="text-xs font-bold text-status-warning">%88.6</span>
+</div>
+</td>
+<td class="px-8 py-4"><span class="px-2 py-0.5 rounded text-[0.6875rem] font-bold bg-status-danger/10 text-status-danger border border-status-danger/20">Kritik</span></td>
+<td class="px-8 py-4"><span class="flex items-center gap-1.5 text-xs text-status-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>Kaydedildi</span></td>
+<td class="px-8 py-4 text-xs text-slate-400">04.01.2026</td>
+<td class="px-8 py-4 text-center"><a class="text-[#1C6EF2] font-semibold text-sm hover:underline inline-flex items-center gap-1" href="#">Aç <i class="fi fi-rr-arrow-small-right"></i></a></td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300">TRK-20240103-001</td>
+<td class="px-8 py-4"><span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded">CT</span></td>
+<td class="px-8 py-4 text-sm font-semibold text-white">Pnömotoraks</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-danger" style="width: 79.1%;"></div>
+</div>
+<span class="text-xs font-bold text-status-danger">%79.1</span>
+</div>
+</td>
+<td class="px-8 py-4"><span class="px-2 py-0.5 rounded text-[0.6875rem] font-bold bg-status-warning/10 text-status-warning border border-status-warning/20">Orta</span></td>
+<td class="px-8 py-4"><span class="flex items-center gap-1.5 text-xs text-status-warning font-medium"><span class="w-1.5 h-1.5 rounded-full bg-status-warning"></span>Taslak</span></td>
+<td class="px-8 py-4 text-xs text-slate-400">03.01.2026</td>
+<td class="px-8 py-4 text-center"><a class="text-[#1C6EF2] font-semibold text-sm hover:underline inline-flex items-center gap-1" href="#">Aç <i class="fi fi-rr-arrow-small-right"></i></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-8 py-6 border-t border-white/5 flex justify-center items-center gap-4 text-sm font-medium">
+<button class="text-[#7D8590] hover:text-white transition-colors inline-flex items-center gap-1" id="reports-prev-page" type="button"><span class="material-symbols-outlined text-base">chevron_left</span><span>Önceki</span></button>
+<div class="flex items-center gap-1" id="reports-page-numbers"></div>
+<button class="text-[#7D8590] hover:text-white transition-colors inline-flex items-center gap-1" id="reports-next-page" type="button"><span>Sonraki</span><span class="material-symbols-outlined text-base">chevron_right</span></button>
+</div>
+</section>
+</main>
+
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/scanner.js"></script>
+
+</body></html>

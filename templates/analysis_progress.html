@@ -2,7 +2,7 @@
 <html class="dark" lang="tr"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>ATGAS - Yeni Tarama</title>
+<title>ATGAS - Analiz Durumu</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -146,7 +146,7 @@
 <main class="ml-[240px] pt-24 px-8 pb-12">
 <div class="mb-10 w-full">
 <div class="flex items-center justify-between relative max-w-4xl mx-auto">
-<div class="flex flex-col items-center z-10">
+<div class="flex flex-col items-center z-10 text-center">
 <div class="w-8 h-8 rounded-full bg-[#1c6ef2] flex items-center justify-center text-white mb-2 shadow-[0_0_15px_rgba(28,110,242,0.4)]">
 <span class="material-symbols-outlined text-sm">check</span>
 </div>
@@ -154,23 +154,23 @@
 <span class="text-[0.875rem] text-white font-bold">Tarama Tipi Seç</span>
 </div>
 <div class="flex-1 h-[2px] bg-[#1c6ef2] mb-8"></div>
-<div class="flex flex-col items-center z-10">
+<div class="flex flex-col items-center z-10 text-center">
+<div class="w-8 h-8 rounded-full bg-[#1c6ef2] flex items-center justify-center text-white mb-2 shadow-[0_0_15px_rgba(28,110,242,0.4)]">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[0.75rem] text-slate-400 font-medium">Adım 2</span>
+<span class="text-[0.875rem] text-white font-bold">Görüntü Yükle</span>
+</div>
+<div class="flex-1 h-[2px] bg-[#1c6ef2] mb-8"></div>
+<div class="flex flex-col items-center z-10 text-center">
 <div class="w-8 h-8 rounded-full border-2 border-[#1c6ef2] flex items-center justify-center text-[#1c6ef2] mb-2 bg-[#10141a]">
-<span class="text-sm font-bold">2</span>
-</div>
-<span class="text-[0.75rem] text-[#1c6ef2] font-medium">Adım 2</span>
-<span class="text-[0.875rem] text-[#1c6ef2] font-bold uppercase tracking-wide">Görüntü Yükle</span>
-</div>
-<div class="flex-1 h-[2px] bg-slate-700 mb-8"></div>
-<div class="flex flex-col items-center z-10">
-<div class="w-8 h-8 rounded-full border-2 border-slate-700 flex items-center justify-center text-slate-600 mb-2">
 <span class="text-sm font-bold">3</span>
 </div>
-<span class="text-[0.75rem] text-slate-600 font-medium">Adım 3</span>
-<span class="text-[0.875rem] text-slate-600 font-medium">Analiz Et</span>
+<span class="text-[0.75rem] text-[#1c6ef2] font-medium">Adım 3</span>
+<span class="text-[0.875rem] text-[#1c6ef2] font-bold">Analiz Et</span>
 </div>
 <div class="flex-1 h-[2px] bg-slate-700 mb-8"></div>
-<div class="flex flex-col items-center z-10">
+<div class="flex flex-col items-center z-10 text-center">
 <div class="w-8 h-8 rounded-full border-2 border-slate-700 flex items-center justify-center text-slate-600 mb-2">
 <span class="text-sm font-bold">4</span>
 </div>
@@ -179,115 +179,115 @@
 </div>
 </div>
 </div>
+<div class="flex items-center gap-4 mb-8">
+<h1 class="text-3xl font-black text-white">Analiz Durumu</h1>
+<span class="bg-[#EFB429]/10 text-[#EFB429] px-3 py-1 rounded-full text-xs font-bold border border-[#EFB429]/20 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#EFB429] animate-pulse"></span>
+                İşleniyor...
+            </span>
+</div>
 <div class="flex gap-8">
-<div class="w-[65%] space-y-10">
-<section>
-<label class="block text-xs font-bold text-[#7D8590] uppercase tracking-widest mb-4">Bölüm 1 — Tarama Tipi Seçin</label>
-<div class="grid grid-cols-3 gap-4">
-<div class="p-6 rounded-2xl border border-white/5 bg-surface-container-low hover:bg-surface-container-high flex flex-col items-center text-center cursor-pointer transition-all">
-<div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 mb-4">
-<span class="material-symbols-outlined text-3xl">psychology</span>
+<div class="w-[40%]">
+<div class="bg-surface-container rounded-2xl border border-white/5 overflow-hidden">
+<div class="p-0 bg-black flex items-center justify-center aspect-square relative overflow-hidden group">
+<img alt="Brain MRI Scan" class="w-full h-full object-cover opacity-60 mix-blend-luminosity hover:opacity-80 transition-opacity duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6YJlhod971U9rnYSFzvuD_SSVmivKLrtf8fuL0TJMXyOufOTifWmXvnv-D82uxIeKxA8kEZeF3xfeGhqhczTzv1uZaagOm4OK-Ko9EuZu2TFNkACzVt4Aybp1f-rbsKcdDmSQusRoBc0IyLQrFfRlZ7XZH4gxORLyDKQziZ-nANSatNRC9Kx8B1_sjGevQpVXtu_qFqcNKInFtuGTQhFffs1WbrrWAOk7KxTj_B19aKvB9P8YKxnKaq13z-2sT39VyGvDuIrIPKtJ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-40"></div>
+<div class="absolute inset-0 border-[20px] border-black/20 pointer-events-none"></div>
 </div>
-<h4 class="text-lg font-bold text-white">MR</h4>
-<p class="text-[0.75rem] text-slate-400">Manyetik Rezonans</p>
-</div>
-<div class="p-6 rounded-2xl border border-white/5 bg-surface-container-low hover:bg-surface-container-high flex flex-col items-center text-center cursor-pointer transition-all">
-<div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 mb-4">
-<span class="material-symbols-outlined text-3xl">dangerous</span>
-</div>
-<h4 class="text-lg font-bold text-white">CT</h4>
-<p class="text-[0.75rem] text-slate-400">Bilgisayarlı Tomografi</p>
-</div>
-<div class="p-6 rounded-2xl border border-white/5 bg-surface-container-low hover:bg-surface-container-high flex flex-col items-center text-center cursor-pointer transition-all">
-<div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 mb-4">
-<span class="material-symbols-outlined text-3xl">skeleton</span>
-</div>
-<h4 class="text-lg font-bold text-white">X-Ray</h4>
-<p class="text-[0.75rem] text-slate-400">Röntgen Görüntüsü</p>
-</div>
-</div>
-</section>
-<section>
-<label class="block text-xs font-bold text-[#7D8590] uppercase tracking-widest mb-4">Bölüm 2 — Görüntü Yükle</label>
-<div class="w-full bg-[#21262D] border-2 border-dashed border-[#30363D] rounded-2xl p-12 flex flex-col items-center justify-center transition-colors hover:border-[#1c6ef2]/50 group" data-upload-dropzone>
-<div class="w-16 h-16 bg-[#1c6ef2]/10 rounded-full flex items-center justify-center mb-6">
-<span class="material-symbols-outlined text-4xl text-[#1C6EF2]">cloud_upload</span>
-</div>
-<p class="text-lg font-medium text-white mb-4">Görüntüyü buraya sürükleyin veya</p>
-<button class="px-8 py-2.5 border border-[#1c6ef2] text-[#1c6ef2] font-bold rounded-lg hover:bg-[#1c6ef2] hover:text-white transition-all mb-4" data-upload-btn>Dosya Seç</button>
-<p class="text-[0.75rem] text-slate-500" data-upload-progress>Desteklenen formatlar: DICOM, PNG, JPEG, NIfTI — Maks. 50 MB</p>
-<p data-upload-result></p>
-</div>
-</section>
-<section>
-<label class="block text-xs font-bold text-[#7D8590] uppercase tracking-widest mb-4">Bölüm 3 — Hasta Bilgileri</label>
-<div class="grid grid-cols-2 gap-6">
+<div class="p-6 space-y-3">
+<h4 class="text-xs font-bold text-[#7D8590] uppercase tracking-widest mb-4">Görüntü önizleme kartı</h4>
 <div class="space-y-2">
-<label class="text-sm font-medium text-slate-300">Ad Soyad</label>
-<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1c6ef2] transition-colors" id="analysis-patient-name" placeholder="Hasta adı ve soyadı" type="text"/>
+<div class="flex justify-between">
+<span class="text-xs text-slate-500">Tarama ID:</span>
+<span class="text-xs font-mono text-slate-400">TRK-20240107-005</span>
 </div>
-<div class="space-y-2">
-<label class="text-sm font-medium text-slate-300">TC Kimlik No</label>
-<div class="relative">
-<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1c6ef2] transition-colors" id="analysis-patient-tc" inputmode="numeric" maxlength="11" pattern="[0-9]*" placeholder="00000000000" type="text"/>
+<div class="flex justify-between">
+<span class="text-xs text-slate-500">Dosya:</span>
+<span class="text-xs text-slate-400">beyin_mr_hasta.dcm</span>
 </div>
+<div class="flex justify-between">
+<span class="text-xs text-slate-500">Model:</span>
+<span class="text-xs text-slate-400">EfficientNetV2-M v2.1.0</span>
 </div>
-<div class="space-y-2">
-<label class="text-sm font-medium text-slate-300">Doğum Tarihi</label>
-<div class="relative">
-<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1c6ef2] transition-colors" id="analysis-patient-birthdate" type="date"/>
+<div class="flex justify-between">
+<span class="text-xs text-slate-500">Tahmini süre:</span>
+<span class="text-xs text-slate-400">28–35 saniye</span>
 </div>
-</div>
-<div class="space-y-2">
-<label class="text-sm font-medium text-slate-300">Protokol No</label>
-<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1c6ef2] transition-colors" id="analysis-patient-protocol" inputmode="numeric" pattern="[0-9]*" placeholder="Hastane protokol numarası" type="text"/>
-</div>
-</div>
-</section>
-</div>
-<div class="w-[35%]">
-<div class="bg-surface-container-low rounded-2xl border border-white/5 p-8 sticky top-28 shadow-2xl">
-<h3 class="text-xl font-bold text-white mb-6">Tarama Ayarları</h3>
-<div class="space-y-4 mb-8">
-<div class="flex justify-between items-center">
-<span class="text-[0.875rem] text-slate-400">Tarama ID:</span>
-<span class="font-mono text-[0.875rem] text-slate-500">TRK-20240107-005</span>
-</div>
-<div class="flex justify-between items-center">
-<span class="text-[0.875rem] text-slate-400">Seçilen Tip:</span>
-<span class="px-3 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-xs font-bold rounded-lg uppercase">MR</span>
-</div>
-<div class="flex justify-between items-center">
-<span class="text-[0.875rem] text-slate-400">Kullanılan Model:</span>
-<span class="px-3 py-1 bg-status-success/10 text-status-success text-xs font-bold rounded-lg">EfficientNetV2-M</span>
+<div class="flex justify-between">
+<span class="text-xs text-slate-500">Giriş boyutu:</span>
+<span class="text-xs text-slate-400">512×512 piksel</span>
 </div>
 </div>
-<div class="h-px bg-white/5 mb-8"></div>
-<div class="space-y-4 mb-10">
-<p class="text-xs font-bold text-[#7D8590] uppercase tracking-wider">İşlem Adımları</p>
-<ol class="space-y-3" id="analysis-process-steps">
-<li class="flex items-center gap-3 text-sm text-white" data-analysis-step="1">
-<span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#1c6ef2]/20 text-[#1c6ef2] flex items-center justify-center text-xs font-bold">1</span>
-<span>Tarama tipini seçin</span>
-</li>
-<li class="flex items-center gap-3 text-sm text-white" data-analysis-step="2">
-<span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#1c6ef2]/20 text-[#1c6ef2] flex items-center justify-center text-xs font-bold">2</span>
-<span>Tıbbi görüntüyü yükleyin</span>
-</li>
-<li class="flex items-center gap-3 text-sm text-slate-400" data-analysis-step="3">
-<span class="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 text-slate-500 flex items-center justify-center text-xs font-bold">3</span>
-<span>Hasta bilgilerini girin</span>
-</li>
-<li class="flex items-center gap-3 text-sm text-slate-400" data-analysis-step="4">
-<span class="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 text-slate-500 flex items-center justify-center text-xs font-bold">4</span>
-<span>Analizi başlatın</span>
-</li>
-</ol>
 </div>
-<button class="w-full bg-[#1c6ef2] hover:bg-[#0058cc] text-white font-bold py-4 rounded-xl shadow-[0_4px_20px_rgba(28,110,242,0.3)] transition-all flex items-center justify-center gap-2 group" id="analysis-start-btn">
-<span>Analizi Başlat</span>
-<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">bolt</span>
-</button>
+</div>
+</div>
+<div class="w-[60%] flex flex-col justify-between">
+<div class="bg-surface-container rounded-2xl border border-white/5 p-10 flex flex-col items-center">
+<div class="relative w-48 h-48 mb-8 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-[#21262D]" cx="96" cy="96" fill="transparent" r="84" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-[#1C6EF2]" cx="96" cy="96" fill="transparent" r="84" stroke="currentColor" stroke-dasharray="527.78" stroke-dashoffset="174.16" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-4xl font-black text-white">67%</span>
+<span class="text-xs text-[#7D8590] mt-1">Analiz ediliyor...</span>
+</div>
+</div>
+<div class="w-full max-w-md bg-[#21262D] h-2 rounded-full overflow-hidden mb-12">
+<div class="bg-[#1C6EF2] h-full" style="width: 67%"></div>
+</div>
+<div class="w-full max-w-md space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-status-success text-lg">check_circle</span>
+<span class="text-[0.875rem] text-slate-300 font-medium">Görüntü Ön-işleme</span>
+</div>
+<span class="text-xs font-bold text-status-success">Tamamlandı</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-status-success text-lg">check_circle</span>
+<span class="text-[0.875rem] text-slate-300 font-medium">Normalizasyon (512×512)</span>
+</div>
+<span class="text-xs font-bold text-status-success">Tamamlandı</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="w-4 h-4 rounded-full bg-[#1C6EF2] flex items-center justify-center ml-1">
+<span class="w-2 h-2 bg-white rounded-full"></span>
+</span>
+<span class="text-[0.875rem] text-white font-bold ml-1">CNN Katmanları Analizi</span>
+</div>
+<span class="text-xs font-bold text-[#1C6EF2]">Devam ediyor... %67</span>
+</div>
+<div class="flex items-center justify-between opacity-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-600 text-lg">radio_button_unchecked</span>
+<span class="text-[0.875rem] text-slate-400">Anomali Tespiti</span>
+</div>
+<span class="text-xs font-bold text-slate-500">Bekliyor</span>
+</div>
+<div class="flex items-center justify-between opacity-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-600 text-lg">radio_button_unchecked</span>
+<span class="text-[0.875rem] text-slate-400">Bounding Box Oluşturma</span>
+</div>
+<span class="text-xs font-bold text-slate-500">Bekliyor</span>
+</div>
+</div>
+</div>
+<div class="mt-8 flex flex-col gap-4">
+<div class="flex gap-4">
+<button class="flex-1 px-6 py-3.5 border-2 border-[#E24B4A] text-[#E24B4A] font-bold rounded-xl hover:bg-[#E24B4A]/5 transition-all text-sm">
+                            İptal Et
+                        </button>
+<button class="flex-1 px-6 py-3.5 bg-slate-800 text-slate-500 font-bold rounded-xl cursor-not-allowed text-sm" disabled="">
+                            Sonuçları Gör
+                        </button>
+</div>
+<p class="text-center text-xs text-slate-500 italic">
+                        Analiz tamamlandığında otomatik olarak yönlendirileceksiniz.
+                    </p>
 </div>
 </div>
 </div>

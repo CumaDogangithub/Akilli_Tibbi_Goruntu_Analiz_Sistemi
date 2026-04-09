@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATGAS - Analiz Sonucu</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#571e00",
+                        "inverse-surface": "#dfe2eb",
+                        "background": "#10141a",
+                        "inverse-on-surface": "#2d3137",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "on-background": "#dfe2eb",
+                        "secondary": "#bfc7d3",
+                        "on-secondary-fixed": "#141c25",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-tertiary-container": "#fffcff",
+                        "on-primary-container": "#fffdff",
+                        "on-surface": "#dfe2eb",
+                        "on-primary-fixed": "#001945",
+                        "surface-dim": "#10141a",
+                        "surface-container": "#1c2026",
+                        "surface-container-low": "#181c22",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-container-high": "#262a31",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#bfc7d3",
+                        "surface-container-highest": "#31353c",
+                        "on-primary": "#002c6f",
+                        "tertiary-container": "#c74f00",
+                        "surface-variant": "#31353c",
+                        "tertiary": "#ffb595",
+                        "secondary-container": "#424a54",
+                        "on-primary-fixed-variant": "#00419c",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface-bright": "#353940",
+                        "on-secondary-fixed-variant": "#404751",
+                        "surface-container-lowest": "#0a0e14",
+                        "outline-variant": "#424654",
+                        "on-secondary": "#29313a",
+                        "surface": "#10141a",
+                        "primary": "#b0c6ff",
+                        "surface-tint": "#b0c6ff",
+                        "inverse-primary": "#0058cc",
+                        "primary-container": "#1c6ef2",
+                        "on-secondary-container": "#b1b9c5",
+                        "outline": "#8c90a0",
+                        "on-surface-variant": "#c2c6d7",
+                        "tertiary-fixed-dim": "#ffb595",
+                        "secondary-fixed": "#dbe3ef",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#d9e2ff",
+                        "status-success": "#61AF64",
+                        "status-warning": "#EFB429",
+                        "status-danger": "#E24B4A"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        body {
+            background-color: #10141a;
+            color: #dfe2eb;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .mri-container {
+            position: relative;
+            background: #000;
+            aspect-ratio: 1/1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bounding-box {
+            position: absolute;
+            top: 25%;
+            right: 20%;
+            width: 30%;
+            height: 30%;
+            border: 2px dashed #E24B4A;
+            pointer-events: none;
+        }
+    </style>
+<link href="/static/css/style.css" rel="stylesheet"/>
+</head>
+<body class="antialiased">
+<aside class="fixed left-0 top-0 h-full w-[240px] z-40 bg-[#181c22] shadow-[20px_0px_40px_rgba(0,0,0,0.4)] flex flex-col justify-between py-6 px-4">
+<div class="space-y-8">
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 text-[0.875rem]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Ana Panel</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 text-[0.875rem]" href="#">
+<span class="material-symbols-outlined">biotech</span>
+<span>Yeni Tarama</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white font-semibold border-r-4 border-[#1c6ef2] bg-[#262a31] text-[0.875rem] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Raporlarım</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 text-[0.875rem]" href="#">
+<span class="material-symbols-outlined">search</span>
+<span>Tarama Ara</span>
+</a>
+</nav>
+</div>
+<div class="space-y-1 border-t border-white/5 pt-6">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 text-[0.875rem]" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span>Profilim</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 text-[0.875rem]" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Çıkış Yap</span>
+</a>
+</div>
+</aside>
+<header class="fixed top-0 right-0 left-[240px] h-[64px] z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-8 w-full">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-black text-[#1c6ef2] tracking-tighter">ATGAS</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 border-r border-white/10 pr-6">
+<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity">notifications</span>
+<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity">settings</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-[0.875rem] font-bold text-white">Dr. Ahmet Yılmaz</p>
+<p class="text-[0.6875rem] text-[#1c6ef2] font-medium uppercase tracking-wider">Onkoloji</p>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-white/10">
+<img alt="Dr. Ahmet Yılmaz" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9D15pqCR_GCMoaJ81obQy_5JUbZPMzzYNhVkvYF-QADwXn4B3fNT4tzxGVq9h0UdIfsn5GOtPCSdSBGsjEQH_KHXxmwCP7jFk_l5nMX4D3r5TLGPufcXURs4PondUASV8ZzywhSCzLVJ3fOqjT9DgXzppBkUl8aLhGHyn6jhj-Fow_MFd7cntJXgj3rXTj4C9bTLlHJUDhrPh5ULmlwjDQ8Wt2gqvD1dvSTvPdcw2tnLlyzBDjBJPodAkRiEtixsw5vyMTppa3SJh"/>
+</div>
+</div>
+</div>
+</header>
+<main class="ml-[240px] pt-24 px-8 pb-12">
+<div class="mb-10 w-full">
+<div class="flex items-center justify-between relative max-w-4xl mx-auto">
+<div class="flex flex-col items-center z-10 text-center">
+<div class="w-8 h-8 rounded-full bg-[#1c6ef2] flex items-center justify-center text-white mb-2 shadow-[0_0_15px_rgba(28,110,242,0.4)]">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[0.75rem] text-slate-400 font-medium">Adım 1</span>
+<span class="text-[0.875rem] text-white font-bold">Tarama Tipi Seç</span>
+</div>
+<div class="flex-1 h-[2px] bg-[#1c6ef2] mb-8 mx-2"></div>
+<div class="flex flex-col items-center z-10 text-center">
+<div class="w-8 h-8 rounded-full bg-[#1c6ef2] flex items-center justify-center text-white mb-2 shadow-[0_0_15px_rgba(28,110,242,0.4)]">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[0.75rem] text-slate-400 font-medium">Adım 2</span>
+<span class="text-[0.875rem] text-white font-bold">Görüntü Yükle</span>
+</div>
+<div class="flex-1 h-[2px] bg-[#1c6ef2] mb-8 mx-2"></div>
+<div class="flex flex-col items-center z-10 text-center">
+<div class="w-8 h-8 rounded-full bg-[#1c6ef2] flex items-center justify-center text-white mb-2 shadow-[0_0_15px_rgba(28,110,242,0.4)]">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[0.75rem] text-slate-400 font-medium">Adım 3</span>
+<span class="text-[0.875rem] text-white font-bold">Analiz Et</span>
+</div>
+<div class="flex-1 h-[2px] bg-[#1c6ef2] mb-8 mx-2"></div>
+<div class="flex flex-col items-center z-10 text-center">
+<div class="w-8 h-8 rounded-full bg-[#1c6ef2] flex items-center justify-center text-white mb-2 shadow-[0_0_15px_rgba(28,110,242,0.4)]">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[0.75rem] text-slate-400 font-medium">Adım 4</span>
+<span class="text-[0.875rem] text-white font-bold">Sonuç</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 mb-8">
+<h1 class="text-3xl font-black text-white">Analiz Sonucu</h1>
+<div class="flex gap-2">
+<span class="px-3 py-1 border border-slate-600 rounded-full text-xs text-slate-400 font-medium">TRK-20240107-001</span>
+<span class="px-3 py-1 bg-[#E24B4A] rounded-full text-xs text-white font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">warning</span> Anomali Tespit Edildi
+                </span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6 mb-6">
+<div class="bg-surface-container rounded-2xl border border-white/5 overflow-hidden">
+<div class="p-4 border-b border-white/5 flex justify-between items-center">
+<h3 class="text-sm font-bold text-slate-300">Orijinal Görüntü</h3>
+</div>
+<div class="mri-container">
+<div class="absolute top-4 left-4 z-20 px-2 py-1 border border-slate-600 rounded text-[10px] text-slate-400 font-bold uppercase">Orijinal</div>
+<img alt="Brain MRI" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6YJlhod971U9rnYSFzvuD_SSVmivKLrtf8fuL0TJMXyOufOTifWmXvnv-D82uxIeKxA8kEZeF3xfeGhqhczTzv1uZaagOm4OK-Ko9EuZu2TFNkACzVt4Aybp1f-rbsKcdDmSQusRoBc0IyLQrFfRlZ7XZH4gxORLyDKQziZ-nANSatNRC9Kx8B1_sjGevQpVXtu_qFqcNKInFtuGTQhFffs1WbrrWAOk7KxTj_B19aKvB9P8YKxnKaq13z-2sT39VyGvDuIrIPKtJ"/>
+<div class="absolute bottom-4 right-4 z-20 flex gap-1 bg-black/60 backdrop-blur rounded p-1">
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">zoom_in</span></button>
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">zoom_out</span></button>
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">replay</span></button>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-2xl border border-white/5 overflow-hidden">
+<div class="p-4 border-b border-white/5 flex justify-between items-center">
+<h3 class="text-sm font-bold text-slate-300">TF Analiz Çıktısı</h3>
+</div>
+<div class="mri-container">
+<div class="absolute top-4 left-4 z-20 px-2 py-1 bg-[#E24B4A] rounded text-[10px] text-white font-bold uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">warning</span> Anomali %94.7
+                    </div>
+<img alt="Brain MRI with analysis" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6YJlhod971U9rnYSFzvuD_SSVmivKLrtf8fuL0TJMXyOufOTifWmXvnv-D82uxIeKxA8kEZeF3xfeGhqhczTzv1uZaagOm4OK-Ko9EuZu2TFNkACzVt4Aybp1f-rbsKcdDmSQusRoBc0IyLQrFfRlZ7XZH4gxORLyDKQziZ-nANSatNRC9Kx8B1_sjGevQpVXtu_qFqcNKInFtuGTQhFffs1WbrrWAOk7KxTj_B19aKvB9P8YKxnKaq13z-2sT39VyGvDuIrIPKtJ"/>
+<div class="bounding-box"></div>
+<div class="absolute bottom-4 right-4 z-20 flex gap-1 bg-black/60 backdrop-blur rounded p-1">
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">zoom_in</span></button>
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">zoom_out</span></button>
+<button class="p-1 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">replay</span></button>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl border border-white/5 p-2 mb-8 flex justify-center gap-2">
+<button class="px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-slate-300 flex items-center gap-2 hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-lg">zoom_in</span> Yakınlaştır
+            </button>
+<button class="px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-slate-300 flex items-center gap-2 hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-lg">zoom_out</span> Uzaklaştır
+            </button>
+<button class="px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-slate-300 flex items-center gap-2 hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-lg">compare_arrows</span> Karşılaştır
+            </button>
+<button class="px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-slate-300 flex items-center gap-2 hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-lg">replay</span> Sıfırla
+            </button>
+<button class="px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-slate-300 flex items-center gap-2 hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-lg">download</span> DICOM İndir
+            </button>
+<button class="px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-slate-300 flex items-center gap-2 hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-lg">download</span> PNG İndir
+            </button>
+</div>
+<div class="flex gap-6">
+<div class="w-[60%] space-y-6">
+<div class="bg-surface-container rounded-2xl border border-white/5 p-6">
+<h3 class="text-lg font-bold text-white mb-6">Yapay Zeka Analiz Raporu</h3>
+<div class="space-y-4">
+<div class="flex py-3 border-b border-white/5">
+<span class="w-1/3 text-sm text-slate-400">Hastalık Tespiti:</span>
+<span class="w-2/3 text-sm font-bold text-[#E24B4A]">Glioblastom Multiforme</span>
+</div>
+<div class="flex items-center py-3 border-b border-white/5">
+<span class="w-1/3 text-sm text-slate-400">Doğruluk Skoru:</span>
+<div class="w-2/3 flex items-center gap-4">
+<span class="text-sm font-bold text-white">%94.7</span>
+<div class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-green-500 via-yellow-400 to-yellow-500" style="width: 94.7%"></div>
+</div>
+</div>
+</div>
+<div class="flex py-3 border-b border-white/5">
+<span class="w-1/3 text-sm text-slate-400">Tarama Tipi:</span>
+<span class="w-2/3 text-sm font-medium text-white">MR</span>
+</div>
+<div class="flex py-3 border-b border-white/5">
+<span class="w-1/3 text-sm text-slate-400">Etkilenen Bölge:</span>
+<span class="w-2/3 text-sm font-medium text-white">Frontal Lob (Sağ)</span>
+</div>
+<div class="flex py-3 border-b border-white/5">
+<span class="w-1/3 text-sm text-slate-400">Tahmini Boyut:</span>
+<span class="w-2/3 text-sm font-medium text-white">3.2 cm × 2.8 cm</span>
+</div>
+<div class="flex items-center py-3">
+<span class="w-1/3 text-sm text-slate-400">Seviye:</span>
+<div class="w-2/3">
+<span class="px-2 py-0.5 bg-[#E24B4A] rounded text-[10px] text-white font-bold uppercase">KRİTİK</span>
+</div>
+</div>
+</div>
+<p class="text-[10px] text-slate-500 mt-6">Model: EfficientNetV2-M v2.1.0 · İşlem tarihi: 07.01.2026 14:32</p>
+</div>
+<div class="bg-surface-container rounded-2xl border border-white/5 p-6">
+<label class="block text-sm font-bold text-slate-300 mb-3">Doktor Notu</label>
+<textarea class="w-full bg-[#21262D] border-none rounded-xl p-4 text-sm text-white placeholder-slate-500 focus:ring-1 focus:ring-primary h-32" placeholder="Analiz bulgularınız ve klinik değerlendirmenizi buraya ekleyin..."></textarea>
+</div>
+</div>
+<div class="w-[40%]">
+<div class="bg-surface-container rounded-2xl border border-white/5 p-6">
+<h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-6">Rapor İşlemleri</h3>
+<div class="space-y-4">
+<button class="w-full py-3.5 border border-[#EFB429] text-[#EFB429] font-bold rounded-xl hover:bg-[#EFB429]/5 transition-all text-sm">
+                            Taslak Kaydet
+                        </button>
+<button class="w-full py-3.5 bg-[#61AF64] text-white font-bold rounded-xl hover:bg-[#61AF64]/90 transition-all text-sm shadow-lg shadow-green-900/20">
+                            Raporu Kaydet
+                        </button>
+<div class="h-px bg-white/5 my-6"></div>
+<button class="w-full py-3 border border-white/10 text-slate-300 font-bold rounded-xl hover:bg-white/5 transition-all text-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">picture_as_pdf</span> PDF Olarak İndir
+                        </button>
+<button class="w-full py-3 border border-white/10 text-slate-300 font-bold rounded-xl hover:bg-white/5 transition-all text-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">image</span> PNG Olarak İndir
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/scanner.js"></script>
+
+</body></html>
