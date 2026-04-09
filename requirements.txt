@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-opencv-python
-pydicom
-flask
 =======
 # ==========================================
 # ATGAS - AKILLI TIBBİ GÖRÜNTÜ ANALİZ SİSTEMİ
@@ -24,4 +20,4 @@ Werkzeug>=3.0.0         # Web üzerinden gelen hasta resimlerini güvenli kaydet
 
 # 4. RAPORLAMA SİSTEMİ (Esmanur'un Modülü)
 reportlab>=4.0.4        # Dinamik ve tıbbi logolu PDF raporları üretmek için
->>>>>>> main
+
