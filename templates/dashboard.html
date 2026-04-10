@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATGAS - Ana Panel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#571e00",
+                        "inverse-surface": "#dfe2eb",
+                        "background": "#10141a",
+                        "inverse-on-surface": "#2d3137",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "on-background": "#dfe2eb",
+                        "secondary": "#bfc7d3",
+                        "on-secondary-fixed": "#141c25",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-tertiary-container": "#fffcff",
+                        "on-primary-container": "#fffdff",
+                        "on-surface": "#dfe2eb",
+                        "on-primary-fixed": "#001945",
+                        "surface-dim": "#10141a",
+                        "surface-container": "#1c2026",
+                        "surface-container-low": "#181c22",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-container-high": "#262a31",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#bfc7d3",
+                        "surface-container-highest": "#31353c",
+                        "on-primary": "#002c6f",
+                        "tertiary-container": "#c74f00",
+                        "surface-variant": "#31353c",
+                        "tertiary": "#ffb595",
+                        "secondary-container": "#424a54",
+                        "on-primary-fixed-variant": "#00419c",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface-bright": "#353940",
+                        "on-secondary-fixed-variant": "#404751",
+                        "surface-container-lowest": "#0a0e14",
+                        "outline-variant": "#424654",
+                        "on-secondary": "#29313a",
+                        "surface": "#10141a",
+                        "primary": "#b0c6ff",
+                        "surface-tint": "#b0c6ff",
+                        "inverse-primary": "#0058cc",
+                        "primary-container": "#1c6ef2",
+                        "on-secondary-container": "#b1b9c5",
+                        "outline": "#8c90a0",
+                        "on-surface-variant": "#c2c6d7",
+                        "tertiary-fixed-dim": "#ffb595",
+                        "secondary-fixed": "#dbe3ef",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#d9e2ff",
+                        "status-success": "#61AF64",
+                        "status-warning": "#EFB429",
+                        "status-danger": "#E24B4A"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #10141a;
+            color: #dfe2eb;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <link href="/static/css/style.css" rel="stylesheet"/>
+</head>
+<body class="antialiased">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full w-[240px] z-40 bg-[#181c22] dark:bg-slate-900 shadow-[20px_0px_40px_rgba(0,0,0,0.4)] flex flex-col justify-between py-6 px-4">
+<div class="space-y-8">
+<nav class="space-y-1">
+<!-- Ana Panel is active -->
+<a class="flex items-center gap-3 px-4 py-3 text-white font-semibold border-r-4 border-[#1c6ef2] bg-[#262a31] font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%] transition-colors duration-200" href="#" style="">
+<span class="material-symbols-outlined" data-icon="dashboard" style="">dashboard</span>
+<span class="" style="">Ana Panel</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#" style="">
+<span class="material-symbols-outlined" data-icon="biotech" style="">biotech</span>
+<span class="" style="">Yeni Tarama</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#" style="">
+<span class="material-symbols-outlined" data-icon="description" style="">description</span>
+<span class="" style="">Raporlarım</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#" style="">
+<span class="material-symbols-outlined" data-icon="search" style="">search</span>
+<span class="" style="">Tarama Ara</span>
+</a>
+</nav>
+</div>
+<div class="space-y-1 border-t border-white/5 pt-6">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#" style="">
+<span class="material-symbols-outlined" data-icon="account_circle" style="">account_circle</span>
+<span class="" style="">Profilim</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#" style="">
+<span class="material-symbols-outlined" data-icon="logout" style="">logout</span>
+<span class="" style="">Çıkış Yap</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar Shell -->
+<header class="fixed top-0 right-0 left-[240px] h-[64px] z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-8 w-full">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-black text-[#1c6ef2] tracking-tighter" style="">ATGAS</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 border-r border-white/10 pr-6">
+<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity" data-icon="notifications" style="">notifications</span>
+<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity" data-icon="settings" style="">settings</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-[0.875rem] font-bold text-white" style="">Dr. Ahmet Yılmaz</p>
+<p class="text-[0.6875rem] text-[#1c6ef2] font-medium uppercase tracking-wider" style="">Onkoloji</p>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-white/10">
+<img class="w-full h-full object-cover" data-alt="professional portrait of a male doctor in medical white coat with a friendly expression in a clinical setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9D15pqCR_GCMoaJ81obQy_5JUbZPMzzYNhVkvYF-QADwXn4B3fNT4tzxGVq9h0UdIfsn5GOtPCSdSBGsjEQH_KHXxmwCP7jFk_l5nMX4D3r5TLGPufcXURs4PondUASV8ZzywhSCzLVJ3fOqjT9DgXzppBkUl8aLhGHyn6jhj-Fow_MFd7cntJXgj3rXTj4C9bTLlHJUDhrPh5ULmlwjDQ8Wt2gqvD1dvSTvPdcw2tnLlyzBDjBJPodAkRiEtixsw5vyMTppa3SJh" style=""/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[240px] pt-24 px-8 pb-12">
+<!-- Page Header -->
+<div class="mb-10">
+<h2 class="text-[1.75rem] font-bold text-white tracking-[-2%]" style="">Ana Panel</h2>
+<p class="text-[0.875rem] text-[#7D8590] mt-1" style="">Hoş geldiniz, Dr. Ahmet Yılmaz</p>
+</div>
+<!-- Row 1: Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+<div class="bg-surface-container-low p-6 rounded-xl border-b-4 border-[#1c6ef2] hover:bg-surface-container-high transition-all group">
+<p class="text-label-sm text-slate-400 font-medium mb-1" style="">Toplam Tarama</p>
+<h3 class="text-4xl font-bold text-white mb-2" style="">247</h3>
+<p class="text-xs text-status-success flex items-center gap-1" style="">
+<span class="material-symbols-outlined text-xs" data-icon="trending_up" style="">trending_up</span>
+                    Bu hafta +12 yeni tarama
+                </p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-b-4 border-status-danger hover:bg-surface-container-high transition-all">
+<p class="text-label-sm text-slate-400 font-medium mb-1" style="">Anomali Tespit</p>
+<h3 class="text-4xl font-bold text-white mb-2" style="">89</h3>
+<p class="text-xs text-slate-300" style="">Tespit oranı: %36.0</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-b-4 border-status-success hover:bg-surface-container-high transition-all">
+<p class="text-label-sm text-slate-400 font-medium mb-1" style="">Ort. Doğruluk</p>
+<h3 class="text-4xl font-bold text-white mb-2" style="">%91.4</h3>
+<p class="text-xs text-slate-300" style="">EfficientNetV2-M modeli</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border-b-4 border-status-warning hover:bg-surface-container-high transition-all">
+<p class="text-label-sm text-slate-400 font-medium mb-1" style="">Bekleyen Taslak</p>
+<h3 class="text-4xl font-bold text-white mb-2" style="">5</h3>
+<p class="text-xs text-slate-300" style="">Tamamlanmayı bekliyor</p>
+</div>
+</div>
+<!-- Row 2: Quick Upload Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<!-- Selected Card -->
+<div class="bg-[#1c6ef2]/10 border-2 border-[#1c6ef2] p-6 rounded-2xl relative flex flex-col items-center text-center cursor-pointer group">
+<div class="w-16 h-16 rounded-2xl bg-[#1c6ef2] flex items-center justify-center text-white mb-4">
+<span class="material-symbols-outlined text-3xl" data-icon="psychology" style="">psychology</span>
+</div>
+<h4 class="text-xl font-bold text-white mb-1" style="">MR Yükle</h4>
+<p class="text-xs text-slate-400" style="">Manyetik Rezonans Görüntüleme</p>
+<button class="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-[#1c6ef2] flex items-center justify-center text-white" style="">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward" style="">arrow_forward</span>
+</button>
+</div>
+<div class="bg-surface-container-low border border-white/5 p-6 rounded-2xl relative flex flex-col items-center text-center cursor-pointer hover:bg-surface-container-high transition-all group">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center text-[#1c6ef2] mb-4">
+<span class="material-symbols-outlined text-3xl" data-icon="radioactive" style="">dangerous</span>
+</div>
+<h4 class="text-xl font-bold text-white mb-1" style="">CT Yükle</h4>
+<p class="text-xs text-slate-400" style="">Bilgisayarlı Tomografi</p>
+<button class="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-[#1c6ef2] group-hover:bg-[#1c6ef2] group-hover:text-white transition-colors" style="">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward" style="">arrow_forward</span>
+</button>
+</div>
+<div class="bg-surface-container-low border border-white/5 p-6 rounded-2xl relative flex flex-col items-center text-center cursor-pointer hover:bg-surface-container-high transition-all group">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center text-[#1c6ef2] mb-4">
+<span class="material-symbols-outlined text-3xl" data-icon="skeleton" style="">skeleton</span>
+</div>
+<h4 class="text-xl font-bold text-white mb-1" style="">X-Ray Yükle</h4>
+<p class="text-xs text-slate-400" style="">Dijital Röntgen Görüntüsü</p>
+<button class="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-[#1c6ef2] group-hover:bg-[#1c6ef2] group-hover:text-white transition-colors" style="">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_forward" style="">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Row 3: Son Analizler Table -->
+<section class="bg-surface-container-low rounded-2xl overflow-hidden shadow-xl">
+<div class="px-8 py-6 flex justify-between items-center border-b border-white/5">
+<h3 class="text-lg font-bold text-white" style="">Son Analizler</h3>
+<a class="text-[0.875rem] font-semibold text-[#1c6ef2] hover:underline flex items-center gap-1" href="/reports" style="">
+                    Tümünü Gör
+                    <span class="material-symbols-outlined text-sm" data-icon="arrow_right_alt" style="">arrow_right_alt</span>
+</a>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="text-slate-400 text-[0.6875rem] font-bold uppercase tracking-widest border-b border-white/5">
+<th class="px-8 py-4" style="">Tarama ID</th>
+<th class="px-8 py-4" style="">Tip</th>
+<th class="px-8 py-4" style="">Tahmin Sonucu</th>
+<th class="px-8 py-4" style="">Doğruluk</th>
+<th class="px-8 py-4" style="">Durum</th>
+<th class="px-8 py-4" style="">Tarih</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5" id="dashboard-reports-tbody">
+<tr class="hover:bg-surface-container-high transition-colors group">
+<td class="px-8 py-4 font-mono text-sm text-slate-300" style="">#ATG-9842</td>
+<td class="px-8 py-4" style="">
+<span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded" style="">MR</span>
+</td>
+<td class="px-8 py-4 text-sm font-semibold text-white" style="">Glioma (High Grade)</td>
+<td class="px-8 py-4" style="">
+<div class="flex items-center gap-3">
+<div class="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-success" style="width: 94%;"></div>
+</div>
+<span class="text-xs font-bold text-status-success" style="">%94.2</span>
+</div>
+</td>
+<td class="px-8 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs text-status-success font-medium" style="">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+                                    Kaydedildi
+                                </span>
+</td>
+<td class="px-8 py-4 text-xs text-slate-400" style="">Bugün, 14:20</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300" style="">#ATG-9840</td>
+<td class="px-8 py-4" style="">
+<span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded" style="">CT</span>
+</td>
+<td class="px-8 py-4 text-sm font-semibold text-white" style="">Pulmoner Nödül</td>
+<td class="px-8 py-4" style="">
+<div class="flex items-center gap-3">
+<div class="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-warning" style="width: 78%;"></div>
+</div>
+<span class="text-xs font-bold text-status-warning" style="">%78.5</span>
+</div>
+</td>
+<td class="px-8 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs text-status-warning font-medium" style="">
+<span class="w-1.5 h-1.5 rounded-full bg-status-warning"></span>
+                                    Taslak
+                                </span>
+</td>
+<td class="px-8 py-4 text-xs text-slate-400" style="">Bugün, 11:05</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300" style="">#ATG-9838</td>
+<td class="px-8 py-4" style="">
+<span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded" style="">X-RAY</span>
+</td>
+<td class="px-8 py-4 text-sm font-semibold text-white" style="">Normal Bulgular</td>
+<td class="px-8 py-4" style="">
+<div class="flex items-center gap-3">
+<div class="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-success" style="width: 98%;"></div>
+</div>
+<span class="text-xs font-bold text-status-success" style="">%98.1</span>
+</div>
+</td>
+<td class="px-8 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs text-status-success font-medium" style="">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+                                    Kaydedildi
+                                </span>
+</td>
+<td class="px-8 py-4 text-xs text-slate-400" style="">Dün, 17:45</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="px-8 py-4 font-mono text-sm text-slate-300" style="">#ATG-9835</td>
+<td class="px-8 py-4" style="">
+<span class="px-2 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.6875rem] font-bold rounded" style="">MR</span>
+</td>
+<td class="px-8 py-4 text-sm font-semibold text-white" style="">Meningioma</td>
+<td class="px-8 py-4" style="">
+<div class="flex items-center gap-3">
+<div class="w-24 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-status-success" style="width: 91%;"></div>
+</div>
+<span class="text-xs font-bold text-status-success" style="">%91.4</span>
+</div>
+</td>
+<td class="px-8 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs text-status-success font-medium" style="">
+<span class="w-1.5 h-1.5 rounded-full bg-status-success"></span>
+                                    Kaydedildi
+                                </span>
+</td>
+<td class="px-8 py-4 text-xs text-slate-400" style="">Dün, 09:12</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</main>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/scanner.js"></script>
+</body></html>

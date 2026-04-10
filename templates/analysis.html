@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ATGAS - Yeni Tarama</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#571e00",
+                        "inverse-surface": "#dfe2eb",
+                        "background": "#10141a",
+                        "inverse-on-surface": "#2d3137",
+                        "on-tertiary-fixed-variant": "#7c2e00",
+                        "on-background": "#dfe2eb",
+                        "secondary": "#bfc7d3",
+                        "on-secondary-fixed": "#141c25",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-tertiary-container": "#fffcff",
+                        "on-primary-container": "#fffdff",
+                        "on-surface": "#dfe2eb",
+                        "on-primary-fixed": "#001945",
+                        "surface-dim": "#10141a",
+                        "surface-container": "#1c2026",
+                        "surface-container-low": "#181c22",
+                        "on-tertiary-fixed": "#351000",
+                        "surface-container-high": "#262a31",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#bfc7d3",
+                        "surface-container-highest": "#31353c",
+                        "on-primary": "#002c6f",
+                        "tertiary-container": "#c74f00",
+                        "surface-variant": "#31353c",
+                        "tertiary": "#ffb595",
+                        "secondary-container": "#424a54",
+                        "on-primary-fixed-variant": "#00419c",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "surface-bright": "#353940",
+                        "on-secondary-fixed-variant": "#404751",
+                        "surface-container-lowest": "#0a0e14",
+                        "outline-variant": "#424654",
+                        "on-secondary": "#29313a",
+                        "surface": "#10141a",
+                        "primary": "#b0c6ff",
+                        "surface-tint": "#b0c6ff",
+                        "inverse-primary": "#0058cc",
+                        "primary-container": "#1c6ef2",
+                        "on-secondary-container": "#b1b9c5",
+                        "outline": "#8c90a0",
+                        "on-surface-variant": "#c2c6d7",
+                        "tertiary-fixed-dim": "#ffb595",
+                        "secondary-fixed": "#dbe3ef",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "error": "#ffb4ab",
+                        "primary-fixed": "#d9e2ff",
+                        "status-success": "#61AF64",
+                        "status-warning": "#EFB429",
+                        "status-danger": "#E24B4A"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #10141a;
+            color: #dfe2eb;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <link href="/static/css/style.css" rel="stylesheet"/>
+</head>
+<body class="antialiased">
+<aside class="fixed left-0 top-0 h-full w-[240px] z-40 bg-[#181c22] dark:bg-slate-900 shadow-[20px_0px_40px_rgba(0,0,0,0.4)] flex flex-col justify-between py-6 px-4">
+<div class="space-y-8">
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Ana Panel</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-white font-semibold border-r-4 border-[#1c6ef2] bg-[#262a31] font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%] transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">biotech</span>
+<span>Yeni Tarama</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Raporlarım</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined">search</span>
+<span>Tarama Ara</span>
+</a>
+</nav>
+</div>
+<div class="space-y-1 border-t border-white/5 pt-6">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span>Profilim</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Çıkış Yap</span>
+</a>
+</div>
+</aside>
+<header class="fixed top-0 right-0 left-[240px] h-[64px] z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-8 w-full">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-black text-[#1c6ef2] tracking-tighter">ATGAS</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 border-r border-white/10 pr-6">
+<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity">notifications</span>
+<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity">settings</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-[0.875rem] font-bold text-white">Dr. Ahmet Yılmaz</p>
+<p class="text-[0.6875rem] text-[#1c6ef2] font-medium uppercase tracking-wider">Onkoloji</p>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-white/10">
+<img alt="Dr. Ahmet Yılmaz" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9D15pqCR_GCMoaJ81obQy_5JUbZPMzzYNhVkvYF-QADwXn4B3fNT4tzxGVq9h0UdIfsn5GOtPCSdSBGsjEQH_KHXxmwCP7jFk_l5nMX4D3r5TLGPufcXURs4PondUASV8ZzywhSCzLVJ3fOqjT9DgXzppBkUl8aLhGHyn6jhj-Fow_MFd7cntJXgj3rXTj4C9bTLlHJUDhrPh5ULmlwjDQ8Wt2gqvD1dvSTvPdcw2tnLlyzBDjBJPodAkRiEtixsw5vyMTppa3SJh"/>
+</div>
+</div>
+</div>
+</header>
+<main class="ml-[240px] pt-24 px-8 pb-12">
+<div class="mb-10 w-full">
+<div class="flex items-center justify-between relative max-w-4xl mx-auto">
+<div class="flex flex-col items-center z-10">
+<div class="w-8 h-8 rounded-full bg-[#1c6ef2] flex items-center justify-center text-white mb-2 shadow-[0_0_15px_rgba(28,110,242,0.4)]">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-[0.75rem] text-slate-400 font-medium">Adım 1</span>
+<span class="text-[0.875rem] text-white font-bold">Tarama Tipi Seç</span>
+</div>
+<div class="flex-1 h-[2px] bg-[#1c6ef2] mb-8"></div>
+<div class="flex flex-col items-center z-10">
+<div class="w-8 h-8 rounded-full border-2 border-[#1c6ef2] flex items-center justify-center text-[#1c6ef2] mb-2 bg-[#10141a]">
+<span class="text-sm font-bold">2</span>
+</div>
+<span class="text-[0.75rem] text-[#1c6ef2] font-medium">Adım 2</span>
+<span class="text-[0.875rem] text-[#1c6ef2] font-bold uppercase tracking-wide">Görüntü Yükle</span>
+</div>
+<div class="flex-1 h-[2px] bg-slate-700 mb-8"></div>
+<div class="flex flex-col items-center z-10">
+<div class="w-8 h-8 rounded-full border-2 border-slate-700 flex items-center justify-center text-slate-600 mb-2">
+<span class="text-sm font-bold">3</span>
+</div>
+<span class="text-[0.75rem] text-slate-600 font-medium">Adım 3</span>
+<span class="text-[0.875rem] text-slate-600 font-medium">Analiz Et</span>
+</div>
+<div class="flex-1 h-[2px] bg-slate-700 mb-8"></div>
+<div class="flex flex-col items-center z-10">
+<div class="w-8 h-8 rounded-full border-2 border-slate-700 flex items-center justify-center text-slate-600 mb-2">
+<span class="text-sm font-bold">4</span>
+</div>
+<span class="text-[0.75rem] text-slate-600 font-medium">Adım 4</span>
+<span class="text-[0.875rem] text-slate-600 font-medium">Sonuç</span>
+</div>
+</div>
+</div>
+<div class="flex gap-8">
+<div class="w-[65%] space-y-10">
+<section>
+<label class="block text-xs font-bold text-[#7D8590] uppercase tracking-widest mb-4">Bölüm 1 — Tarama Tipi Seçin</label>
+<div class="grid grid-cols-3 gap-4">
+<div class="p-6 rounded-2xl border border-white/5 bg-surface-container-low hover:bg-surface-container-high flex flex-col items-center text-center cursor-pointer transition-all">
+<div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 mb-4">
+<span class="material-symbols-outlined text-3xl">psychology</span>
+</div>
+<h4 class="text-lg font-bold text-white">MR</h4>
+<p class="text-[0.75rem] text-slate-400">Manyetik Rezonans</p>
+</div>
+<div class="p-6 rounded-2xl border border-white/5 bg-surface-container-low hover:bg-surface-container-high flex flex-col items-center text-center cursor-pointer transition-all">
+<div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 mb-4">
+<span class="material-symbols-outlined text-3xl">dangerous</span>
+</div>
+<h4 class="text-lg font-bold text-white">CT</h4>
+<p class="text-[0.75rem] text-slate-400">Bilgisayarlı Tomografi</p>
+</div>
+<div class="p-6 rounded-2xl border border-white/5 bg-surface-container-low hover:bg-surface-container-high flex flex-col items-center text-center cursor-pointer transition-all">
+<div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 mb-4">
+<span class="material-symbols-outlined text-3xl">skeleton</span>
+</div>
+<h4 class="text-lg font-bold text-white">X-Ray</h4>
+<p class="text-[0.75rem] text-slate-400">Röntgen Görüntüsü</p>
+</div>
+</div>
+</section>
+<section>
+<label class="block text-xs font-bold text-[#7D8590] uppercase tracking-widest mb-4">Bölüm 2 — Görüntü Yükle</label>
+<div class="w-full bg-[#21262D] border-2 border-dashed border-[#30363D] rounded-2xl p-12 flex flex-col items-center justify-center transition-colors hover:border-[#1c6ef2]/50 group" data-upload-dropzone>
+<div class="w-16 h-16 bg-[#1c6ef2]/10 rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-[#1C6EF2]">cloud_upload</span>
+</div>
+<p class="text-lg font-medium text-white mb-4">Görüntüyü buraya sürükleyin veya</p>
+<button class="px-8 py-2.5 border border-[#1c6ef2] text-[#1c6ef2] font-bold rounded-lg hover:bg-[#1c6ef2] hover:text-white transition-all mb-4" data-upload-btn>Dosya Seç</button>
+<p class="text-[0.75rem] text-slate-500" data-upload-progress>Desteklenen formatlar: DICOM, PNG, JPEG, NIfTI — Maks. 50 MB</p>
+<p data-upload-result></p>
+</div>
+</section>
+<section>
+<label class="block text-xs font-bold text-[#7D8590] uppercase tracking-widest mb-4">Bölüm 3 — Hasta Bilgileri</label>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300">Ad Soyad</label>
+<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1c6ef2] transition-colors" id="analysis-patient-name" placeholder="Hasta adı ve soyadı" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300">TC Kimlik No</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1c6ef2] transition-colors" id="analysis-patient-tc" inputmode="numeric" maxlength="11" pattern="[0-9]*" placeholder="00000000000" type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300">Doğum Tarihi</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1c6ef2] transition-colors" id="analysis-patient-birthdate" type="date"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-sm font-medium text-slate-300">Protokol No</label>
+<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1c6ef2] transition-colors" id="analysis-patient-protocol" inputmode="numeric" pattern="[0-9]*" placeholder="Hastane protokol numarası" type="text"/>
+</div>
+</div>
+</section>
+</div>
+<div class="w-[35%]">
+<div class="bg-surface-container-low rounded-2xl border border-white/5 p-8 sticky top-28 shadow-2xl">
+<h3 class="text-xl font-bold text-white mb-6">Tarama Ayarları</h3>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between items-center">
+<span class="text-[0.875rem] text-slate-400">Tarama ID:</span>
+<span class="font-mono text-[0.875rem] text-slate-500">TRK-20240107-005</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[0.875rem] text-slate-400">Seçilen Tip:</span>
+<span class="px-3 py-1 bg-[#1c6ef2]/10 text-[#1c6ef2] text-xs font-bold rounded-lg uppercase">MR</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[0.875rem] text-slate-400">Kullanılan Model:</span>
+<span class="px-3 py-1 bg-status-success/10 text-status-success text-xs font-bold rounded-lg">EfficientNetV2-M</span>
+</div>
+</div>
+<div class="h-px bg-white/5 mb-8"></div>
+<div class="space-y-4 mb-10">
+<p class="text-xs font-bold text-[#7D8590] uppercase tracking-wider">İşlem Adımları</p>
+<ol class="space-y-3" id="analysis-process-steps">
+<li class="flex items-center gap-3 text-sm text-white" data-analysis-step="1">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#1c6ef2]/20 text-[#1c6ef2] flex items-center justify-center text-xs font-bold">1</span>
+<span>Tarama tipini seçin</span>
+</li>
+<li class="flex items-center gap-3 text-sm text-white" data-analysis-step="2">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-[#1c6ef2]/20 text-[#1c6ef2] flex items-center justify-center text-xs font-bold">2</span>
+<span>Tıbbi görüntüyü yükleyin</span>
+</li>
+<li class="flex items-center gap-3 text-sm text-slate-400" data-analysis-step="3">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 text-slate-500 flex items-center justify-center text-xs font-bold">3</span>
+<span>Hasta bilgilerini girin</span>
+</li>
+<li class="flex items-center gap-3 text-sm text-slate-400" data-analysis-step="4">
+<span class="flex-shrink-0 w-6 h-6 rounded-full bg-white/5 text-slate-500 flex items-center justify-center text-xs font-bold">4</span>
+<span>Analizi başlatın</span>
+</li>
+</ol>
+</div>
+<button class="w-full bg-[#1c6ef2] hover:bg-[#0058cc] text-white font-bold py-4 rounded-xl shadow-[0_4px_20px_rgba(28,110,242,0.3)] transition-all flex items-center justify-center gap-2 group" id="analysis-start-btn">
+<span>Analizi Başlat</span>
+<span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">bolt</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/scanner.js"></script>
+
+</body></html>

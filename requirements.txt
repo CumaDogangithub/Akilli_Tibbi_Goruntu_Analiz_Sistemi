@@ -1,0 +1,23 @@
+=======
+# ==========================================
+# ATGAS - AKILLI TIBBİ GÖRÜNTÜ ANALİZ SİSTEMİ
+# ==========================================
+
+# 1. YAPAY ZEKA VE MATEMATİK (Cuma'nın Modülü)
+tensorflow>=2.15.0      # Keras 3 mimarisini ve Derin Öğrenme motorunu içerir
+numpy>=1.24.3           # Matris ve dizi işlemleri (Görüntüleri sayılara çevirmek için)
+scikit-learn>=1.3.0     # Confusion Matrix ve Performans raporları için
+
+# 2. GÖRÜNTÜ İŞLEME VE GÖRSELLEŞTİRME (Nihal ve Elif'in Modülü)
+opencv-python>=4.8.0    # Resim okuma, yeniden boyutlandırma, maskeleme ve ısı haritası
+matplotlib>=3.7.2       # Grafikleri ve ısı haritasını diske çizmek için (Agg backend)
+Pillow>=10.0.0          # TensorFlow'un load_img fonksiyonu için gerekli görüntü kütüphanesi
+pydicom>=2.4.1          # DICOM (.dcm) uzantılı gerçek hastane görüntülerini okumak için
+
+# 3. WEB ARAYÜZÜ VE BACKEND (Ozan'ın Modülü)
+Flask>=3.0.0            # Web sunucusunu ayağa kaldırmak için
+Werkzeug>=3.0.0         # Web üzerinden gelen hasta resimlerini güvenli kaydetmek için
+
+# 4. RAPORLAMA SİSTEMİ (Esmanur'un Modülü)
+reportlab>=4.0.4        # Dinamik ve tıbbi logolu PDF raporları üretmek için
+

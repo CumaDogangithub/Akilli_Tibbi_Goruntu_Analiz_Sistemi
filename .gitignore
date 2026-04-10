@@ -1,0 +1,63 @@
+# =========================
+# İşletim Sistemi Dosyaları
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =========================
+# IDE ve Editör Dosyaları
+# =========================
+.idea/
+.vscode/
+*.swp
+*.swo
+.sublime-workspace
+
+# =========================
+# Hassas Bilgiler ve Ayarlar
+# =========================
+.env
+.env.local
+.env.*.local
+secrets.json
+config.local.js
+
+# =========================
+# Log Dosyaları
+# =========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Python ve Sanal Ortam (Çok Önemli!)
+# =========================
+venv/
+env/
+__pycache__/
+*.pyc
+
+# =========================
+# Yaygın Klasörler (Proje tipine göre değişebilir)
+# =========================
+node_modules/
+build/
+dist/
+coverage/
+
+# =========================
+# ATGAS PROJESİNE ÖZEL DOSYALAR (Cuma'nın Eklemeleri)
+# =========================
+
+# Cuma'nın Yapay Zeka Eğitmek İçin Kullandığı Veriler (GB'larca yer tutar, yüklenmemeli)
+dataset/
+
+# Herkesin kendi bilgisayarındaki lokal test sonuçları (GitHub'ı kirletmemesi için)
+# Not: Klasörün kendisi GitHub'a gitsin ama içindeki resimler gitmesin diye .gitkeep'i hariç tutuyoruz
+static/img/analiz_sonuclari/*
+!static/img/analiz_sonuclari/.gitkeep
