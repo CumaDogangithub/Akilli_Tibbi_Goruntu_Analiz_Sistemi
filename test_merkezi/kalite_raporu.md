@@ -1,7 +1,7 @@
 # 🩺 ATGAS Görüntü Ön İşleme Modülü Kalite Raporu
 
 **Tarih:** 10 Nisan 2026  
-**:** Elif İkra Çakmak  
+**Hazırlayan:** Elif İkra Çakmak  
 **Proje:** Akıllı Tıbbi Görüntü Analiz Sistemi (ATGAS)  
 
 ---
