@@ -1,242 +1,110 @@
-<!DOCTYPE html>
-<html class="dark" lang="tr"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>ATGAS - Profil / Hesap Ayarları</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-tertiary": "#571e00",
-                        "inverse-surface": "#dfe2eb",
-                        "background": "#10141a",
-                        "inverse-on-surface": "#2d3137",
-                        "on-tertiary-fixed-variant": "#7c2e00",
-                        "on-background": "#dfe2eb",
-                        "secondary": "#bfc7d3",
-                        "on-secondary-fixed": "#141c25",
-                        "tertiary-fixed": "#ffdbcc",
-                        "on-tertiary-container": "#fffcff",
-                        "on-primary-container": "#fffdff",
-                        "on-surface": "#dfe2eb",
-                        "on-primary-fixed": "#001945",
-                        "surface-dim": "#10141a",
-                        "surface-container": "#1c2026",
-                        "surface-container-low": "#181c22",
-                        "on-tertiary-fixed": "#351000",
-                        "surface-container-high": "#262a31",
-                        "on-error-container": "#ffdad6",
-                        "secondary-fixed-dim": "#bfc7d3",
-                        "surface-container-highest": "#31353c",
-                        "on-primary": "#002c6f",
-                        "tertiary-container": "#c74f00",
-                        "surface-variant": "#31353c",
-                        "tertiary": "#ffb595",
-                        "secondary-container": "#424a54",
-                        "on-primary-fixed-variant": "#00419c",
-                        "on-error": "#690005",
-                        "error-container": "#93000a",
-                        "surface-bright": "#353940",
-                        "on-secondary-fixed-variant": "#404751",
-                        "surface-container-lowest": "#0a0e14",
-                        "outline-variant": "#424654",
-                        "on-secondary": "#29313a",
-                        "surface": "#10141a",
-                        "primary": "#b0c6ff",
-                        "surface-tint": "#b0c6ff",
-                        "inverse-primary": "#0058cc",
-                        "primary-container": "#1c6ef2",
-                        "on-secondary-container": "#b1b9c5",
-                        "outline": "#8c90a0",
-                        "on-surface-variant": "#c2c6d7",
-                        "tertiary-fixed-dim": "#ffb595",
-                        "secondary-fixed": "#dbe3ef",
-                        "primary-fixed-dim": "#b0c6ff",
-                        "error": "#ffb4ab",
-                        "primary-fixed": "#d9e2ff",
-                        "status-success": "#61AF64",
-                        "status-warning": "#EFB429",
-                        "status-danger": "#E24B4A"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "fontFamily": {
-                        "headline": ["Inter"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
-                    }
-                }
-            }
-        }
-    </script>
-<style>
-        body {
-            background-color: #10141a;
-            color: #dfe2eb;
-            font-family: 'Inter', sans-serif;
-        }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-    </style>
-    <link href="/static/css/style.css" rel="stylesheet"/>
-</head>
-<body class="antialiased">
-<aside class="fixed left-0 top-0 h-full w-[240px] z-40 bg-[#181c22] dark:bg-slate-900 shadow-[20px_0px_40px_rgba(0,0,0,0.4)] flex flex-col justify-between py-6 px-4">
-<div class="space-y-8">
-<nav class="space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
-<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-<span>Ana Panel</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
-<span class="material-symbols-outlined" data-icon="biotech">biotech</span>
-<span>Yeni Tarama</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
-<span class="material-symbols-outlined" data-icon="description">description</span>
-<span>Raporlarım</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
-<span class="material-symbols-outlined" data-icon="search">search</span>
-<span>Tarama Ara</span>
-</a>
-</nav>
-</div>
-<div class="space-y-1 border-t border-white/5 pt-6">
-<a class="flex items-center gap-3 px-4 py-3 text-white font-semibold border-r-4 border-[#1c6ef2] bg-[#262a31] font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%] transition-colors duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
-<span>Profilim</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-[#262a31] transition-colors duration-200 font-['Inter'] text-[0.875rem] leading-[150%] tracking-[-2%]" href="#">
-<span class="material-symbols-outlined" data-icon="logout">logout</span>
-<span>Çıkış Yap</span>
-</a>
-</div>
-</aside>
-<header class="fixed top-0 right-0 left-[240px] h-[64px] z-30 bg-[#10141a]/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-8 w-full">
-<div class="flex items-center gap-2">
-<span class="text-2xl font-black text-[#1c6ef2] tracking-tighter">ATGAS</span>
-</div>
-<div class="flex items-center gap-6">
-<div class="flex items-center gap-4 border-r border-white/10 pr-6">
-<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity" data-icon="notifications">notifications</span>
-<span class="material-symbols-outlined text-slate-300 hover:text-white cursor-pointer transition-opacity" data-icon="settings">settings</span>
-</div>
-<div class="flex items-center gap-3">
-<div class="text-right">
-<p class="text-[0.875rem] font-bold text-white">Dr. Ahmet Yılmaz</p>
-<p class="text-[0.6875rem] text-[#1c6ef2] font-medium uppercase tracking-wider">Onkoloji</p>
-</div>
-<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-high border border-white/10">
-<img alt="Dr. Ahmet Yılmaz" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9D15pqCR_GCMoaJ81obQy_5JUbZPMzzYNhVkvYF-QADwXn4B3fNT4tzxGVq9h0UdIfsn5GOtPCSdSBGsjEQH_KHXxmwCP7jFk_l5nMX4D3r5TLGPufcXURs4PondUASV8ZzywhSCzLVJ3fOqjT9DgXzppBkUl8aLhGHyn6jhj-Fow_MFd7cntJXgj3rXTj4C9bTLlHJUDhrPh5ULmlwjDQ8Wt2gqvD1dvSTvPdcw2tnLlyzBDjBJPodAkRiEtixsw5vyMTppa3SJh"/>
-</div>
-</div>
-</div>
-</header>
-<main class="ml-[240px] pt-24 px-8 pb-12 relative min-h-screen">
-<div class="mb-8">
-<h2 class="text-[1.75rem] font-bold text-white tracking-[-2%]">Profil / Hesap Ayarları</h2>
-</div>
-<div class="bg-surface-container-low rounded-xl p-6 mb-6 flex items-center gap-6 border border-white/5">
-<div class="w-[64px] h-[64px] rounded-full overflow-hidden border-2 border-[#1c6ef2]">
-<img alt="Dr. Ahmet Yılmaz" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9D15pqCR_GCMoaJ81obQy_5JUbZPMzzYNhVkvYF-QADwXn4B3fNT4tzxGVq9h0UdIfsn5GOtPCSdSBGsjEQH_KHXxmwCP7jFk_l5nMX4D3r5TLGPufcXURs4PondUASV8ZzywhSCzLVJ3fOqjT9DgXzppBkUl8aLhGHyn6jhj-Fow_MFd7cntJXgj3rXTj4C9bTLlHJUDhrPh5ULmlwjDQ8Wt2gqvD1dvSTvPdcw2tnLlyzBDjBJPodAkRiEtixsw5vyMTppa3SJh"/>
-</div>
-<div class="flex flex-col gap-1">
-<div class="flex items-center gap-3">
-<h1 class="text-2xl font-bold text-[#E6EDF3]">Dr. Ahmet Yılmaz</h1>
-<span class="px-3 py-0.5 bg-[#1c6ef2]/10 text-[#1c6ef2] text-[0.75rem] font-bold rounded-full border border-[#1c6ef2]/20">Onkoloji</span>
-</div>
-<p class="text-[0.875rem] text-[#7D8590]">ahmet.yilmaz@hastane.com</p>
-<p class="text-[0.75rem] text-[#7D8590]">Hesap oluşturulma: 15 Ocak 2024</p>
-</div>
-</div>
-<div class="flex gap-8 border-b border-white/10 mb-8">
-<button class="pb-4 text-[0.875rem] font-semibold text-white border-b-2 border-[#1c6ef2]" data-tab-target="personal">Kişisel Bilgiler</button>
-<button class="pb-4 text-[0.875rem] font-medium text-slate-400 hover:text-white transition-colors" data-tab-target="password">Şifre Değiştir</button>
-<button class="pb-4 text-[0.875rem] font-medium text-slate-400 hover:text-white transition-colors" data-tab-target="stats">İstatistiklerim</button>
-</div>
-<div class="max-w-4xl" data-tab-panel="personal">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-<div class="space-y-2">
-<label class="block text-[0.8125rem] font-semibold text-slate-400">Ad Soyad</label>
-<input class="w-full bg-surface-container border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#1c6ef2] focus:ring-1 focus:ring-[#1c6ef2] outline-none transition-all" type="text" value="Ahmet Yılmaz"/>
-</div>
-<div class="space-y-2">
-<label class="block text-[0.8125rem] font-semibold text-slate-400">Branş</label>
-<input class="w-full bg-surface-container border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#1c6ef2] focus:ring-1 focus:ring-[#1c6ef2] outline-none transition-all" type="text" value="Onkoloji"/>
-</div>
-<div class="space-y-2">
-<label class="block text-[0.8125rem] font-semibold text-slate-400">E-posta Adresi</label>
-<input class="w-full bg-surface-container border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#1c6ef2] focus:ring-1 focus:ring-[#1c6ef2] outline-none transition-all" type="email" value="ahmet.yilmaz@hastane.com"/>
-</div>
-<div class="space-y-2">
-<label class="block text-[0.8125rem] font-semibold text-slate-400">Unvan</label>
-<input class="w-full bg-surface-container border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#1c6ef2] focus:ring-1 focus:ring-[#1c6ef2] outline-none transition-all" type="text" value="Uzman Doktor"/>
-</div>
-</div>
-<div class="flex justify-end gap-4">
-<button class="px-6 py-2.5 rounded-lg border border-white/10 text-white font-semibold text-[0.875rem] hover:bg-white/5 transition-colors">
-                    Değişiklikleri Geri Al
-                </button>
-<button class="px-6 py-2.5 rounded-lg bg-[#1c6ef2] text-white font-semibold text-[0.875rem] hover:bg-[#1c6ef2]/90 transition-colors shadow-lg shadow-[#1c6ef2]/20">
-                    Bilgileri Kaydet
-                </button>
-</div>
-</div>
-<div class="max-w-4xl hidden" data-tab-panel="password">
-<div class="w-full max-w-2xl space-y-6 mb-8">
-<div class="space-y-2">
-<label class="block text-[0.8125rem] font-semibold text-slate-400">Mevcut Şifre</label>
-<input class="w-full bg-surface-container border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#1c6ef2] focus:ring-1 focus:ring-[#1c6ef2] outline-none transition-all" placeholder="••••••••" type="password"/>
-</div>
-<div class="space-y-2">
-<label class="block text-[0.8125rem] font-semibold text-slate-400">Yeni Şifre</label>
-<input class="w-full bg-surface-container border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#1c6ef2] focus:ring-1 focus:ring-[#1c6ef2] outline-none transition-all" placeholder="En az 8 karakter" type="password"/>
-</div>
-<div class="space-y-2">
-<label class="block text-[0.8125rem] font-semibold text-slate-400">Yeni Şifre (Tekrar)</label>
-<input class="w-full bg-surface-container border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-[#1c6ef2] focus:ring-1 focus:ring-[#1c6ef2] outline-none transition-all" placeholder="Yeni şifreyi tekrar yazın" type="password"/>
-</div>
-</div>
-<div class="flex justify-end">
-<button class="px-6 py-2.5 rounded-lg bg-[#1c6ef2] text-white font-semibold text-[0.875rem] hover:bg-[#1c6ef2]/90 transition-colors shadow-lg shadow-[#1c6ef2]/20">
-                    Şifreyi Güncelle
-                </button>
-</div>
-</div>
-<div class="max-w-4xl hidden" data-tab-panel="stats">
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-<div class="bg-surface-container border border-white/10 rounded-xl p-4">
-<p class="text-xs text-slate-400">Toplam İnceleme</p>
-<p class="text-2xl font-bold text-white mt-1">247</p>
-</div>
-<div class="bg-surface-container border border-white/10 rounded-xl p-4">
-<p class="text-xs text-slate-400">Ortalama Doğruluk</p>
-<p class="text-2xl font-bold text-[#61AF64] mt-1">%91.4</p>
-</div>
-<div class="bg-surface-container border border-white/10 rounded-xl p-4">
-<p class="text-xs text-slate-400">Bu Hafta</p>
-<p class="text-2xl font-bold text-[#1c6ef2] mt-1">+12</p>
-</div>
-</div>
-<div class="bg-surface-container border border-white/10 rounded-xl p-5">
-<p class="text-sm text-slate-300">Demo panel: Burada doktor bazlı performans eğilimleri, modalite dağılımı ve rapor tamamlama istatistikleri gösterilecektir.</p>
-</div>
-</div>
-</main>
+{% extends "base.html" %}
+{% set aktif_sayfa = 'profil' %}
+{% block baslik %}Profilim{% endblock %}
 
-<script src="/static/js/ui.js"></script>
-<script src="/static/js/scanner.js"></script>
+{% block icerik %}
+  <h1>Profil / Hesap Ayarları</h1>
 
-</body></html>
+  <div class="kart" style="display:flex; align-items:center; gap:18px; margin-bottom:24px;">
+    <div class="avatar" style="width:64px; height:64px; font-size:22px;">{{ doktor.ad_soyad[:2].upper() }}</div>
+    <div>
+      <div style="font-size:18px; font-weight:700;">
+        {{ doktor.ad_soyad }}
+        <span class="rozet rozet-mavi" style="margin-left:8px;">{{ doktor.brans }}</span>
+      </div>
+      <div style="font-size:12px; color:var(--metin-sonuk);">{{ doktor.eposta }}</div>
+      <div style="font-size:11px; color:var(--metin-sonuk); margin-top:4px;">
+        Hesap oluşturma: {{ doktor.olusturulma_tarihi[:10] }}
+      </div>
+    </div>
+  </div>
+
+  {% if mesaj %}<div class="alert alert-success">✓ {{ mesaj }}</div>{% endif %}
+  {% if hata %}<div class="alert alert-danger">⚠ {{ hata }}</div>{% endif %}
+
+  <div class="tab-menu">
+    <a class="aktif" onclick="sekmeAc('bilgi', this)">Kişisel Bilgiler</a>
+    <a onclick="sekmeAc('sifre', this)">Şifre Değiştir</a>
+    <a onclick="sekmeAc('istat', this)">İstatistiklerim</a>
+  </div>
+
+  <!-- Bilgi sekmesi -->
+  <div class="kart sekme" id="sekme-bilgi">
+    <form method="POST">
+      <input type="hidden" name="islem" value="bilgi_guncelle">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-grup">
+          <label>Ad Soyad</label>
+          <input type="text" name="ad_soyad" value="{{ doktor.ad_soyad }}" required>
+        </div>
+        <div class="form-grup">
+          <label>Branş</label>
+          <input type="text" name="brans" value="{{ doktor.brans }}" required>
+        </div>
+        <div class="form-grup">
+          <label>E-posta</label>
+          <input type="email" name="eposta" value="{{ doktor.eposta }}" required>
+        </div>
+        <div class="form-grup">
+          <label>Unvan</label>
+          <input type="text" name="unvan" value="{{ doktor.unvan or 'Uzman Doktor' }}">
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <button type="submit" class="btn btn-primary">Bilgileri Kaydet</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Şifre sekmesi -->
+  <div class="kart sekme" id="sekme-sifre" style="display:none;">
+    <form method="POST">
+      <input type="hidden" name="islem" value="sifre_degistir">
+      <div class="form-grup">
+        <label>Mevcut Şifre</label>
+        <input type="password" name="mevcut_sifre" required>
+      </div>
+      <div class="form-grup">
+        <label>Yeni Şifre</label>
+        <input type="password" name="yeni_sifre" minlength="6" required>
+      </div>
+      <div class="form-grup">
+        <label>Yeni Şifre (Tekrar)</label>
+        <input type="password" name="yeni_sifre_tekrar" minlength="6" required>
+      </div>
+      <div style="text-align:right;">
+        <button type="submit" class="btn btn-primary">Şifreyi Güncelle</button>
+      </div>
+      <div style="font-size:11px; color:var(--metin-sonuk); margin-top:12px;">
+        💡 En az 6 karakter olmalıdır.
+      </div>
+    </form>
+  </div>
+
+  <!-- İstatistik sekmesi -->
+  <div class="sekme" id="sekme-istat" style="display:none;">
+    <div class="stat-grid">
+      <div class="stat-kart">
+        <div class="etiket">Toplam Taramam</div>
+        <div class="deger">{{ istat.toplam or 0 }}</div>
+      </div>
+      <div class="stat-kart yesil">
+        <div class="etiket">Kaydettiğim Rapor</div>
+        <div class="deger">{{ istat.kayitli or 0 }}</div>
+      </div>
+      <div class="stat-kart kirmizi">
+        <div class="etiket">Tespit Ettiğim Anomali</div>
+        <div class="deger">{{ istat.anomali or 0 }}</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function sekmeAc(ad, link) {
+  document.querySelectorAll(".sekme").forEach(s => s.style.display = "none");
+  document.getElementById("sekme-" + ad).style.display = "block";
+  document.querySelectorAll(".tab-menu a").forEach(a => a.classList.remove("aktif"));
+  link.classList.add("aktif");
+}
+</script>
+{% endblock %}

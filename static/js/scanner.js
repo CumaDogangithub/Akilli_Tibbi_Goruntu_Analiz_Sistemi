@@ -1,107 +1,257 @@
+/* ATGAS — Yeni Tarama: Hiyerarşik tip seçimi, drop zone, aşamalı loader */
+
 (function () {
-	const ALLOWED = [
-		"image/png",
-		"image/jpeg",
-		"application/dicom",
-		"application/dicom+json",
-		"application/octet-stream"
-	];
+  const dropZone = document.getElementById("drop-zone");
+  if (!dropZone) return;
 
-	function hasAllowedExtension(fileName) {
-		const lower = fileName.toLowerCase();
-		return [".dcm", ".dicom", ".png", ".jpg", ".jpeg", ".nii", ".nii.gz"].some((ext) => lower.endsWith(ext));
-	}
+  const fileInput = document.getElementById("goruntu-input");
+  const seciliDosyaEt = document.getElementById("secili-dosya");
+  const onizleme = document.getElementById("onizleme");
+  const analizBtn = document.getElementById("analiz-btn");
+  const form = document.getElementById("tarama-form");
+  const uzmanInput = document.getElementById("uzman_kodu");
 
-	function showMessage(container, text, isError) {
-		if (!container) {
-			return;
-		}
-		container.textContent = text;
-		container.className = isError ? "upload-error-note" : "upload-success-note";
-	}
+  const anaTipKartlari = document.querySelectorAll(".ana-tip-kart");
+  const altUzmanKartlari = document.querySelectorAll(".alt-uzman-kart");
+  const altCt = document.getElementById("alt-ct");
+  const altMri = document.getElementById("alt-mri");
 
-	async function uploadFile(file, resultBox, progressText) {
-		if (!file) {
-			return;
-		}
+  // ============================================================
+  // 1) HIYERARŞIK TIP SEÇIMI — Ana tip → (CT/MRI ise) alt tip
+  // ============================================================
+  anaTipKartlari.forEach((kart) => {
+    kart.addEventListener("click", () => {
+      anaTipKartlari.forEach((k) => k.classList.remove("aktif"));
+      kart.classList.add("aktif");
+      altUzmanKartlari.forEach((k) => k.classList.remove("aktif"));
 
-		if (!ALLOWED.includes(file.type) && !hasAllowedExtension(file.name)) {
-			showMessage(resultBox, "Desteklenmeyen dosya turu. DICOM, PNG, JPG, JPEG, NIfTI desteklenir.", true);
-			return;
-		}
+      const anaTip = kart.dataset.anaTip;
+      altCt.style.display = anaTip === "ct" ? "block" : "none";
+      altMri.style.display = anaTip === "mri" ? "block" : "none";
 
-		progressText.textContent = "Yukleniyor...";
-		const formData = new FormData();
-		formData.append("image", file);
+      if (anaTip === "xray") {
+        // X-Ray'in alt seçeneği yok → uzman direkt belirleniyor
+        uzmanInput.value = kart.dataset.uzman;
+      } else {
+        // CT/MRI seçildi → alt seçim bekleniyor
+        uzmanInput.value = "";
+      }
+      durumGuncelle();
+    });
+  });
 
-		try {
-			const response = await fetch("/upload-image", {
-				method: "POST",
-				body: formData
-			});
+  altUzmanKartlari.forEach((kart) => {
+    kart.addEventListener("click", () => {
+      // Sadece aynı grup içindeki diğerlerini temizle
+      const grup = kart.closest(".alt-kategori");
+      grup.querySelectorAll(".alt-uzman-kart").forEach((k) => k.classList.remove("aktif"));
+      kart.classList.add("aktif");
+      uzmanInput.value = kart.dataset.uzman;
+      durumGuncelle();
+    });
+  });
 
-			const data = await response.json();
-			if (!response.ok || !data.ok) {
-				throw new Error(data.error || "Dosya yuklenemedi.");
-			}
+  // ============================================================
+  // 2) DROP ZONE — TEK DİALOG (label + sürükleme)
+  // ============================================================
+  // NOT: drop-zone bir <label for="goruntu-input"> olduğu için tıklayınca
+  // tarayıcı otomatik dosya dialogunu açar. Manuel "click" çağrısına gerek YOK.
+  ["dragover", "dragenter"].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    })
+  );
+  ["dragleave"].forEach((ev) =>
+    dropZone.addEventListener(ev, () => dropZone.classList.remove("dragover"))
+  );
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      dosyaSecildi();
+    }
+  });
+  fileInput.addEventListener("change", dosyaSecildi);
 
-			progressText.textContent = "Yukleme tamamlandi";
-			showMessage(resultBox, "Dosya basariyla yuklendi: " + data.filename, false);
-			window.dispatchEvent(new CustomEvent("atgas-upload-success", { detail: data }));
-		} catch (error) {
-			progressText.textContent = "Yukleme basarisiz";
-			showMessage(resultBox, error.message || "Dosya yuklenirken bir hata olustu.", true);
-		}
-	}
+  function dosyaSecildi() {
+    const dosya = fileInput.files[0];
+    if (!dosya) return;
+    const izinli = [".png", ".jpg", ".jpeg", ".dcm"];
+    const uzanti = "." + dosya.name.split(".").pop().toLowerCase();
+    if (!izinli.includes(uzanti)) {
+      dropZone.classList.add("hata");
+      seciliDosyaEt.textContent = "Desteklenmeyen format!";
+      seciliDosyaEt.style.color = "var(--kirmizi)";
+      return;
+    }
+    if (dosya.size > 50 * 1024 * 1024) {
+      dropZone.classList.add("hata");
+      seciliDosyaEt.textContent = "Dosya çok büyük (maks 50 MB)";
+      return;
+    }
+    dropZone.classList.remove("hata");
+    seciliDosyaEt.textContent = `✓ ${dosya.name} (${(dosya.size / 1024).toFixed(0)} KB)`;
+    seciliDosyaEt.style.color = "var(--yesil)";
 
-	document.addEventListener("DOMContentLoaded", function () {
-		const dropzone = document.querySelector("[data-upload-dropzone]");
-		const pickerButton = document.querySelector("[data-upload-btn]");
-		const resultBox = document.querySelector("[data-upload-result]");
-		const progressText = document.querySelector("[data-upload-progress]");
+    if (onizleme && dosya.type.startsWith("image/")) {
+      const okuyucu = new FileReader();
+      okuyucu.onload = (e) => {
+        onizleme.src = e.target.result;
+        onizleme.style.display = "block";
+      };
+      okuyucu.readAsDataURL(dosya);
+    }
+    durumGuncelle();
+  }
 
-		if (!dropzone || !pickerButton || !resultBox || !progressText) {
-			return;
-		}
+  // ============================================================
+  // 3) FORM VALİDASYONU
+  // ============================================================
+  form.querySelectorAll("input").forEach((inp) => inp.addEventListener("input", durumGuncelle));
 
-		const input = document.createElement("input");
-		input.type = "file";
-		input.accept = ".dcm,.dicom,.png,.jpg,.jpeg,.nii,.nii.gz";
-		input.hidden = true;
-		dropzone.appendChild(input);
+  function durumGuncelle() {
+    const tcInput = document.getElementById("hasta_tc");
+    const tcDeger = tcInput.value.trim();
+    if (tcDeger && (tcDeger.length !== 11 || !/^\d+$/.test(tcDeger))) {
+      tcInput.style.borderColor = "var(--kirmizi)";
+    } else {
+      tcInput.style.borderColor = "";
+    }
 
-		pickerButton.addEventListener("click", function (event) {
-			event.preventDefault();
-			input.click();
-		});
+    const gerekli = ["hasta_ad_soyad", "hasta_tc", "hasta_dogum_tarihi", "protokol_no"];
+    const tumDoldu = gerekli.every((id) => document.getElementById(id).value.trim());
+    const dosyaVar = fileInput.files.length > 0;
+    const uzmanVar = !!uzmanInput.value;
+    const tcGecerli = tcDeger.length === 11 && /^\d+$/.test(tcDeger);
 
-		input.addEventListener("change", function () {
-			if (input.files && input.files.length) {
-				uploadFile(input.files[0], resultBox, progressText);
-			}
-		});
+    analizBtn.disabled = !(tumDoldu && dosyaVar && uzmanVar && tcGecerli);
+  }
 
-		["dragenter", "dragover"].forEach((name) => {
-			dropzone.addEventListener(name, function (event) {
-				event.preventDefault();
-				event.stopPropagation();
-				dropzone.classList.add("border-[#1c6ef2]");
-			});
-		});
+  // ============================================================
+  // 4) AŞAMALI LOADER OVERLAY
+  // ============================================================
+  const overlay = document.getElementById("analiz-overlay");
+  const overlayYuzde = document.getElementById("overlay-yuzde");
+  const overlayBar = document.getElementById("overlay-bar");
+  const adimlar = document.querySelectorAll("#overlay-adimlar li");
 
-		["dragleave", "drop"].forEach((name) => {
-			dropzone.addEventListener(name, function (event) {
-				event.preventDefault();
-				event.stopPropagation();
-				dropzone.classList.remove("border-[#1c6ef2]");
-			});
-		});
+  // Aşamaların görsel zamanlaması (ms). Toplam ~14sn — gerçek analiz biterse erken kapanır.
+  const ASAMALAR = [
+    { ad: "Görüntü yükleniyor",       sure: 1500 },
+    { ad: "CLAHE + gürültü giderme",  sure: 2000 },
+    { ad: "Model belleğe yükleniyor", sure: 3000 },
+    { ad: "CNN katmanları işleniyor", sure: 4000 },
+    { ad: "Grad-CAM ısı haritası",    sure: 2500 },
+    { ad: "DB'ye kaydediliyor",       sure: 1000 },
+  ];
+  let mevcutAdim = 0;
+  let zamanlayici = null;
+  let analizBitti = false;
 
-		dropzone.addEventListener("drop", function (event) {
-			const files = event.dataTransfer ? event.dataTransfer.files : null;
-			if (files && files.length) {
-				uploadFile(files[0], resultBox, progressText);
-			}
-		});
-	});
+  function loaderBaslat() {
+    overlay.style.display = "flex";
+    mevcutAdim = 0;
+    analizBitti = false;
+    adimlar.forEach((li) => li.classList.remove("aktif", "tamam"));
+    adimlar[0].classList.add("aktif");
+    overlayYuzde.textContent = "0%";
+    overlayBar.style.width = "0%";
+
+    let baslangic = Date.now();
+    let toplamSure = ASAMALAR.reduce((t, a) => t + a.sure, 0);
+
+    zamanlayici = setInterval(() => {
+      const gecen = Date.now() - baslangic;
+      let kumulatif = 0;
+      let yeniAdim = 0;
+      for (let i = 0; i < ASAMALAR.length; i++) {
+        kumulatif += ASAMALAR[i].sure;
+        if (gecen < kumulatif) { yeniAdim = i; break; }
+        yeniAdim = i + 1;
+      }
+      // Eğer son aşamayı geçtiyse, %95'te bekle (analiz bitene kadar)
+      let yuzde = Math.min(95, Math.floor((gecen / toplamSure) * 95));
+
+      if (yeniAdim !== mevcutAdim) {
+        for (let i = 0; i < yeniAdim && i < adimlar.length; i++) {
+          adimlar[i].classList.remove("aktif");
+          adimlar[i].classList.add("tamam");
+        }
+        if (yeniAdim < adimlar.length) {
+          adimlar[yeniAdim].classList.add("aktif");
+        }
+        mevcutAdim = yeniAdim;
+      }
+      overlayYuzde.textContent = yuzde + "%";
+      overlayBar.style.width = yuzde + "%";
+
+      if (analizBitti) {
+        clearInterval(zamanlayici);
+      }
+    }, 200);
+  }
+
+  function loaderBitir(basarili) {
+    analizBitti = true;
+    clearInterval(zamanlayici);
+    if (basarili) {
+      adimlar.forEach((li) => {
+        li.classList.remove("aktif");
+        li.classList.add("tamam");
+      });
+      overlayYuzde.textContent = "100%";
+      overlayBar.style.width = "100%";
+      overlayBar.style.background = "var(--yesil)";
+    } else {
+      overlay.style.display = "none";
+    }
+  }
+
+  // ============================================================
+  // 5) FORM GÖNDER
+  // ============================================================
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (analizBtn.disabled) return;
+
+    const fd = new FormData(form);
+    analizBtn.disabled = true;
+    loaderBaslat();
+
+    try {
+      const yanit = await fetch("/api/analiz", { method: "POST", body: fd });
+      const veri = await yanit.json();
+      if (veri.durum === "basarili") {
+        loaderBitir(true);
+        setTimeout(() => (window.location.href = veri.redirect_url), 600);
+      } else {
+        loaderBitir(false);
+        toast(veri.mesaj || "Analiz hatası", "hata");
+        analizBtn.disabled = false;
+      }
+    } catch (err) {
+      loaderBitir(false);
+      toast("Sunucu hatası: " + err.message, "hata");
+      analizBtn.disabled = false;
+    }
+  });
+
+  // ============================================================
+  // 6) Önceden seçili tip (dashboard'tan gelen ?tip= parametresi)
+  // ============================================================
+  const onSecili = document.body.dataset.onSecili;
+  if (onSecili) {
+    // Eğer tam uzman kodu geldiyse (örn "ct_akciger") önce ana tipi tıkla, sonra alt
+    if (onSecili === "xray") {
+      document.querySelector(`.ana-tip-kart[data-ana-tip="xray"]`)?.click();
+    } else if (onSecili.startsWith("ct_")) {
+      document.querySelector(`.ana-tip-kart[data-ana-tip="ct"]`)?.click();
+      document.querySelector(`.alt-uzman-kart[data-uzman="${onSecili}"]`)?.click();
+    } else if (onSecili.startsWith("mri_")) {
+      document.querySelector(`.ana-tip-kart[data-ana-tip="mri"]`)?.click();
+      document.querySelector(`.alt-uzman-kart[data-uzman="${onSecili}"]`)?.click();
+    }
+  }
 })();
