@@ -13,7 +13,10 @@
 
 <div class="uygulama">
   <aside class="sidebar" id="sidebar">
-    <div class="logo">ATGAS</div>
+    <div class="logo">
+      {% include "_logo.html" %}
+      <span>ATGAS</span>
+    </div>
     <nav>
       <a href="{{ url_for('dashboard') }}" class="{% if aktif_sayfa == 'dashboard' %}aktif{% endif %}">▣ Ana Panel</a>
       <a href="{{ url_for('tarama') }}"    class="{% if aktif_sayfa == 'tarama' %}aktif{% endif %}">＋ Yeni Tarama</a>
@@ -26,7 +29,7 @@
             {% for r in son_taramalar %}
               <li>
                 <a href="{{ url_for('rapor_detay', rapor_id=r.id) }}"
-                   title="{{ r.tf_tahmin_sonucu }} · {{ r.islem_tarihi[:16] }}">
+                   title="{{ r.tf_tahmin_sonucu }} · {{ r.islem_tarihi | kisa_tarih }}">
                   <span class="tip-rozet">{{ r.tarama_tipi }}</span>
                   <span>{{ r.tf_tahmin_sonucu }}</span>
                 </a>
@@ -50,7 +53,13 @@
     <div class="header">
       <div style="display:flex; align-items:center; min-width:0;">
         <button class="hamburger" type="button" onclick="sidebarToggle()" aria-label="Menüyü aç">≡</button>
-        <div class="marka">ATGAS · Akıllı Tıbbi Görüntü Analiz Sistemi</div>
+        <div class="marka">
+          {% with boyut='kucuk' %}{% include "_logo.html" %}{% endwith %}
+          <div class="ad-grup">
+            <span>ATGAS</span>
+            <span class="alt">Akıllı Tıbbi Görüntü Analiz Sistemi</span>
+          </div>
+        </div>
       </div>
       {% if doktor %}
       <div class="doktor-menu">

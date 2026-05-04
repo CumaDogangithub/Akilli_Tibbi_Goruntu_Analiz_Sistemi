@@ -14,7 +14,7 @@
       </div>
       <div style="font-size:12px; color:var(--metin-sonuk);">{{ doktor.eposta }}</div>
       <div style="font-size:11px; color:var(--metin-sonuk); margin-top:4px;">
-        Hesap oluşturma: {{ doktor.olusturulma_tarihi[:10] }}
+        Hesap oluşturma: {{ doktor.olusturulma_tarihi | kisa_gun }}
       </div>
     </div>
   </div>

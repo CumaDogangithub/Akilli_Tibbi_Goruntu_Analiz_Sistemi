@@ -1,13 +1,21 @@
-from .db import (
-    veritabani_baglantisi,
-    veritabanini_kur,
+"""ATGAS Veritabanı Modülü — SQLAlchemy ORM (PostgreSQL/Supabase)"""
+
+from .modeller import db, Doktor, AnalizRaporu
+from .kurulum import (
+    db_init,
+    database_uri,
+    maskelenmis_url,
     ornek_doktor_ekle,
-    DB_YOLU,
+    aktif_backend,
 )
 
 __all__ = [
-    "veritabani_baglantisi",
-    "veritabanini_kur",
+    "db",
+    "Doktor",
+    "AnalizRaporu",
+    "db_init",
+    "database_uri",
+    "maskelenmis_url",
     "ornek_doktor_ekle",
-    "DB_YOLU",
+    "aktif_backend",
 ]

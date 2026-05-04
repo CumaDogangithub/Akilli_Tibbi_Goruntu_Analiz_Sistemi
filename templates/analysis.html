@@ -82,10 +82,11 @@
       <div class="icon">⬆</div>
       <p>Görüntüyü buraya sürükleyin veya tıklayarak seçin</p>
       <span class="btn btn-primary" style="pointer-events:none;">Dosya Seç</span>
-      <input type="file" id="goruntu-input" name="goruntu" accept=".png,.jpg,.jpeg,.dcm">
+      <input type="file" id="goruntu-input" name="goruntu"
+             accept=".png,.jpg,.jpeg,.dcm,.dicom,.dic,.ima,application/dicom,*">
       <div class="secili-dosya" id="secili-dosya"></div>
       <div style="font-size:11px; color:var(--metin-sonuk); margin-top:8px;">
-        Desteklenen formatlar: DICOM, PNG, JPEG · Maks 50 MB
+        Desteklenen formatlar: DICOM (.dcm/.dicom/.dic/.ima), PNG, JPG, JPEG · Maks 50 MB
       </div>
       <img id="onizleme" style="display:none; max-width:200px; margin:16px auto 0; border-radius:4px;">
     </label>
@@ -142,24 +143,40 @@
   </div>
 
 {% else %}
-  <!-- ============================ ANALİZ DETAY ============================ -->
+  <!-- ============================ ANALİZ DETAY / ONİZLEME ============================ -->
   {% set seviye = (rapor.seviye or 'Orta') %}
   {% set rozet = 'rozet-yesil' if seviye == 'Temiz' else ('rozet-kirmizi' if seviye == 'Kritik' else 'rozet-sari') %}
+  {% set onizleme_mi = (mod == 'onizleme') %}
   <h1>
     Analiz Sonucu
     <span style="font-size:14px; color:var(--metin-sonuk); font-weight:normal;">
-      &nbsp;TRK-{{ '%06d' % rapor.id }}
+      {% if onizleme_mi %}
+        &nbsp;ÖNİZLEME — Henüz Kaydedilmedi
+      {% else %}
+        &nbsp;TRK-{{ '%06d' % rapor.id }}
+      {% endif %}
     </span>
     {% if rapor.ham_sinif != 'Normal' %}
       <span class="rozet rozet-kirmizi" style="margin-left:12px;">⚠ Anomali Tespit Edildi</span>
     {% else %}
       <span class="rozet rozet-yesil" style="margin-left:12px;">✓ Temiz</span>
     {% endif %}
+    {% if onizleme_mi %}
+      <span class="rozet rozet-sari" style="margin-left:8px;">⏳ Kaydedilmedi</span>
+    {% endif %}
   </h1>
   <div class="alt-baslik">
     <span class="rozet rozet-mavi">{{ rapor.tarama_tipi }}</span>
-    &nbsp; İşlem Tarihi: {{ rapor.islem_tarihi[:16] }}
+    &nbsp; İşlem Tarihi:
+    {% if onizleme_mi %}{{ rapor.olusturulma }}{% else %}{{ rapor.islem_tarihi | kisa_tarih }}{% endif %}
   </div>
+
+  {% if onizleme_mi %}
+  <div class="alert alert-warning">
+    ⚠ Bu analiz <b>henüz veritabanına kaydedilmedi</b>. Çıkmadan önce
+    <b>Taslak Kaydet</b> veya <b>Raporu Kaydet</b> butonunu kullanın.
+  </div>
+  {% endif %}
 
   <!-- HASTA BİLGİLERİ KARTI - belirgin, dikkat çekici -->
   <div class="hasta-kart">
@@ -191,18 +208,20 @@
   </div>
 
   <!-- Görüntü karşılaştırma — EŞİT BOYUTTA 1:1 ÇERÇEVELER -->
+  {# DB'de sadece dosya adı saklanır → URL inşası direkt
+     | dosya_adi filter'ı eski absolute path'li kayıtlara karşı defansif. #}
   <div class="karsilastir">
     <div class="gor-panel">
       <div class="baslik">● ORİJİNAL GÖRÜNTÜ</div>
       <div class="resim-cerceve">
-        <img src="{{ url_for('yuklenen_dosya', dosya=rapor.goruntu_dosya_yolu.split('uploads')[-1].lstrip('\\/')) }}"
+        <img src="{{ url_for('yuklenen_dosya', dosya=rapor.goruntu_dosya_yolu | dosya_adi) }}"
              alt="orijinal" onerror="this.style.opacity=0.3">
       </div>
     </div>
     <div class="gor-panel tf">
       <div class="baslik">● TENSORFLOW ANALİZ ÇIKTISI</div>
       <div class="resim-cerceve">
-        <img src="{{ url_for('static', filename='img/analiz_sonuclari/' + rapor.isaretli_goruntu_yolu.split('analiz_sonuclari')[-1].lstrip('\\/')) }}"
+        <img src="{{ url_for('static', filename='img/analiz_sonuclari/' + (rapor.isaretli_goruntu_yolu | dosya_adi)) }}"
              alt="ai">
       </div>
     </div>
@@ -263,12 +282,20 @@
         <button class="btn btn-warning" onclick="taslakKaydet()">💾 Taslak Kaydet</button>
         <button class="btn btn-success" onclick="raporKaydet()">✓ Raporu Kaydet</button>
         <hr style="border-color:var(--kenarlik);">
-        <a class="btn" href="{{ url_for('rapor_pdf', rapor_id=rapor.id) }}">📄 PDF Olarak İndir</a>
+        {% if onizleme_mi %}
+          <button class="btn" onclick="pdfIndirOnizleme()">📄 PDF Olarak İndir</button>
+        {% else %}
+          <a class="btn" href="{{ url_for('rapor_pdf', rapor_id=rapor.id) }}">📄 PDF Olarak İndir</a>
+        {% endif %}
+        <hr style="border-color:var(--kenarlik);">
+        <a class="btn btn-primary" href="{{ url_for('tarama') }}" id="yeni-tarama-link">＋ Yeni Tarama Başlat</a>
       </div>
 
       <div style="margin-top:24px; padding:12px; background:var(--yuzey); border-radius:6px;">
         <div style="font-size:11px; color:var(--metin-sonuk); margin-bottom:6px;">DURUM</div>
-        {% if rapor.durum == 'Kaydedildi' %}
+        {% if onizleme_mi %}
+          <span class="rozet rozet-sari">⏳ Henüz Kaydedilmedi</span>
+        {% elif rapor.durum == 'Kaydedildi' %}
           <span class="rozet rozet-yesil">● Kaydedildi</span>
         {% else %}
           <span class="rozet rozet-sari">● Taslak</span>
@@ -278,22 +305,78 @@
   </div>
 
   <script>
-    const RAPOR_ID = {{ rapor.id }};
+    // mod=detay → mevcut rapor id, mod=onizleme → null (henüz DB'de yok)
+    // const DEĞİL — ilk INSERT sonrası güncelleyebilmek için let
+    let RAPOR_ID = {% if onizleme_mi %}null{% else %}{{ rapor.id }}{% endif %};
+    const ONIZLEME_MI = {{ 'true' if onizleme_mi else 'false' }};
+    let kaydedilmedi = ONIZLEME_MI;
+
     async function taslakKaydet() {
       const not = document.getElementById("doktor-notu").value;
       const v = await jsonPOST("/api/save_draft", { rapor_id: RAPOR_ID, doktor_notu: not });
-      if (v.durum === "basarili") toast("Taslak olarak kaydedildi.");
-      else toast(v.mesaj || "Hata", "hata");
+      if (v.durum === "basarili") {
+        kaydedilmedi = false;
+        // Onizleme'den ilk INSERT geldi → artık DB'de var, sonraki çağrılar UPDATE olsun
+        if (v.rapor_id) RAPOR_ID = v.rapor_id;
+        toast("Taslak olarak kaydedildi.");
+        if (v.yeni_url) history.replaceState(null, "", v.yeni_url);
+      } else {
+        toast(v.mesaj || "Hata", "hata");
+      }
     }
+
     async function raporKaydet() {
       if (!confirm("Rapor kalıcı olarak kaydedilecek. Onaylıyor musunuz?")) return;
       const not = document.getElementById("doktor-notu").value;
       const v = await jsonPOST("/api/save_report", { rapor_id: RAPOR_ID, doktor_notu: not });
       if (v.durum === "basarili") {
+        kaydedilmedi = false;
+        if (v.rapor_id) RAPOR_ID = v.rapor_id;
         toast("Rapor başarıyla kaydedildi.");
-        setTimeout(() => location.href = "/raporlar", 1000);
-      } else toast(v.mesaj || "Hata", "hata");
+        setTimeout(() => (location.href = "/raporlar"), 1000);
+      } else {
+        toast(v.mesaj || "Hata", "hata");
+      }
     }
+
+    async function pdfIndirOnizleme() {
+      if (!confirm("PDF indirmek için rapor önce TASLAK olarak kaydedilecek. Devam edelim mi?")) return;
+      const not = document.getElementById("doktor-notu").value;
+      const v = await jsonPOST("/api/save_draft", { rapor_id: RAPOR_ID, doktor_notu: not });
+      if (v.durum !== "basarili") {
+        toast(v.mesaj || "Kaydetme hatası", "hata");
+        return;
+      }
+      kaydedilmedi = false;
+      if (v.rapor_id) RAPOR_ID = v.rapor_id;
+      toast("Taslak kaydedildi, PDF indiriliyor…");
+      if (v.yeni_url) history.replaceState(null, "", v.yeni_url);
+      window.open("/raporlar/" + v.rapor_id + "/pdf", "_blank");
+    }
+
+    // ============ Sayfadan ÇIKIŞ UYARISI (kaydedilmemiş analizler için) ============
+    window.addEventListener("beforeunload", (e) => {
+      if (kaydedilmedi) {
+        // Modern tarayıcılar mesaj metnini görmezden gelir, sadece dialog gösterir
+        e.preventDefault();
+        e.returnValue = "Analiz sonucunuz henüz kaydedilmedi. Çıkarsanız kaybolacak.";
+        return e.returnValue;
+      }
+    });
+
+    // Sidebar/header linklerine tıklarken in-app gezinme: önce JS-onayı
+    document.addEventListener("click", (e) => {
+      if (!kaydedilmedi) return;
+      const a = e.target.closest("a");
+      if (!a) return;
+      const href = a.getAttribute("href");
+      // Aynı sayfadaki anchor veya javascript: → ihmal
+      if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
+      // Onay
+      if (!confirm("Analiz sonucunuz henüz kaydedilmedi. Çıkmak istediğinize emin misiniz?")) {
+        e.preventDefault();
+      }
+    });
   </script>
 {% endif %}
 {% endblock %}

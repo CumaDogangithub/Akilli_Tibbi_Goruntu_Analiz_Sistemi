@@ -18,7 +18,7 @@ Thumbs.db
 .sublime-workspace
 
 # =========================
-# Hassas Bilgiler ve Ayarlar
+# Hassas Bilgiler ve Ayarlar  (.env GitHub'a GİTMEZ — secret'lar içerir)
 # =========================
 .env
 .env.local
@@ -35,7 +35,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # =========================
-# Python ve Sanal Ortam (Çok Önemli!)
+# Python ve Sanal Ortam
 # =========================
 venv/
 env/
@@ -43,7 +43,7 @@ __pycache__/
 *.pyc
 
 # =========================
-# Yaygın Klasörler (Proje tipine göre değişebilir)
+# Yaygın Frontend Klasörleri
 # =========================
 node_modules/
 build/
@@ -51,29 +51,16 @@ dist/
 coverage/
 
 # =========================
-# ATGAS PROJESİNE ÖZEL DOSYALAR (Cuma'nın Eklemeleri)
+# ATGAS PROJESİNE ÖZEL
 # =========================
 
-# Cuma'nın Yapay Zeka Eğitmek İçin Kullandığı Veriler (GB'larca yer tutar, yüklenmemeli)
+# Cuma'nın Yapay Zeka Eğitmek İçin Kullandığı Veriler (GB'larca, yüklenmez)
 dataset/
 
-# Herkesin kendi bilgisayarındaki lokal test sonuçları (GitHub'ı kirletmemesi için)
-# Not: Klasörün kendisi GitHub'a gitsin ama içindeki resimler gitmesin diye .gitkeep'i hariç tutuyoruz
-static/img/analiz_sonuclari/*
-!static/img/analiz_sonuclari/.gitkeep
-
-# Yüklenen hasta görüntüleri (KVKK gereği repo'da olmamalı, her geliştiricide kendi test verisi olur)
-static/uploads/*
-!static/uploads/.gitkeep
-
-# Çalışma anında üretilen SQLite veritabanı (her makinede ayrı, push edilmemeli)
+# SQLite çalışma dosyası (geliştirme tarihinde kalmıştı, artık PostgreSQL kullanılıyor)
 veritabani/*.db
 veritabani/*.sqlite
 veritabani/*.sqlite3
-
-# Runtime PDF raporları (dinamik üretiliyor — orijinal döküman PDF'leri repo'da kalır)
-raporlar/rapor_*.pdf
-raporlar/_test_*.pdf
 
 # Geçici test/curl çıktıları
 cookies.txt
@@ -82,7 +69,21 @@ cookies.txt
 # Claude Code lokal ayarları
 .claude/
 
-# Lokal yardımcı PDF/test dosyaları
+# Lokal yardımcı test PDF dosyaları (kök dizinde)
 test_dark.pdf
 test_yeni.pdf
-test_*.pdf
+/test_*.pdf
+
+# TensorBoard eğitim/değerlendirme logları
+modul_yapay_zeka/logs/
+logs/
+
+# =========================
+# NOT: raporlar/ ve static/uploads/ klasörleri ARTIK TRACKED
+# =========================
+# Bu klasörlerin içindeki dosyalar GitHub'a yüklenir (örnek/test verisi olarak).
+# ⚠ KVKK UYARISI: Production'da bu klasörlere gerçek hasta verisi yüklediğin
+# anda commit ETMEDEN local'de kalmasını sağla. Hassas veri push edilirse
+# git history'sinde kalır — public repo'da KVKK ihlali olur.
+#
+# Üretimde bu klasörler S3/MinIO/Azure Blob gibi harici bir storage'a alınmalı.

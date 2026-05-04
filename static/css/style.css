@@ -28,6 +28,48 @@ html, body {
 a { color: var(--mavi); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+/* ===================== ATGAS LOGO ===================== */
+.atgas-logo-yuvarlak {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #1C6EF2 0%, #1559C9 100%);
+  box-shadow: 0 2px 10px rgba(28, 110, 242, 0.4);
+  flex-shrink: 0;
+  position: relative;
+}
+.atgas-logo-yuvarlak svg {
+  width: 65%;
+  height: 65%;
+  display: block;
+}
+/* AI aktif nabız animasyonu — yeşil dot */
+.atgas-logo-yuvarlak::before {
+  content: '';
+  position: absolute;
+  top: -3px; right: -3px;
+  width: 10px; height: 10px;
+  background: var(--yesil);
+  border-radius: 50%;
+  border: 2px solid var(--panel);
+  box-shadow: 0 0 0 0 rgba(97, 175, 100, 0.7);
+  animation: atgas-nabiz 2s infinite;
+}
+@keyframes atgas-nabiz {
+  0%   { box-shadow: 0 0 0 0 rgba(97, 175, 100, 0.7); }
+  70%  { box-shadow: 0 0 0 6px rgba(97, 175, 100, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(97, 175, 100, 0); }
+}
+
+/* Boyut varyantları */
+.atgas-logo-yuvarlak.kucuk { width: 28px; height: 28px; border-radius: 7px; }
+.atgas-logo-yuvarlak.kucuk::before { width: 8px; height: 8px; top: -2px; right: -2px; }
+.atgas-logo-yuvarlak.buyuk { width: 56px; height: 56px; border-radius: 14px; }
+.atgas-logo-yuvarlak.buyuk::before { width: 14px; height: 14px; top: -4px; right: -4px; }
+
 /* ===================== LAYOUT ===================== */
 .uygulama { display: flex; min-height: 100vh; }
 .sidebar {
@@ -37,6 +79,9 @@ a:hover { text-decoration: underline; }
   padding: 20px 0;
 }
 .sidebar .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 0 20px 20px;
   font-size: 22px; font-weight: 800; color: var(--mavi);
   border-bottom: 1px solid var(--kenarlik); margin-bottom: 16px;
@@ -63,7 +108,23 @@ a:hover { text-decoration: underline; }
   padding: 14px 28px; background: var(--panel);
   border-bottom: 1px solid var(--kenarlik);
 }
-.header .marka { font-size: 18px; font-weight: 800; color: var(--mavi); }
+.header .marka {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--mavi);
+  min-width: 0;
+}
+.header .marka .ad-grup {
+  display: flex; flex-direction: column; line-height: 1.15;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.header .marka .ad-grup .alt {
+  font-size: 10px; color: var(--metin-sonuk);
+  font-weight: 500; letter-spacing: 0.4px;
+}
 
 /* === İŞLEVSEL DOKTOR DROPDOWN === */
 .doktor-menu { position: relative; }
@@ -734,6 +795,7 @@ textarea { min-height: 90px; resize: vertical; }
     overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .header .marka .ad-grup .alt { display: none; } /* alt başlığı mobilde gizle */
   /* Doktor menü bilgisi: sadece avatar + ok kalsın */
   .doktor-bilgi { padding: 6px 8px; gap: 6px; }
   .doktor-bilgi > div[style*="text-align:right"] { display: none; }
