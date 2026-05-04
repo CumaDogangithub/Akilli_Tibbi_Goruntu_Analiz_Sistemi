@@ -87,7 +87,7 @@
             {% endif %}
           </td>
           <td style="font-size:12px;">{{ r.hasta_ad_soyad }}</td>
-          <td style="font-size:11px; color:var(--metin-sonuk);">{{ r.islem_tarihi[:16] }}</td>
+          <td style="font-size:11px; color:var(--metin-sonuk);">{{ r.islem_tarihi | kisa_tarih }}</td>
           <td>
             <div class="islem-btnlar">
               <a class="islem-btn ac" href="{{ url_for('rapor_detay', rapor_id=r.id) }}" title="Raporu detaylı görüntüle">

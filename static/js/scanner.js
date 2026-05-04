@@ -78,11 +78,14 @@
   function dosyaSecildi() {
     const dosya = fileInput.files[0];
     if (!dosya) return;
-    const izinli = [".png", ".jpg", ".jpeg", ".dcm"];
+
+    // Tarayıcı tarafında sadece açıkça yasak olanları reddet (DICOM uzantısız da olabilir,
+    // sunucu magic bytes ile son kararı verir).
+    const yasakli = [".exe", ".sh", ".bat", ".js", ".html", ".php"];
     const uzanti = "." + dosya.name.split(".").pop().toLowerCase();
-    if (!izinli.includes(uzanti)) {
+    if (yasakli.includes(uzanti)) {
       dropZone.classList.add("hata");
-      seciliDosyaEt.textContent = "Desteklenmeyen format!";
+      seciliDosyaEt.textContent = "Bu tip dosya yüklenemez!";
       seciliDosyaEt.style.color = "var(--kirmizi)";
       return;
     }
@@ -95,6 +98,7 @@
     seciliDosyaEt.textContent = `✓ ${dosya.name} (${(dosya.size / 1024).toFixed(0)} KB)`;
     seciliDosyaEt.style.color = "var(--yesil)";
 
+    // DICOM browser'da render edilemez → önizleme sadece resim mime'larında
     if (onizleme && dosya.type.startsWith("image/")) {
       const okuyucu = new FileReader();
       okuyucu.onload = (e) => {
@@ -102,6 +106,8 @@
         onizleme.style.display = "block";
       };
       okuyucu.readAsDataURL(dosya);
+    } else if (onizleme) {
+      onizleme.style.display = "none";
     }
     durumGuncelle();
   }

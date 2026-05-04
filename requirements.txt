@@ -4,6 +4,7 @@
 
 # 1. YAPAY ZEKA VE MATEMATİK (Cuma'nın Modülü)
 tensorflow>=2.15.0      # Keras 3 mimarisini ve Derin Öğrenme motorunu içerir
+tensorboard>=2.15.0     # Model değerlendirme metriklerini görselleştirme (TF 2.16+ ayrı paket)
 numpy>=1.24.3           # Matris ve dizi işlemleri (Görüntüleri sayılara çevirmek için)
 scikit-learn>=1.3.0     # Confusion Matrix ve Performans raporları için
 
@@ -20,6 +21,12 @@ Werkzeug>=3.0.0         # Web üzerinden gelen hasta resimlerini güvenli kaydet
 # 4. RAPORLAMA SİSTEMİ (Esmanur'un Modülü)
 reportlab>=4.0.4        # Dinamik ve tıbbi logolu PDF raporları üretmek için
 
-# 5. VERİTABANI VE GÜVENLİK
-# (sqlite3 Python standart kütüphanesinde gelir; ek paket gerekmez)
+# 5. VERİTABANI VE ORM
+# DATABASE_URL zorunludur (.env içinde). SQLite desteği kaldırıldı, sadece PostgreSQL.
+# Önerilen: Supabase (DATABASE_URL=postgresql://...)
+psycopg[binary]>=3.1            # PostgreSQL adapter (psycopg3, SQLAlchemy ile uyumlu)
+SQLAlchemy>=2.0                 # ORM (Object-Relational Mapping)
+Flask-SQLAlchemy>=3.1           # Flask <-> SQLAlchemy entegrasyonu
+Flask-Migrate>=4.0              # Alembic migration yönetimi (flask db upgrade vb.)
+python-dotenv>=1.0.0            # .env yüklemesi
 # werkzeug.security yukarıdaki Werkzeug paketinden gelir
