@@ -57,11 +57,6 @@ coverage/
 # Cuma'nın Yapay Zeka Eğitmek İçin Kullandığı Veriler (GB'larca, yüklenmez)
 dataset/
 
-# SQLite çalışma dosyası (geliştirme tarihinde kalmıştı, artık PostgreSQL kullanılıyor)
-veritabani/*.db
-veritabani/*.sqlite
-veritabani/*.sqlite3
-
 # Geçici test/curl çıktıları
 cookies.txt
 *.bak
