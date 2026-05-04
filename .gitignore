@@ -61,3 +61,28 @@ dataset/
 # Not: Klasörün kendisi GitHub'a gitsin ama içindeki resimler gitmesin diye .gitkeep'i hariç tutuyoruz
 static/img/analiz_sonuclari/*
 !static/img/analiz_sonuclari/.gitkeep
+
+# Yüklenen hasta görüntüleri (KVKK gereği repo'da olmamalı, her geliştiricide kendi test verisi olur)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Çalışma anında üretilen SQLite veritabanı (her makinede ayrı, push edilmemeli)
+veritabani/*.db
+veritabani/*.sqlite
+veritabani/*.sqlite3
+
+# Runtime PDF raporları (dinamik üretiliyor — orijinal döküman PDF'leri repo'da kalır)
+raporlar/rapor_*.pdf
+raporlar/_test_*.pdf
+
+# Geçici test/curl çıktıları
+cookies.txt
+*.bak
+
+# Claude Code lokal ayarları
+.claude/
+
+# Lokal yardımcı PDF/test dosyaları
+test_dark.pdf
+test_yeni.pdf
+test_*.pdf
