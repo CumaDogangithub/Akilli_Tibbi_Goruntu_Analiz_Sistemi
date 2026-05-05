@@ -96,20 +96,23 @@ def db_init(app):
 # YARDIMCILAR
 # ============================================================================
 def ornek_doktor_ekle():
-    """Demo doktor: doktor@atgas.local / 123456 (yoksa ekler).
+    """Demo doktor hesabını ekler (yoksa). Bilgiler .env'den okunur:
+       DEMO_DOKTOR_AD, DEMO_DOKTOR_EPOSTA, DEMO_DOKTOR_SIFRE, DEMO_DOKTOR_BRANS
     Çağrılmadan önce app context'i aktif olmalı."""
-    if Doktor.query.count() == 0:
-        d = Doktor(
-            ad_soyad="Dr. Cuma Doğan",
-            eposta="doktor@atgas.local",
-            brans="Radyoloji",
-            unvan="Uzman Doktor",
-        )
-        d.sifre_ayarla("123456")
-        db.session.add(d)
-        db.session.commit()
-        return True
-    return False
+    if Doktor.query.count() > 0:
+        return False
+
+    # .env'den oku — tırnak işaretleri varsa kaldır (kabuk format'ları için)
+    ad     = os.environ.get("DEMO_DOKTOR_AD",     "Dr. Demo").strip('"').strip("'")
+    eposta = os.environ.get("DEMO_DOKTOR_EPOSTA", "doktor@atgas.local")
+    sifre  = os.environ.get("DEMO_DOKTOR_SIFRE",  "123456")
+    brans  = os.environ.get("DEMO_DOKTOR_BRANS",  "Radyoloji")
+
+    d = Doktor(ad_soyad=ad, eposta=eposta, brans=brans, unvan="Uzman Doktor")
+    d.sifre_ayarla(sifre)
+    db.session.add(d)
+    db.session.commit()
+    return True
 
 
 def aktif_backend():

@@ -74,9 +74,24 @@ def sonuc_yolu(yol_veya_dosya_adi: str) -> str:
     f = _basename_norm(yol_veya_dosya_adi)
     return os.path.join(ISLENMIS_KLASORU, f) if f else ""
 
+# ============================================================================
+# UYGULAMA YAPILANDIRMASI — tümü .env'den
+# ============================================================================
+def _env_int(ad, varsayilan):
+    try: return int(os.environ.get(ad, varsayilan))
+    except (TypeError, ValueError): return varsayilan
+
+def _env_bool(ad, varsayilan=False):
+    return str(os.environ.get(ad, varsayilan)).strip().lower() in ("1", "true", "yes", "evet")
+
+FLASK_HOST    = os.environ.get("FLASK_HOST", "127.0.0.1")
+FLASK_PORT    = _env_int("FLASK_PORT", 5001)
+FLASK_DEBUG   = _env_bool("FLASK_DEBUG", False)
+MAX_UPLOAD_MB = _env_int("MAX_UPLOAD_MB", 50)
+
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("ATGAS_SECRET", "atgas-gizli-2026-cuma")
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB
+app.config["SECRET_KEY"] = os.environ.get("ATGAS_SECRET") or "atgas-degistir-bu-secret"
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
 
 # SQLAlchemy + Flask-Migrate
 db_init(app)
@@ -629,7 +644,7 @@ def yuklenen_dosya(dosya):
 
 @app.errorhandler(413)
 def cok_buyuk(_):
-    return jsonify({"durum": "hata", "mesaj": "Dosya çok büyük (maks 50 MB)."}), 413
+    return jsonify({"durum": "hata", "mesaj": f"Dosya çok büyük (maks {MAX_UPLOAD_MB} MB)."}), 413
 
 
 # ============================================================================
@@ -641,11 +656,16 @@ if __name__ == "__main__":
         except Exception:
             pass
 
+    demo_eposta = os.environ.get("DEMO_DOKTOR_EPOSTA", "doktor@atgas.local")
+    demo_sifre  = os.environ.get("DEMO_DOKTOR_SIFRE", "123456")
+
     print("\n[ATGAS] Flask Sunucusu baslatiliyor...")
     print(f"   * ORM:          SQLAlchemy 2.0 + Flask-SQLAlchemy")
     print(f"   * DB URL:       {maskelenmis_url()[:80]}...")
     print(f"   * Yuklemeler:   {YUKLEME_KLASORU}")
     print(f"   * PDF Raporlar: {RAPOR_KLASORU}")
-    print(f"   * Demo Hesap:   doktor@atgas.local / 123456")
-    print(f"   * URL:          http://127.0.0.1:5000\n")
-    app.run(debug=False, host="127.0.0.1", port=5000)
+    print(f"   * Maks Upload:  {MAX_UPLOAD_MB} MB")
+    print(f"   * Debug:        {FLASK_DEBUG}")
+    print(f"   * Demo Hesap:   {demo_eposta} / {demo_sifre}")
+    print(f"   * URL:          http://{FLASK_HOST}:{FLASK_PORT}\n")
+    app.run(debug=FLASK_DEBUG, host=FLASK_HOST, port=FLASK_PORT)

@@ -18,3 +18,4 @@ Bu proje, Agile/Scrum metodolojisi takip edilerek aşağıdaki ekip tarafından 
 * 💻 **Nihal Eylül İl** - Yazılım Mühendisi
 * 💻 **Ozan Diyar Ay** - Yazılım Mühendisi
 * 💻 **Esmanur Ulu** - Yazılım Mühendisi
+* 💻 **Elif İkra Çakmak** - Yazılım Mühendisi
