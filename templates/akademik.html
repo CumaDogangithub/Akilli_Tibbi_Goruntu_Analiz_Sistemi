@@ -209,24 +209,26 @@ async function tensorboardBaslat() {
     return;
   }
 
-  // Süreç başladı (port hemen açık olmayabilir). UI'yı çalışır durumuna getir
-  tbDurumGuncelle(true);
   toast(v.mesaj || "TensorBoard başlatıldı.");
 
-  if (v.port_acik) {
-    tbIframeYukle(v.url);
-    return;
+  // Port hazır olana kadar bekle (henüz açılmadıysa)
+  if (!v.port_acik) {
+    btn.innerText = "⏳ TB hazırlanıyor (logs yükleniyor)...";
+    const hazir = await tbHazirOlanaKadarBekle(v.url);
+    if (!hazir) {
+      toast("TensorBoard ayağa kalkamadı (timeout). Sayfayı manuel yenileyin.", "uyari", 6000);
+      btn.disabled = false;
+      btn.innerText = "🚀 TensorBoard'u Başlat";
+      return;
+    }
   }
 
-  // Port hazır olana kadar bekle, sonra iframe'i yükle
-  btn.innerText = "⏳ TB hazırlanıyor (logs yükleniyor)...";
-  const hazir = await tbHazirOlanaKadarBekle(v.url);
-  if (hazir) {
-    tbIframeYukle(v.url);
-    toast("TensorBoard hazır.", "basarili", 2500);
-  } else {
-    toast("TensorBoard ayağa kalkamadı (timeout). Sayfayı yenileyin.", "uyari", 6000);
-  }
+  // TB ayakta — HTML render'ı tam hazır olması için ek kısa bekleme,
+  // sonra sayfayı yenile. Yenileme; iframe'i sunucu-render edilmiş hâliyle
+  // doğru şekilde gömer (JS injection sırasında bazen blank kalıyordu).
+  btn.innerText = "✓ Hazırlandı, sayfa yenileniyor...";
+  await new Promise(rs => setTimeout(rs, 800));
+  location.reload();
 }
 
 async function uretimLogUret() {
