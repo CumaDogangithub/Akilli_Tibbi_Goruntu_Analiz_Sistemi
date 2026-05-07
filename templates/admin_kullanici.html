@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% set aktif_sayfa = 'admin' %}
+{% block baslik %}{{ hedef.ad_soyad }} · Kullanıcı{% endblock %}
+
+{% block icerik %}
+  <div style="margin-bottom:14px;">
+    <a href="{{ url_for('admin_panel') }}" class="btn">← Yönetim Paneli</a>
+  </div>
+
+  <h1>{{ hedef.ad_soyad }}</h1>
+  <div class="alt-baslik">
+    {% if hedef.rol == 'admin' %}
+      <span class="rozet rozet-kirmizi">⚙ Yönetici</span>
+    {% elif hedef.rol == 'akademisyen' %}
+      <span class="rozet rozet-mavi">🎓 Akademisyen</span>
+    {% elif hedef.rol == 'radyolog' %}
+      <span class="rozet rozet-sari">☢ Radyolog</span>
+    {% else %}
+      <span class="rozet rozet-yesil">🩺 Doktor</span>
+    {% endif %}
+    {{ hedef.brans }} · {{ hedef.unvan }} · ID #{{ hedef.id }}
+  </div>
+
+  <!-- Profil Kartı -->
+  <div class="kart" style="display:flex; align-items:center; gap:18px; margin-bottom:24px;">
+    <div class="avatar" style="width:80px; height:80px; font-size:28px;">{{ hedef.ad_soyad[:2].upper() }}</div>
+    <div style="flex:1;">
+      <div style="font-size:18px; font-weight:700; margin-bottom:4px;">{{ hedef.ad_soyad }}</div>
+      <div style="font-size:12px; color:var(--metin-sonuk);">{{ hedef.eposta }}</div>
+      <div style="font-size:11px; color:var(--metin-sonuk); margin-top:4px;">
+        Hesap oluşturma: {{ hedef.olusturulma_tarihi | kisa_gun }}
+      </div>
+    </div>
+  </div>
+
+  <!-- İstatistikler -->
+  <div class="stat-grid">
+    <div class="stat-kart">
+      <div class="etiket">Toplam Rapor</div>
+      <div class="deger">{{ rapor_stats.toplam }}</div>
+    </div>
+    <div class="stat-kart yesil">
+      <div class="etiket">Kaydedilmiş</div>
+      <div class="deger">{{ rapor_stats.kaydedildi }}</div>
+    </div>
+    <div class="stat-kart sari">
+      <div class="etiket">Taslak</div>
+      <div class="deger">{{ rapor_stats.taslak }}</div>
+    </div>
+    <div class="stat-kart kirmizi">
+      <div class="etiket">Anomali</div>
+      <div class="deger">{{ rapor_stats.anomali }}</div>
+    </div>
+  </div>
+
+  <div class="tab-menu">
+    <a class="aktif" onclick="kullaniciSekme('bilgi', this)">📝 Bilgileri Düzenle</a>
+    <a onclick="kullaniciSekme('sifre', this)">🔑 Şifre Sıfırla</a>
+    {% if rapor_stats.toplam > 0 %}
+    <a onclick="kullaniciSekme('raporlar', this)">▤ Son Raporları ({{ rapor_stats.toplam }})</a>
+    {% endif %}
+  </div>
+
+  <!-- Bilgi düzenle -->
+  <div class="kart sekme" id="sekme-bilgi">
+    <h3 style="margin-bottom:14px;">Kullanıcı Bilgilerini Güncelle</h3>
+    <form method="POST" action="{{ url_for('admin_kullanici_guncelle', kid=hedef.id) }}">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-grup">
+          <label>Ad Soyad *</label>
+          <input type="text" name="ad_soyad" value="{{ hedef.ad_soyad }}" required>
+        </div>
+        <div class="form-grup">
+          <label>Rol *</label>
+          <select name="rol" {% if hedef.id == doktor.id %}disabled title="Kendi rolünüzü değiştiremezsiniz."{% endif %}>
+            {% for r in roller %}
+              <option value="{{ r }}" {% if hedef.rol == r %}selected{% endif %}>
+                {% if r == 'admin' %}⚙ Yönetici
+                {% elif r == 'akademisyen' %}🎓 Akademisyen
+                {% elif r == 'radyolog' %}☢ Radyolog
+                {% else %}🩺 Doktor{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+          {% if hedef.id == doktor.id %}
+            <input type="hidden" name="rol" value="{{ hedef.rol }}">
+            <div style="font-size:11px; color:var(--sari); margin-top:4px;">
+              ⚠ Kendi yönetici rolünüzü buradan değiştiremezsiniz.
+            </div>
+          {% endif %}
+        </div>
+        <div class="form-grup">
+          <label>E-posta *</label>
+          <input type="email" name="eposta" value="{{ hedef.eposta }}" required>
+        </div>
+        <div class="form-grup">
+          <label>Branş *</label>
+          <input type="text" name="brans" value="{{ hedef.brans }}" required>
+        </div>
+        <div class="form-grup">
+          <label>Unvan</label>
+          <input type="text" name="unvan" value="{{ hedef.unvan or '' }}">
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <button type="submit" class="btn btn-primary">Bilgileri Kaydet</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Şifre sıfırla -->
+  <div class="kart sekme" id="sekme-sifre" style="display:none;">
+    <h3 style="margin-bottom:14px;">Yeni Şifre Belirle</h3>
+    <div class="alert alert-warning" style="margin-bottom:14px;">
+      ⚠ Yöneticisiniz; bu kullanıcının şifresini sıfırlamak için mevcut şifreye ihtiyacınız yok.
+      Yeni şifreyi kullanıcıya güvenli bir kanal üzerinden iletin.
+    </div>
+    <form method="POST" action="{{ url_for('admin_kullanici_sifre', kid=hedef.id) }}">
+      <div class="form-grup">
+        <label>Yeni Şifre (en az 6 karakter)</label>
+        <input type="text" name="yeni_sifre" minlength="6" required placeholder="Yeni şifreyi yazın">
+      </div>
+      <div style="text-align:right;">
+        <button type="submit" class="btn btn-warning"
+                onclick="return confirm('Bu kullanıcının şifresi sıfırlanacak. Devam edilsin mi?');">
+          Şifreyi Sıfırla
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Son raporlar -->
+  {% if rapor_stats.toplam > 0 %}
+  <div class="sekme" id="sekme-raporlar" style="display:none;">
+    <div class="tablo-kart">
+      <div class="baslik">{{ hedef.ad_soyad }} - Son 10 Rapor</div>
+      <table class="atgas">
+        <thead>
+          <tr>
+            <th>Rapor #</th><th>Tip</th><th>Tahmin</th><th>Doğruluk</th><th>Durum</th><th>Tarih</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in son_raporlari %}
+            <tr onclick="location.href='{{ url_for('rapor_detay', rapor_id=r.id) }}'" style="cursor:pointer;">
+              <td><a href="{{ url_for('rapor_detay', rapor_id=r.id) }}">TRK-{{ '%06d' % r.id }}</a></td>
+              <td><span class="rozet rozet-mavi">{{ r.tarama_tipi }}</span></td>
+              <td>{{ r.tf_tahmin_sonucu }}</td>
+              <td>%{{ r.dogruluk_orani }}</td>
+              <td>
+                {% if r.durum == 'Kaydedildi' %}<span class="rozet rozet-yesil">● Kaydedildi</span>
+                {% else %}<span class="rozet rozet-sari">● Taslak</span>{% endif %}
+              </td>
+              <td style="font-size:11px;">{{ r.islem_tarihi | kisa_tarih }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Tehlikeli bölge -->
+  {% if hedef.id != doktor.id %}
+  <div class="kart" style="margin-top:24px; border-color:var(--kirmizi); border-left:4px solid var(--kirmizi);">
+    <h3 style="margin-bottom:8px; color:var(--kirmizi);">⚠ Tehlikeli Bölge</h3>
+    <p style="font-size:12px; color:var(--metin-sonuk); margin-bottom:12px;">
+      Bu kullanıcı kalıcı olarak silinecek. {% if rapor_stats.toplam > 0 %}
+      Bu kullanıcının {{ rapor_stats.toplam }} raporu var; önce raporlarını silmeniz gerekir.
+      {% endif %}
+    </p>
+    <form method="POST" action="{{ url_for('admin_kullanici_sil', kid=hedef.id) }}"
+          onsubmit="return confirm('{{ hedef.ad_soyad }} silinecek. Bu işlem geri alınamaz. Devam edilsin mi?');">
+      <button type="submit" class="btn btn-danger" {% if rapor_stats.toplam > 0 %}disabled{% endif %}>
+        ✕ Kullanıcıyı Sil
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+<script>
+function kullaniciSekme(ad, link) {
+  document.querySelectorAll(".sekme").forEach(s => s.style.display = "none");
+  document.getElementById("sekme-" + ad).style.display = "block";
+  document.querySelectorAll(".tab-menu a").forEach(a => a.classList.remove("aktif"));
+  link.classList.add("aktif");
+}
+</script>
+{% endblock %}

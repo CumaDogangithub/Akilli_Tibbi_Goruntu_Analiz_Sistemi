@@ -718,6 +718,14 @@ textarea { min-height: 90px; resize: vertical; }
   border-left-color: var(--mavi);
   text-decoration: none;
 }
+/* Aktif rapor (analiz detayında olunduğunda) */
+.sidebar-alt-liste li.aktif a,
+.sidebar-alt-liste li a.aktif {
+  background: rgba(28,110,242,0.12);
+  color: var(--mavi);
+  border-left-color: var(--mavi);
+  font-weight: 600;
+}
 .sidebar-alt-liste li a span:not(.tip-rozet) {
   overflow: hidden; text-overflow: ellipsis;
 }

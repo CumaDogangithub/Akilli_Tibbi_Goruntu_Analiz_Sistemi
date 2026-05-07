@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% set aktif_sayfa = 'admin' %}
+{% block baslik %}Yönetim Paneli{% endblock %}
+
+{% block icerik %}
+  <h1>Yönetim Paneli</h1>
+  <div class="alt-baslik">Sistem kullanıcıları ve istatistikler · {{ doktor.ad_soyad }}</div>
+
+  <!-- Sistem Özeti -->
+  <div class="stat-grid">
+    <div class="stat-kart">
+      <div class="etiket">Toplam Kullanıcı</div>
+      <div class="deger">{{ sistem_stats.toplam_kullanici }}</div>
+      <div class="alt">{{ rol_sayilari.get('doktor', 0) }} doktor · {{ rol_sayilari.get('radyolog', 0) }} radyolog · {{ rol_sayilari.get('akademisyen', 0) }} akademisyen · {{ rol_sayilari.get('admin', 0) }} admin</div>
+    </div>
+    <div class="stat-kart yesil">
+      <div class="etiket">Sistemdeki Rapor</div>
+      <div class="deger">{{ sistem_stats.toplam_rapor }}</div>
+      <div class="alt">Tüm doktorların toplamı</div>
+    </div>
+    <div class="stat-kart kirmizi">
+      <div class="etiket">Anomali Tespit</div>
+      <div class="deger">{{ sistem_stats.anomali }}</div>
+      <div class="alt">Patolojik bulgu</div>
+    </div>
+    <div class="stat-kart sari">
+      <div class="etiket">Aktif Roller</div>
+      <div class="deger">{{ rol_sayilari|length }}</div>
+      <div class="alt">Sistemde tanımlı rol sayısı</div>
+    </div>
+  </div>
+
+  <div class="tab-menu">
+    <a class="aktif" onclick="adminSekmeAc('liste', this)">👥 Kullanıcı Listesi</a>
+    <a id="sekme-link-ekle" onclick="adminSekmeAc('ekle', this)">➕ Yeni Kullanıcı Ekle</a>
+  </div>
+
+  <!-- ============== KULLANICI LİSTESİ ============== -->
+  <div class="sekme" id="sekme-liste">
+    <div class="form-grup">
+      <input type="text" placeholder="🔍 Kullanıcı adı, e-posta veya rol ara..."
+             oninput="tabloFiltrele(this.value, 'kullanici-tablosu')">
+    </div>
+
+    <div class="tablo-kart">
+      <div class="baslik">Sistem Kullanıcıları ({{ kullanicilar|length }} kayıt)</div>
+      {% if kullanicilar %}
+      <table class="atgas" id="kullanici-tablosu">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Ad Soyad</th>
+            <th>Rol</th>
+            <th>Branş / Unvan</th>
+            <th>E-posta</th>
+            <th>Kayıt Tarihi</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for k in kullanicilar %}
+          <tr>
+            <td>{{ k.id }}</td>
+            <td><a href="{{ url_for('admin_kullanici_detay', kid=k.id) }}"><b>{{ k.ad_soyad }}</b></a></td>
+            <td>
+              {% if k.rol == 'admin' %}
+                <span class="rozet rozet-kirmizi">⚙ Yönetici</span>
+              {% elif k.rol == 'akademisyen' %}
+                <span class="rozet rozet-mavi">🎓 Akademisyen</span>
+              {% elif k.rol == 'radyolog' %}
+                <span class="rozet rozet-sari">☢ Radyolog</span>
+              {% else %}
+                <span class="rozet rozet-yesil">🩺 Doktor</span>
+              {% endif %}
+            </td>
+            <td style="font-size:12px;">{{ k.brans }}<br><span style="color:var(--metin-sonuk); font-size:11px;">{{ k.unvan }}</span></td>
+            <td style="font-size:12px;">{{ k.eposta }}</td>
+            <td style="font-size:11px; color:var(--metin-sonuk);">{{ k.olusturulma_tarihi | kisa_gun }}</td>
+            <td>
+              <div class="islem-btnlar">
+                <a class="islem-btn ac" href="{{ url_for('admin_kullanici_detay', kid=k.id) }}" title="Profili görüntüle / düzenle">
+                  <span class="ikon">▤</span><span class="etk">Görüntüle</span>
+                </a>
+                {% if k.id != doktor.id %}
+                  <form method="POST" action="{{ url_for('admin_kullanici_sil', kid=k.id) }}"
+                        style="display:inline;" onsubmit="return confirm('{{ k.ad_soyad }} silinecek. Devam edilsin mi?');">
+                    <button type="submit" class="islem-btn sil" title="Kullanıcıyı sil">
+                      <span class="ikon">✕</span><span class="etk">Sil</span>
+                    </button>
+                  </form>
+                {% else %}
+                  <span class="rozet rozet-gri" style="font-size:9px;">Siz</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding:40px; text-align:center; color:var(--metin-sonuk);">Henüz kullanıcı yok.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ============== YENİ KULLANICI FORMU ============== -->
+  <div class="sekme" id="sekme-ekle" style="display:none;">
+    <a id="kullanici-ekle"></a>
+    <div class="kart">
+      <h3 style="margin-bottom:12px;">Yeni Kullanıcı Kaydı</h3>
+      <div class="alt-baslik" style="margin-bottom:18px;">
+        Sisteme yeni bir doktor, radyolog, akademisyen veya yönetici ekleyin.
+        Kullanıcı bu bilgilerle <b>{{ url_for('login') }}</b> üzerinden giriş yapabilir.
+      </div>
+
+      <form method="POST" action="{{ url_for('admin_kullanici_ekle') }}">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+          <div class="form-grup">
+            <label>Ad Soyad *</label>
+            <input type="text" name="ad_soyad" placeholder="Dr. Mehmet Yılmaz" required>
+          </div>
+          <div class="form-grup">
+            <label>Rol *</label>
+            <select name="rol" required>
+              <option value="doktor">🩺 Doktor — görüntü yükler, analiz yapar, rapor oluşturur</option>
+              <option value="radyolog">☢ Radyolog — tüm raporları inceler, anomalileri değerlendirir</option>
+              <option value="akademisyen">🎓 Akademisyen — TensorBoard ve model metriklerini izler</option>
+              <option value="admin">⚙ Yönetici — kullanıcı yönetimi ve sistem kontrolü</option>
+            </select>
+          </div>
+          <div class="form-grup">
+            <label>E-posta *</label>
+            <input type="email" name="eposta" placeholder="kullanici@hastane.com" required>
+          </div>
+          <div class="form-grup">
+            <label>Şifre * (en az 6 karakter)</label>
+            <input type="password" name="sifre" minlength="6" placeholder="••••••••" required>
+          </div>
+          <div class="form-grup">
+            <label>Branş *</label>
+            <input type="text" name="brans" placeholder="Radyoloji / Nöroloji / Kardiyoloji..." required>
+          </div>
+          <div class="form-grup">
+            <label>Unvan</label>
+            <input type="text" name="unvan" placeholder="Uzman Doktor / Profesör / Asistan..." value="Uzman Doktor">
+          </div>
+        </div>
+
+        <div style="text-align:right; margin-top:8px;">
+          <button type="submit" class="btn btn-primary">✓ Kullanıcı Ekle</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="alert alert-info" style="margin-top:18px;">
+      💡 <b>Rol İpucu:</b>
+      <ul style="margin:8px 0 0 18px; line-height:1.8;">
+        <li><b>Doktor</b> → DICOM/PNG yükler, AI analizi yapar, raporlarını yönetir</li>
+        <li><b>Radyolog</b> → Sistemdeki tüm raporları görür ve anomali işaretlemelerini değerlendirir (yeni tarama yapamaz)</li>
+        <li><b>Akademisyen</b> → TensorBoard ile model performansını izler (rapor sayfasına erişemez)</li>
+        <li><b>Yönetici</b> → Tüm yetkilere sahiptir: kullanıcı ekler, raporları silebilir, TensorBoard'a erişir</li>
+      </ul>
+    </div>
+  </div>
+
+<script>
+function adminSekmeAc(ad, link) {
+  document.querySelectorAll(".sekme").forEach(s => s.style.display = "none");
+  document.getElementById("sekme-" + ad).style.display = "block";
+  document.querySelectorAll(".tab-menu a").forEach(a => a.classList.remove("aktif"));
+  link.classList.add("aktif");
+}
+
+// URL hash 'kullanici-ekle' ise direkt formu aç
+if (location.hash === "#kullanici-ekle") {
+  adminSekmeAc('ekle', document.getElementById("sekme-link-ekle"));
+}
+</script>
+{% endblock %}

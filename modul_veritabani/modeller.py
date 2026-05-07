@@ -16,6 +16,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 db = SQLAlchemy()
 
 
+# Roller — projeakisi.md kullanıcı hikayelerine göre:
+#   admin       → Sistemi yönetir, yeni kullanıcı ekler/siler
+#   doktor      → Görüntü yükler, AI analizi yapar, kendi raporlarını saklar
+#   radyolog    → Tüm raporları görüntüler, anomali işaretlemelerini inceler
+#   akademisyen → Model performans metriklerini TensorBoard üzerinden izler
+ROLLER = ("admin", "doktor", "radyolog", "akademisyen")
+
+
 class Doktor(db.Model):
     __tablename__ = "doktorlar"
 
@@ -25,6 +33,7 @@ class Doktor(db.Model):
     sifre = db.Column(db.String(255), nullable=False)
     brans = db.Column(db.String(50), nullable=False)
     unvan = db.Column(db.String(50), default="Uzman Doktor")
+    rol = db.Column(db.String(20), nullable=False, default="doktor", index=True)
     olusturulma_tarihi = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     raporlar = db.relationship(
@@ -41,8 +50,17 @@ class Doktor(db.Model):
     def sifre_dogrula(self, ham_sifre: str) -> bool:
         return check_password_hash(self.sifre, ham_sifre)
 
+    @property
+    def rol_etiketi(self) -> str:
+        return {
+            "admin": "Yönetici",
+            "doktor": "Doktor",
+            "radyolog": "Radyolog",
+            "akademisyen": "Akademisyen",
+        }.get(self.rol or "doktor", "Doktor")
+
     def __repr__(self):
-        return f"<Doktor {self.id} {self.ad_soyad}>"
+        return f"<Doktor {self.id} {self.ad_soyad} ({self.rol})>"
 
 
 class AnalizRaporu(db.Model):

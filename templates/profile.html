@@ -10,7 +10,16 @@
     <div>
       <div style="font-size:18px; font-weight:700;">
         {{ doktor.ad_soyad }}
-        <span class="rozet rozet-mavi" style="margin-left:8px;">{{ doktor.brans }}</span>
+        {% if doktor.rol == 'admin' %}
+          <span class="rozet rozet-kirmizi" style="margin-left:8px;">⚙ Yönetici</span>
+        {% elif doktor.rol == 'akademisyen' %}
+          <span class="rozet rozet-mavi" style="margin-left:8px;">🎓 Akademisyen</span>
+        {% elif doktor.rol == 'radyolog' %}
+          <span class="rozet rozet-sari" style="margin-left:8px;">☢ Radyolog</span>
+        {% else %}
+          <span class="rozet rozet-yesil" style="margin-left:8px;">🩺 Doktor</span>
+        {% endif %}
+        <span class="rozet rozet-gri" style="margin-left:4px;">{{ doktor.brans }}</span>
       </div>
       <div style="font-size:12px; color:var(--metin-sonuk);">{{ doktor.eposta }}</div>
       <div style="font-size:11px; color:var(--metin-sonuk); margin-top:4px;">
