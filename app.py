@@ -982,6 +982,19 @@ def _port_dinleniyor_mu(port: int, host: str = "127.0.0.1", zaman_asimi: float =
         return False
 
 
+def _tensorboard_url_uret():
+    """Tarayıcıya verilecek TB URL'ini Flask request host'undan üretir.
+    Sebep: kullanıcı sunucuya 'http://192.168.x.y:5001' gibi bağlandıysa, ona
+    'http://127.0.0.1:6006' linki vermek anlamsız (kendi makinesini açar).
+    Aynı host + TB portu döndürürüz."""
+    try:
+        host = (request.host or "").split(":")[0] or "127.0.0.1"
+    except RuntimeError:
+        # request context dışında çağrılırsa (CLI/test)
+        host = "127.0.0.1"
+    return f"http://{host}:{TENSORBOARD_PORT}/"
+
+
 def _tensorboard_baslat():
     """Arka planda TensorBoard sunucusunu başlatır.
     Birden fazla launcher dener (tensorboard CLI → python -m tensorboard.main → tensorboard).
@@ -1004,9 +1017,11 @@ def _tensorboard_baslat():
     # ile log üretebilir.
     os.makedirs(TENSORBOARD_LOGDIR, exist_ok=True)
 
+    # 0.0.0.0: Docker container içinden ya da uzak sunucuya bağlanan tarayıcılar
+    # da erişebilsin (127.0.0.1 yalnız aynı makinede çalışırdı).
     args_ortak = [
         "--logdir", TENSORBOARD_LOGDIR,
-        "--host", "127.0.0.1",
+        "--host", "0.0.0.0",
         "--port", str(TENSORBOARD_PORT),
         "--reload_interval", "5",
     ]
@@ -1212,7 +1227,7 @@ def akademik_panel():
         "akademik.html",
         doktor=aktif_doktor(),
         log_kayitlari=log_kayitlari,
-        tensorboard_url=f"http://127.0.0.1:{TENSORBOARD_PORT}/",
+        tensorboard_url=_tensorboard_url_uret(),
         tensorboard_calisiyor=tb_calisiyor,
         metrikler={
             "toplam": metrikler.toplam or 0,
@@ -1230,7 +1245,7 @@ def akademik_tb_baslat():
     return jsonify({
         "durum": "basarili" if ok else "hata",
         "mesaj": mesaj,
-        "url": f"http://127.0.0.1:{TENSORBOARD_PORT}/",
+        "url": _tensorboard_url_uret(),
         "pid": pid,
         "port_acik": _port_dinleniyor_mu(TENSORBOARD_PORT),
         "calisiyor": _tensorboard_calisiyor_mu() or _port_dinleniyor_mu(TENSORBOARD_PORT),
@@ -1244,7 +1259,7 @@ def akademik_tb_durum():
     return jsonify({
         "calisiyor": _tensorboard_calisiyor_mu() or _port_dinleniyor_mu(TENSORBOARD_PORT),
         "port_acik": _port_dinleniyor_mu(TENSORBOARD_PORT),
-        "url": f"http://127.0.0.1:{TENSORBOARD_PORT}/",
+        "url": _tensorboard_url_uret(),
     })
 
 
