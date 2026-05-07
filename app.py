@@ -332,6 +332,64 @@ def tarama():
     )
 
 
+@app.route("/ornek-veriler/indir")
+@rol_gerekli("doktor", "admin")
+def ornek_veriler_indir():
+    """Sistemi test etmek isteyen doktor/admin için örnek MR/CT/X-Ray görüntülerini
+    tek bir zip dosyası olarak indirir. Kaynak: modul_yapay_zeka/ornek_test_verileri/
+
+    Klasör yapısını koruyarak (xray/Covid_19/49.png ...) zip'e basıyoruz; kullanıcı
+    açtığında tip ve sınıf bilgisini hemen görür."""
+    import io
+    import zipfile
+    from flask import send_file
+
+    kaynak = os.path.join(ANA_DIZIN, "modul_yapay_zeka", "ornek_test_verileri")
+    if not os.path.isdir(kaynak):
+        return jsonify({"durum": "hata", "mesaj": "Örnek veri klasörü bulunamadı."}), 404
+
+    bellek = io.BytesIO()
+    eklenen = 0
+    with zipfile.ZipFile(bellek, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Kısa bir README ekle — kullanıcı açtığında ne yapacağını bilsin
+        readme = (
+            "ATGAS — Örnek Tıbbi Görüntü Verileri\n"
+            "=====================================\n\n"
+            "Bu zip, sistemi test etmeniz için hazırlanmış örnek görüntüleri içerir.\n"
+            "Klasör yapısı: <tip>/<hastalık>/<dosya>\n\n"
+            "Kullanım:\n"
+            "  1. Bu zip'i açın.\n"
+            "  2. ATGAS > Yeni Tarama sayfasında istediğiniz tip + uzmanlık alanını seçin.\n"
+            "  3. İlgili klasördeki bir görüntüyü sürükleyip bırakın veya seçin.\n"
+            "  4. Hasta bilgilerini doldurun ve analiz başlatın.\n\n"
+            "İçerikler:\n"
+            "  - xray/      : Akciğer X-Ray (Covid_19, Normal, Tuberkuloz, Zaturre)\n"
+            "  - ct/        : Bilgisayarlı Tomografi (Akciğer Nodülü, Beyin Kanaması)\n"
+            "  - mri/       : MR (Lomber Disk Hernisi, Meningioma)\n\n"
+            "NOT: Bu görüntüler test/eğitim amaçlıdır, gerçek hasta verisi değildir.\n"
+        )
+        zf.writestr("OKUYUN.txt", readme)
+
+        for kok, _, dosyalar in os.walk(kaynak):
+            for ad in dosyalar:
+                tam_yol = os.path.join(kok, ad)
+                # Zip içindeki göreli yol (kaynak klasörünün altından)
+                rel = os.path.relpath(tam_yol, kaynak).replace("\\", "/")
+                zf.write(tam_yol, rel)
+                eklenen += 1
+
+    if eklenen == 0:
+        return jsonify({"durum": "hata", "mesaj": "Örnek görüntü bulunamadı."}), 404
+
+    bellek.seek(0)
+    return send_file(
+        bellek,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name="atgas_ornek_veriler.zip",
+    )
+
+
 @app.route("/api/analiz", methods=["POST"])
 @rol_gerekli("doktor", "admin")
 def api_analiz():
