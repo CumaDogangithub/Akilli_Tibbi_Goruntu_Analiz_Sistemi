@@ -51,8 +51,10 @@ RESULTS_DIR_REL = os.environ.get("RESULTS_DIR", "static/img/analiz_sonuclari").r
 
 YUKLEME_KLASORU = os.path.join(ANA_DIZIN, *UPLOADS_DIR_REL.split("/"))
 ISLENMIS_KLASORU = os.path.join(ANA_DIZIN, *RESULTS_DIR_REL.split("/"))
+TENSORBOARD_LOGS_KLASORU = os.path.join(ANA_DIZIN, "modul_yapay_zeka", "logs")
 os.makedirs(YUKLEME_KLASORU, exist_ok=True)
 os.makedirs(ISLENMIS_KLASORU, exist_ok=True)
+os.makedirs(TENSORBOARD_LOGS_KLASORU, exist_ok=True)   # akademisyen panelinde log özeti için
 
 
 def _basename_norm(yol: str) -> str:
@@ -219,8 +221,8 @@ def kenar_cubugu_son_taramalar():
         return {"son_taramalar": None, "aktif_rapor_id": aktif_rapor_id}
 
     sorgu = AnalizRaporu.query.order_by(AnalizRaporu.islem_tarihi.desc())
-    if rol != "admin":
-        # Doktor + radyolog → sadece kendi
+    # admin + radyolog tüm sistemdeki son taramaları görür; doktor sadece kendi
+    if rol not in ("admin", "radyolog"):
         sorgu = sorgu.filter_by(doktor_id=session["doktor_id"])
     son = sorgu.limit(5).all()
     return {"son_taramalar": son, "aktif_rapor_id": aktif_rapor_id}
@@ -445,9 +447,9 @@ def rapor_onizleme():
 @app.route("/analiz/sonucu/<int:rapor_id>")
 @giris_gerekli
 def rapor_detay(rapor_id):
-    # Sadece admin tüm raporları görebilir; diğer roller yalnızca kendi raporlarını.
+    # admin + radyolog tüm raporları görür; diğer roller yalnız kendi raporlarını.
     sorgu = AnalizRaporu.query.filter_by(id=rapor_id)
-    if aktif_rol() != "admin":
+    if aktif_rol() not in ("admin", "radyolog"):
         sorgu = sorgu.filter_by(doktor_id=session["doktor_id"])
     rapor = sorgu.first()
     if not rapor:
@@ -560,9 +562,12 @@ def raporlar():
         func.count(case((AnalizRaporu.ham_sinif != "Normal", 1))).label("anomali"),
     )
 
-    # ROL ZORUNLULUKLARI — Bir doktorun analizleri diğer doktorlara görünmesin.
-    # Sadece admin tüm raporları görebilir; doktor/radyolog yalnızca kendi raporlarını.
-    if rol == "admin":
+    # ROL ZORUNLULUKLARI:
+    # - admin / radyolog → TÜM raporlar (anomali işaretlemelerini incelemek için)
+    # - doktor → yalnız kendi raporları
+    tum_raporlari_gorur = rol in ("admin", "radyolog")
+
+    if tum_raporlari_gorur:
         if secili_doktor_id:
             sorgu_liste = sorgu_liste.filter_by(doktor_id=secili_doktor_id)
             sorgu_say = sorgu_say.filter(AnalizRaporu.doktor_id == secili_doktor_id)
@@ -573,9 +578,9 @@ def raporlar():
     rapor_listesi = sorgu_liste.all()
     sayilar = sorgu_say.one()
 
-    # Admin'e doktor filtreleme açılır listesi için tüm doktorlar
+    # admin + radyolog → doktor filtreleme açılır listesi
     doktor_listesi = []
-    if rol == "admin":
+    if tum_raporlari_gorur:
         doktor_listesi = (
             Doktor.query
             .filter(Doktor.rol == "doktor")
@@ -627,8 +632,9 @@ def api_rapor_sil(rapor_id):
 @app.route("/raporlar/<int:rapor_id>/pdf")
 @giris_gerekli
 def rapor_pdf(rapor_id):
+    # admin + radyolog tüm raporların PDF'ini indirebilir; doktor sadece kendi raporları
     sorgu = AnalizRaporu.query.filter_by(id=rapor_id)
-    if aktif_rol() != "admin":
+    if aktif_rol() not in ("admin", "radyolog"):
         sorgu = sorgu.filter_by(doktor_id=session["doktor_id"])
     rapor = sorgu.first()
     if not rapor:
@@ -993,8 +999,10 @@ def _tensorboard_baslat():
             _tensorboard_proc["adopted_pid"] = pid
         return True, f"Port {TENSORBOARD_PORT} zaten dinleniyor (PID {pid or '?'})", pid
 
-    if not os.path.isdir(TENSORBOARD_LOGDIR):
-        return False, f"Log klasörü yok: {TENSORBOARD_LOGDIR}", None
+    # Log klasörü yoksa oluştur (TensorBoard boş klasörle de ayağa kalkar; kullanıcıya
+    # boş ekran gösterir ama hata vermez). Akademisyen sonradan model değerlendirme
+    # ile log üretebilir.
+    os.makedirs(TENSORBOARD_LOGDIR, exist_ok=True)
 
     args_ortak = [
         "--logdir", TENSORBOARD_LOGDIR,

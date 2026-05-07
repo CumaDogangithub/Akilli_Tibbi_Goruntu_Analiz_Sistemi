@@ -29,9 +29,10 @@ def database_uri() -> str:
     Beklenenler:
       - DATABASE_URL .env'de tanımlı olmalı
       - postgres:// öneki postgresql:// olarak normalize edilir
-      - SQLAlchemy 2.0 default psycopg2 ister; biz psycopg3 kullandığımız için
-        postgresql+psycopg:// dialect'ine zorlarız
-      - Supabase/PgBouncer'a özel (pgbouncer=true gibi) parametreler libpq tanımaz,
+      - SQLAlchemy 2.0 default psycopg2 ister; biz pg8000 (saf Python) kullandığımız
+        için postgresql+pg8000:// dialect'ine zorlarız. Sebep: psycopg[binary] C
+        uzantısı TensorFlow C++ runtime'ı ile çakışıp segfault üretiyordu.
+      - Supabase/PgBouncer'a özel (pgbouncer=true gibi) parametreler pg8000 tanımaz,
         query string'den temizlenir.
     """
     raw = os.environ.get("DATABASE_URL", "").strip()
@@ -53,9 +54,10 @@ def database_uri() -> str:
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://"):]
 
-    # SQLAlchemy 2.0 default: postgresql+psycopg2. Bizde psycopg3 kurulu → explicit.
+    # SQLAlchemy 2.0 default: postgresql+psycopg2. Biz pg8000 (saf Python) kullanıyoruz
+    # — TensorFlow C++ runtime'ı ile psycopg[binary] çakışıp segfault üretiyordu.
     if url.startswith("postgresql://") and not url.startswith("postgresql+"):
-        url = "postgresql+psycopg://" + url[len("postgresql://"):]
+        url = "postgresql+pg8000://" + url[len("postgresql://"):]
 
     # Sürücü-spesifik (libpq'nun tanımadığı) parametreleri sıyır
     parts = urlsplit(url)

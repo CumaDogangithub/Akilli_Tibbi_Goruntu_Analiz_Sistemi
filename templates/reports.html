@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 {% set aktif_sayfa = 'raporlar' %}
-{% block baslik %}{% if aktif_rol == 'admin' %}Tüm Raporlar{% else %}Raporlarım{% endif %}{% endblock %}
+{# admin VE radyolog tüm raporları görür; doktor sadece kendi raporlarını #}
+{% set tum_raporlari_gorur = aktif_rol in ('admin', 'radyolog') %}
+{% block baslik %}{% if tum_raporlari_gorur %}Tüm Raporlar{% else %}Raporlarım{% endif %}{% endblock %}
 
 {% block icerik %}
-  <h1>{% if aktif_rol == 'admin' %}Tüm Raporlar{% else %}Raporlarım{% endif %}</h1>
+  <h1>{% if tum_raporlari_gorur %}Tüm Raporlar{% else %}Raporlarım{% endif %}</h1>
   <div class="alt-baslik">
     {% if aktif_rol == 'admin' %}
       Sistemdeki tüm doktorlara ait analiz raporları.
+    {% elif aktif_rol == 'radyolog' %}
+      Tüm doktorların analiz raporları — anomali işaretlemelerini inceleyin.
     {% else %}
       Veritabanına kaydedilmiş tüm analizleriniz.
     {% endif %}
@@ -32,13 +36,13 @@
   </div>
 
   <!-- Arama + Filtreler -->
-  <div style="display:grid; grid-template-columns: {% if aktif_rol == 'admin' %}1fr 280px{% else %}1fr{% endif %}; gap:12px;">
+  <div style="display:grid; grid-template-columns: {% if tum_raporlari_gorur %}1fr 280px{% else %}1fr{% endif %}; gap:12px;">
     <div class="form-grup">
       <input type="text" id="arama" placeholder="🔍 Tarama ID, hasta adı, doktor veya tahmin ile ara..."
              oninput="tabloFiltrele(this.value, 'rapor-tablosu')">
     </div>
-    {% if aktif_rol == 'admin' %}
-    <!-- Admin için doktor filtreleme dropdown'u -->
+    {% if tum_raporlari_gorur %}
+    <!-- admin + radyolog için doktor filtreleme dropdown'u -->
     <div class="form-grup">
       <select onchange="doktorFiltrele(this.value)">
         <option value="">— Tüm doktorların raporları —</option>
@@ -53,11 +57,11 @@
   </div>
 
   <div class="cip-grup">
-    {# Sütun indeksleri admin görünümünde Doktor sütunu eklendiği için kayıyor:
-       admin için tip=2, seviye=5, durum=6; diğer için tip=1, seviye=4, durum=5 #}
-    {% set tip_idx = 2 if aktif_rol == 'admin' else 1 %}
-    {% set sev_idx = 5 if aktif_rol == 'admin' else 4 %}
-    {% set dur_idx = 6 if aktif_rol == 'admin' else 5 %}
+    {# Sütun indeksleri admin/radyolog görünümünde Doktor sütunu eklendiği için kayıyor:
+       admin/radyolog için tip=2, seviye=5, durum=6; doktor için tip=1, seviye=4, durum=5 #}
+    {% set tip_idx = 2 if tum_raporlari_gorur else 1 %}
+    {% set sev_idx = 5 if tum_raporlari_gorur else 4 %}
+    {% set dur_idx = 6 if tum_raporlari_gorur else 5 %}
     <span class="cip aktif" data-cip-grup="tip" data-deger="tumu" onclick="cipFiltrele('tumu','tip','rapor-tablosu', {{ tip_idx }})">Tümü</span>
     <span class="cip" data-cip-grup="tip" data-deger="MR" onclick="cipFiltrele('MR','tip','rapor-tablosu', {{ tip_idx }})">MR</span>
     <span class="cip" data-cip-grup="tip" data-deger="CT" onclick="cipFiltrele('CT','tip','rapor-tablosu', {{ tip_idx }})">CT</span>
@@ -73,7 +77,7 @@
       <thead>
         <tr>
           <th>Rapor #</th>
-          {% if aktif_rol == 'admin' %}<th>Doktor</th>{% endif %}
+          {% if tum_raporlari_gorur %}<th>Doktor</th>{% endif %}
           <th>Tip</th>
           <th>TF Tahmin</th>
           <th>Doğruluk</th>
@@ -88,7 +92,7 @@
         {% for r in raporlar %}
         <tr>
           <td><a href="{{ url_for('rapor_detay', rapor_id=r.id) }}">TRK-{{ '%06d' % r.id }}</a></td>
-          {% if aktif_rol == 'admin' %}
+          {% if tum_raporlari_gorur %}
             <td style="font-size:12px;">
               <b>{{ r.doktor.ad_soyad }}</b><br>
               <span style="color:var(--metin-sonuk); font-size:11px;">{{ r.doktor.brans }}</span>
@@ -129,9 +133,12 @@
               <a class="islem-btn pdf" href="{{ url_for('rapor_pdf', rapor_id=r.id) }}" title="PDF olarak indir">
                 <span class="ikon">⬇</span><span class="etk">PDF</span>
               </a>
+              {# Silme: yalnız admin + raporun sahibi doktor — radyolog SİLEMEZ #}
+              {% if aktif_rol == 'admin' or (aktif_rol == 'doktor' and r.doktor_id == doktor.id) %}
               <button type="button" class="islem-btn sil" onclick="raporSil({{ r.id }})" title="Raporu kalıcı olarak sil">
                 <span class="ikon">✕</span><span class="etk">Sil</span>
               </button>
+              {% endif %}
             </div>
           </td>
         </tr>
@@ -140,7 +147,11 @@
     </table>
     {% else %}
     <div style="padding:60px; text-align:center; color:var(--metin-sonuk);">
-      Henüz rapor yok. <a href="{{ url_for('tarama') }}">İlk taramayı başlat →</a>
+      {% if tum_raporlari_gorur %}
+        Sistemde henüz hiçbir doktorun raporu yok.
+      {% else %}
+        Henüz rapor yok. <a href="{{ url_for('tarama') }}">İlk taramayı başlat →</a>
+      {% endif %}
     </div>
     {% endif %}
   </div>
