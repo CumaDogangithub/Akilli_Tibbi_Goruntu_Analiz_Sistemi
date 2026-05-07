@@ -984,15 +984,16 @@ def _port_dinleniyor_mu(port: int, host: str = "127.0.0.1", zaman_asimi: float =
 
 def _tensorboard_url_uret():
     """Tarayıcıya verilecek TB URL'ini Flask request host'undan üretir.
-    Sebep: kullanıcı sunucuya 'http://192.168.x.y:5001' gibi bağlandıysa, ona
-    'http://127.0.0.1:6006' linki vermek anlamsız (kendi makinesini açar).
-    Aynı host + TB portu döndürürüz."""
+    nginx /tensorboard/ sub-path olarak 6006'ya proxy'liyor (Cloudflare port 6006'yı
+    forward etmediği için doğrudan 6006 erişimi prod'da çalışmaz). Lokal dev'de de
+    nginx yoksa aynı sub-path 404 dönerse kullanıcı bunu zaten görür."""
     try:
-        host = (request.host or "").split(":")[0] or "127.0.0.1"
+        host = request.host or "127.0.0.1"
+        scheme = request.scheme or "http"
     except RuntimeError:
         # request context dışında çağrılırsa (CLI/test)
-        host = "127.0.0.1"
-    return f"http://{host}:{TENSORBOARD_PORT}/"
+        return f"http://127.0.0.1:{TENSORBOARD_PORT}/"
+    return f"{scheme}://{host}/tensorboard/"
 
 
 def _tensorboard_baslat():
@@ -1019,10 +1020,13 @@ def _tensorboard_baslat():
 
     # 0.0.0.0: Docker container içinden ya da uzak sunucuya bağlanan tarayıcılar
     # da erişebilsin (127.0.0.1 yalnız aynı makinede çalışırdı).
+    # path_prefix: TB nginx /tensorboard/ sub-path'inin arkasında çalışacağı için
+    # kendi içsel linklerini /tensorboard/data/... olarak üretmeli.
     args_ortak = [
         "--logdir", TENSORBOARD_LOGDIR,
         "--host", "0.0.0.0",
         "--port", str(TENSORBOARD_PORT),
+        "--path_prefix", "/tensorboard",
         "--reload_interval", "5",
     ]
 
