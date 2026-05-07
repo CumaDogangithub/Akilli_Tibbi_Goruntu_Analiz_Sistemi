@@ -78,10 +78,16 @@
   <div class="tablo-kart">
     <div class="baslik" style="display:flex; justify-content:space-between; align-items:center;">
       <span>📈 TensorBoard — Model Performans Görselleştirmesi</span>
-      <div style="display:flex; gap:8px; align-items:center;">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
         <span id="tb-durum" class="rozet {% if tensorboard_calisiyor %}rozet-yesil{% else %}rozet-sari{% endif %}">
           {% if tensorboard_calisiyor %}● Çalışıyor{% else %}● Durduruldu{% endif %}
         </span>
+        <button id="uretim-log-btn" type="button" class="btn"
+                style="background:var(--mavi); color:#fff;"
+                onclick="uretimLogUret()"
+                title="DB'deki canlı analizlerden TensorBoard'a yeni veri noktası ekler">
+          🔬 Üretim Logu Üret
+        </button>
         <button id="tb-baslat-btn" type="button" class="btn btn-primary" onclick="tensorboardBaslat()"
                 {% if tensorboard_calisiyor %}style="display:none;"{% endif %}>
           🚀 TensorBoard'u Başlat
@@ -99,7 +105,7 @@
 
     <div class="tb-cerceve" id="tb-cerceve">
       {% if tensorboard_calisiyor %}
-        <iframe src="{{ tensorboard_url }}" title="TensorBoard"></iframe>
+        <iframe id="tb-iframe" src="{{ tensorboard_url }}" title="TensorBoard"></iframe>
       {% else %}
         <div class="tb-bos" id="tb-bos-mesaj">
           <div style="font-size:48px;">📈</div>
@@ -220,6 +226,33 @@ async function tensorboardBaslat() {
     toast("TensorBoard hazır.", "basarili", 2500);
   } else {
     toast("TensorBoard ayağa kalkamadı (timeout). Sayfayı yenileyin.", "uyari", 6000);
+  }
+}
+
+async function uretimLogUret() {
+  const btn = document.getElementById("uretim-log-btn");
+  const eskiMetin = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = "⏳ Üretim verisi işleniyor...";
+
+  try {
+    const v = await jsonPOST("{{ url_for('akademik_uretim_log_uret') }}", {});
+    const tip = v.durum === "basarili" ? "basarili" : (v.durum === "uyari" ? "uyari" : "hata");
+    toast(v.mesaj || "Tamamlandı.", tip, 6000);
+
+    // TB iframe yenile (yeni veri noktası geldi → grafikler güncellensin)
+    if (v.durum === "basarili") {
+      const iframe = document.getElementById("tb-iframe");
+      if (iframe) {
+        // TB reload_interval=5sn olduğu için biraz bekle, sonra reload
+        setTimeout(() => { iframe.src = iframe.src; }, 1500);
+      }
+    }
+  } catch (e) {
+    toast("Üretim log hatası: " + e.message, "hata", 8000);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = eskiMetin;
   }
 }
 

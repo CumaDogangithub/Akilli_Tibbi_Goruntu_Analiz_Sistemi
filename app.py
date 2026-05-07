@@ -1267,6 +1267,34 @@ def akademik_tb_durum():
     })
 
 
+@app.route("/akademik/uretim-log-uret", methods=["POST"])
+@rol_gerekli("akademisyen", "admin")
+def akademik_uretim_log_uret():
+    """DB'deki canlı analiz verilerinden TensorBoard üretim log'u üretir.
+    Her tetikleme yeni bir veri noktası ekler (step=unix timestamp), TB'de
+    zaman serisi olarak gözükür."""
+    try:
+        from modul_yapay_zeka.uretim_log import uretim_loglarini_yaz
+        ozet = uretim_loglarini_yaz()
+    except Exception as e:
+        return jsonify({"durum": "hata", "mesaj": f"Log üretim hatası: {e}"}), 500
+
+    if ozet.get("toplam", 0) == 0:
+        return jsonify({
+            "durum": "uyari",
+            "mesaj": "DB'de henüz analiz yok — önce hasta taraması yapın.",
+            "ozet": ozet,
+        })
+
+    return jsonify({
+        "durum": "basarili",
+        "mesaj": (f"{ozet['toplam']} analiz işlendi · "
+                  f"%{ozet['ort_guven']} ort güven · "
+                  f"%{int(ozet['anomali_orani']*100)} anomali oranı"),
+        "ozet": ozet,
+    })
+
+
 # ============================================================================
 # Statik dosya servisi
 # ============================================================================
