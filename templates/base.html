@@ -18,17 +18,47 @@
       <span>ATGAS</span>
     </div>
     <nav>
-      <a href="{{ url_for('dashboard') }}" class="{% if aktif_sayfa == 'dashboard' %}aktif{% endif %}">▣ Ana Panel</a>
-      <a href="{{ url_for('tarama') }}"    class="{% if aktif_sayfa == 'tarama' %}aktif{% endif %}">＋ Yeni Tarama</a>
-      <a href="{{ url_for('raporlar') }}"  class="{% if aktif_sayfa == 'raporlar' %}aktif{% endif %}">▤ Raporlarım</a>
+      {# ROL BAZLI MENÜ — rolüne göre farklı seçenekler gözükür #}
 
-      {# Son taramalar alt-listesi (context_processor → son_taramalar) #}
-      {% if son_taramalar is defined %}
+      {# Ana panel: admin → admin paneli, akademisyen → akademik panel, diğerleri → /dashboard #}
+      {% if aktif_rol == 'admin' %}
+        <a href="{{ url_for('admin_panel') }}" class="{% if aktif_sayfa == 'admin' %}aktif{% endif %}">▣ Yönetim Paneli</a>
+      {% elif aktif_rol == 'akademisyen' %}
+        <a href="{{ url_for('akademik_panel') }}" class="{% if aktif_sayfa == 'akademik' %}aktif{% endif %}">▣ Akademik Panel</a>
+      {% else %}
+        <a href="{{ url_for('dashboard') }}" class="{% if aktif_sayfa == 'dashboard' %}aktif{% endif %}">▣ Ana Panel</a>
+      {% endif %}
+
+      {# Yeni tarama — sadece doktor ve admin yapabilir #}
+      {% if aktif_rol in ['doktor', 'admin'] %}
+        <a href="{{ url_for('tarama') }}" class="{% if aktif_sayfa == 'tarama' %}aktif{% endif %}">＋ Yeni Tarama</a>
+      {% endif %}
+
+      {# Akademisyen ekstra link — TensorBoard #}
+      {% if aktif_rol in ['akademisyen', 'admin'] %}
+        <a href="{{ url_for('akademik_panel') }}" class="{% if aktif_sayfa == 'akademik' %}aktif{% endif %}">📈 TensorBoard</a>
+      {% endif %}
+
+      {# Admin ekstra link — yeni kullanıcı #}
+      {% if aktif_rol == 'admin' %}
+        <a href="{{ url_for('admin_panel') }}#kullanici-ekle" style="font-size:12.5px;">➕ Yeni Kullanıcı</a>
+      {% endif %}
+
+      {# Raporlar — admin için EN ALTTA, akademisyen hariç diğerleri için yukarıda mantıklı #}
+      {% if aktif_rol != 'akademisyen' %}
+        <a href="{{ url_for('raporlar') }}" class="{% if aktif_sayfa == 'raporlar' %}aktif{% endif %}">
+          ▤ {% if aktif_rol == 'doktor' %}Raporlarım{% else %}Tüm Raporlar{% endif %}
+        </a>
+      {% endif %}
+
+      {# Son taramalar alt-listesi — aktif rapor highlight'lı #}
+      {% if son_taramalar is defined and son_taramalar is not none and aktif_rol != 'akademisyen' %}
         {% if son_taramalar %}
           <ul class="sidebar-alt-liste">
             {% for r in son_taramalar %}
-              <li>
+              <li class="{% if aktif_rapor_id and r.id == aktif_rapor_id %}aktif{% endif %}">
                 <a href="{{ url_for('rapor_detay', rapor_id=r.id) }}"
+                   class="{% if aktif_rapor_id and r.id == aktif_rapor_id %}aktif{% endif %}"
                    title="{{ r.tf_tahmin_sonucu }} · {{ r.islem_tarihi | kisa_tarih }}">
                   <span class="tip-rozet">{{ r.tarama_tipi }}</span>
                   <span>{{ r.tf_tahmin_sonucu }}</span>
@@ -66,7 +96,10 @@
         <div class="doktor-bilgi" id="doktor-toggle" onclick="doktorMenuToggle(event)">
           <div style="text-align:right">
             <div class="ad">{{ doktor.ad_soyad }}</div>
-            <div class="brans">{{ doktor.brans }}</div>
+            <div class="brans">
+              <span class="rozet rozet-mavi" style="font-size:9px; padding:1px 6px;">{{ rol_etiketi or 'Doktor' }}</span>
+              · {{ doktor.brans }}
+            </div>
           </div>
           <div class="avatar">{{ doktor.ad_soyad[:2].upper() }}</div>
           <span class="ok">▼</span>
@@ -80,12 +113,26 @@
           <a href="{{ url_for('profil') }}">
             <span class="ikon">◎</span> Profilim
           </a>
+          {% if aktif_rol != 'akademisyen' %}
           <a href="{{ url_for('raporlar') }}">
-            <span class="ikon">▤</span> Raporlarım
+            <span class="ikon">▤</span> {% if aktif_rol == 'doktor' %}Raporlarım{% else %}Tüm Raporlar{% endif %}
           </a>
+          {% endif %}
+          {% if aktif_rol in ['doktor', 'admin'] %}
           <a href="{{ url_for('tarama') }}">
             <span class="ikon">＋</span> Yeni Tarama
           </a>
+          {% endif %}
+          {% if aktif_rol in ['akademisyen', 'admin'] %}
+          <a href="{{ url_for('akademik_panel') }}">
+            <span class="ikon">📈</span> Akademik Panel
+          </a>
+          {% endif %}
+          {% if aktif_rol == 'admin' %}
+          <a href="{{ url_for('admin_panel') }}">
+            <span class="ikon">⚙</span> Yönetim Paneli
+          </a>
+          {% endif %}
           <a href="{{ url_for('logout') }}" class="cikis">
             <span class="ikon">⎋</span> Çıkış Yap
           </a>

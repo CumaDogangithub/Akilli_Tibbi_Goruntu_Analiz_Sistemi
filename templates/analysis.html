@@ -7,8 +7,19 @@
 {% block icerik %}
 {% if mod == 'yeni' %}
   <!-- ============================ YENİ TARAMA ============================ -->
-  <h1>Yeni Tarama</h1>
-  <div class="alt-baslik">Tıbbi görüntüyü yükleyin, AI analiz başlatsın.</div>
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+    <div>
+      <h1>Yeni Tarama</h1>
+      <div class="alt-baslik">Tıbbi görüntüyü yükleyin, AI analiz başlatsın.</div>
+    </div>
+    {# Test aşamasında: doktor + admin örnek görüntüleri indirip sistemi denesin diye #}
+    <a href="{{ url_for('ornek_veriler_indir') }}"
+       class="btn"
+       style="background:var(--mavi); color:#fff; white-space:nowrap;"
+       title="MR/CT/X-Ray örnek görüntüleri zip olarak indirin (test amaçlı)">
+      ⬇ Örnek Verileri İndir
+    </a>
+  </div>
 
   <!-- Stepper -->
   <div class="stepper">

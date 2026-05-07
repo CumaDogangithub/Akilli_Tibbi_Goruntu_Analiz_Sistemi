@@ -9,7 +9,7 @@ numpy>=1.24.3           # Matris ve dizi işlemleri (Görüntüleri sayılara ç
 scikit-learn>=1.3.0     # Confusion Matrix ve Performans raporları için
 
 # 2. GÖRÜNTÜ İŞLEME VE GÖRSELLEŞTİRME (Nihal ve Elif'in Modülü)
-opencv-python>=4.8.0    # Resim okuma, yeniden boyutlandırma, maskeleme ve ısı haritası
+opencv-python-headless>=4.8.0   # Resim okuma, yeniden boyutlandırma, maskeleme ve ısı haritası (server: GUI'siz)
 matplotlib>=3.7.2       # Grafikleri ve ısı haritasını diske çizmek için (Agg backend)
 Pillow>=10.0.0          # TensorFlow'un load_img fonksiyonu için gerekli görüntü kütüphanesi
 pydicom>=2.4.1          # DICOM (.dcm) uzantılı gerçek hastane görüntülerini okumak için
@@ -24,7 +24,7 @@ reportlab>=4.0.4        # Dinamik ve tıbbi logolu PDF raporları üretmek için
 # 5. VERİTABANI VE ORM
 # DATABASE_URL zorunludur (.env içinde). SQLite desteği kaldırıldı, sadece PostgreSQL.
 # Önerilen: Supabase (DATABASE_URL=postgresql://...)
-psycopg[binary]>=3.1            # PostgreSQL adapter (psycopg3, SQLAlchemy ile uyumlu)
+pg8000>=1.30.0                  # PostgreSQL adapter (saf Python — TF C++ ile çakışmaz)
 SQLAlchemy>=2.0                 # ORM (Object-Relational Mapping)
 Flask-SQLAlchemy>=3.1           # Flask <-> SQLAlchemy entegrasyonu
 Flask-Migrate>=4.0              # Alembic migration yönetimi (flask db upgrade vb.)

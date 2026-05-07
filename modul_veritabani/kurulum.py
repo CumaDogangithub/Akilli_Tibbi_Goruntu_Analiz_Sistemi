@@ -16,8 +16,9 @@ import os
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 from flask_migrate import Migrate
+from sqlalchemy import text
 
-from .modeller import db, Doktor, AnalizRaporu
+from .modeller import db, Doktor, AnalizRaporu, ROLLER
 
 
 # ============================================================================
@@ -28,9 +29,10 @@ def database_uri() -> str:
     Beklenenler:
       - DATABASE_URL .env'de tanımlı olmalı
       - postgres:// öneki postgresql:// olarak normalize edilir
-      - SQLAlchemy 2.0 default psycopg2 ister; biz psycopg3 kullandığımız için
-        postgresql+psycopg:// dialect'ine zorlarız
-      - Supabase/PgBouncer'a özel (pgbouncer=true gibi) parametreler libpq tanımaz,
+      - SQLAlchemy 2.0 default psycopg2 ister; biz pg8000 (saf Python) kullandığımız
+        için postgresql+pg8000:// dialect'ine zorlarız. Sebep: psycopg[binary] C
+        uzantısı TensorFlow C++ runtime'ı ile çakışıp segfault üretiyordu.
+      - Supabase/PgBouncer'a özel (pgbouncer=true gibi) parametreler pg8000 tanımaz,
         query string'den temizlenir.
     """
     raw = os.environ.get("DATABASE_URL", "").strip()
@@ -52,9 +54,10 @@ def database_uri() -> str:
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://"):]
 
-    # SQLAlchemy 2.0 default: postgresql+psycopg2. Bizde psycopg3 kurulu → explicit.
+    # SQLAlchemy 2.0 default: postgresql+psycopg2. Biz pg8000 (saf Python) kullanıyoruz
+    # — TensorFlow C++ runtime'ı ile psycopg[binary] çakışıp segfault üretiyordu.
     if url.startswith("postgresql://") and not url.startswith("postgresql+"):
-        url = "postgresql+psycopg://" + url[len("postgresql://"):]
+        url = "postgresql+pg8000://" + url[len("postgresql://"):]
 
     # Sürücü-spesifik (libpq'nun tanımadığı) parametreleri sıyır
     parts = urlsplit(url)
@@ -95,24 +98,91 @@ def db_init(app):
 # ============================================================================
 # YARDIMCILAR
 # ============================================================================
-def ornek_doktor_ekle():
-    """Demo doktor hesabını ekler (yoksa). Bilgiler .env'den okunur:
-       DEMO_DOKTOR_AD, DEMO_DOKTOR_EPOSTA, DEMO_DOKTOR_SIFRE, DEMO_DOKTOR_BRANS
-    Çağrılmadan önce app context'i aktif olmalı."""
-    if Doktor.query.count() > 0:
+def rol_kolonu_garanti_et():
+    """Eski Supabase kurulumlarında 'rol' sütunu yoksa ekler.
+    PostgreSQL özellikli (IF NOT EXISTS) — tek seferlik, idempotent."""
+    try:
+        db.session.execute(text(
+            "ALTER TABLE doktorlar "
+            "ADD COLUMN IF NOT EXISTS rol VARCHAR(20) NOT NULL DEFAULT 'doktor'"
+        ))
+        db.session.execute(text(
+            "CREATE INDEX IF NOT EXISTS ix_doktorlar_rol ON doktorlar(rol)"
+        ))
+        db.session.commit()
+    except Exception:
+        # Tablo henüz yoksa create_all() oluşturacak; sessizce geç
+        db.session.rollback()
+
+
+def _kullanici_olustur_yoksa(eposta, ad_soyad, sifre, brans, unvan, rol):
+    """Verilen e-posta sahibi kullanıcı yoksa oluşturur. True/False döner."""
+    if Doktor.query.filter_by(eposta=eposta).first():
         return False
-
-    # .env'den oku — tırnak işaretleri varsa kaldır (kabuk format'ları için)
-    ad     = os.environ.get("DEMO_DOKTOR_AD",     "Dr. Demo").strip('"').strip("'")
-    eposta = os.environ.get("DEMO_DOKTOR_EPOSTA", "doktor@atgas.local")
-    sifre  = os.environ.get("DEMO_DOKTOR_SIFRE",  "123456")
-    brans  = os.environ.get("DEMO_DOKTOR_BRANS",  "Radyoloji")
-
-    d = Doktor(ad_soyad=ad, eposta=eposta, brans=brans, unvan="Uzman Doktor")
-    d.sifre_ayarla(sifre)
-    db.session.add(d)
+    k = Doktor(
+        ad_soyad=ad_soyad.strip('"').strip("'"),
+        eposta=eposta,
+        brans=brans,
+        unvan=unvan,
+        rol=rol,
+    )
+    k.sifre_ayarla(sifre)
+    db.session.add(k)
     db.session.commit()
     return True
+
+
+def ornek_doktor_ekle():
+    """Demo hesapları yoksa ekler — her rol için bir tane.
+    Bilgiler .env'den okunur (DEMO_DOKTOR_*, DEMO_ADMIN_*, DEMO_RADYOLOG_*, DEMO_AKADEMISYEN_*).
+    Çağrılmadan önce app context'i aktif olmalı."""
+    eklenenler = []
+
+    # 1) DOKTOR
+    if _kullanici_olustur_yoksa(
+        eposta=os.environ.get("DEMO_DOKTOR_EPOSTA", "doktor@atgas.local"),
+        ad_soyad=os.environ.get("DEMO_DOKTOR_AD",   "Dr. Demo"),
+        sifre=os.environ.get("DEMO_DOKTOR_SIFRE",   "123456"),
+        brans=os.environ.get("DEMO_DOKTOR_BRANS",   "Radyoloji"),
+        unvan="Uzman Doktor",
+        rol="doktor",
+    ):
+        eklenenler.append("doktor")
+
+    # 2) ADMIN
+    if _kullanici_olustur_yoksa(
+        eposta=os.environ.get("DEMO_ADMIN_EPOSTA",  "admin@atgas.local"),
+        ad_soyad=os.environ.get("DEMO_ADMIN_AD",    "Sistem Yöneticisi"),
+        sifre=os.environ.get("DEMO_ADMIN_SIFRE",    "admin123"),
+        brans=os.environ.get("DEMO_ADMIN_BRANS",    "Yönetim"),
+        unvan="Yönetici",
+        rol="admin",
+    ):
+        eklenenler.append("admin")
+
+    # 3) RADYOLOG
+    if _kullanici_olustur_yoksa(
+        eposta=os.environ.get("DEMO_RADYOLOG_EPOSTA",  "radyolog@atgas.local"),
+        ad_soyad=os.environ.get("DEMO_RADYOLOG_AD",    "Dr. Radyolog"),
+        sifre=os.environ.get("DEMO_RADYOLOG_SIFRE",    "radyolog123"),
+        brans=os.environ.get("DEMO_RADYOLOG_BRANS",    "Radyoloji"),
+        unvan="Uzman Radyolog",
+        rol="radyolog",
+    ):
+        eklenenler.append("radyolog")
+
+    # 4) AKADEMİSYEN
+    if _kullanici_olustur_yoksa(
+        eposta=os.environ.get("DEMO_AKADEMISYEN_EPOSTA",  "akademisyen@atgas.local"),
+        ad_soyad=os.environ.get("DEMO_AKADEMISYEN_AD",    "Prof. Akademisyen"),
+        sifre=os.environ.get("DEMO_AKADEMISYEN_SIFRE",    "akademisyen123"),
+        brans=os.environ.get("DEMO_AKADEMISYEN_BRANS",    "Tıbbi Görüntüleme AR-GE"),
+        unvan="Akademisyen",
+        rol="akademisyen",
+    ):
+        eklenenler.append("akademisyen")
+
+    return eklenenler
 
 
 def aktif_backend():
