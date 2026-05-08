@@ -6,7 +6,7 @@ Flask Backend (SQLAlchemy ORM + PostgreSQL/Supabase)
 import os
 import re
 import uuid
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from functools import wraps
 
 # .env dosyasındaki ortam değişkenlerini yükle (DATABASE_URL, ATGAS_SECRET vs.)
@@ -76,6 +76,19 @@ def sonuc_yolu(yol_veya_dosya_adi: str) -> str:
     f = _basename_norm(yol_veya_dosya_adi)
     return os.path.join(ISLENMIS_KLASORU, f) if f else ""
 
+def _bekleyen_temizle():
+    """Oturumdaki bekleyen analizi ve ilişkili geçici dosyaları diskten siler."""
+    bekleyen = session.pop("bekleyen_analiz", None)
+    if bekleyen:
+        # Her bir dosyayı bağımsız silmeyi dener; biri kilitliyse diğeri hata vermez
+        for anahtar, yol_fonk in [("goruntu_dosya_yolu", yukleme_yolu), ("isaretli_goruntu_yolu", sonuc_yolu)]:
+            dosya_adi = bekleyen.get(anahtar)
+            if dosya_adi:
+                try:
+                    os.remove(yol_fonk(dosya_adi))
+                except OSError:
+                    pass
+
 # ============================================================================
 # UYGULAMA YAPILANDIRMASI — tümü .env'den
 # ============================================================================
@@ -94,6 +107,7 @@ MAX_UPLOAD_MB = _env_int("MAX_UPLOAD_MB", 50)
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("ATGAS_SECRET") or "atgas-degistir-bu-secret"
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
 # SQLAlchemy + Flask-Migrate
 db_init(app)
@@ -259,6 +273,7 @@ def login():
         sifre = request.form.get("sifre", "")
         doktor = Doktor.query.filter_by(eposta=eposta).first()
         if doktor and doktor.sifre_dogrula(sifre):
+            session.permanent = True
             session["doktor_id"] = doktor.id
             session["doktor_ad"] = doktor.ad_soyad
             session["doktor_brans"] = doktor.brans
@@ -412,6 +427,19 @@ def api_analiz():
     if len(hasta_tc) != 11 or not hasta_tc.isdigit():
         return jsonify({"durum": "hata", "mesaj": "TC Kimlik 11 haneli rakam olmalıdır."}), 400
 
+    # Doğum Tarihi Doğrulaması
+    try:
+        dogum_obj = datetime.strptime(hasta_dogum, "%Y-%m-%d").date()
+        if dogum_obj > date.today():
+            return jsonify({"durum": "hata", "mesaj": "Doğum tarihi gelecek bir tarih olamaz."}), 400
+        if dogum_obj.year < 1900:
+            return jsonify({"durum": "hata", "mesaj": "Mantıksız doğum yılı (1900'den eski olamaz)."}), 400
+    except ValueError:
+        return jsonify({"durum": "hata", "mesaj": "Geçersiz doğum tarihi formatı."}), 400
+
+    # Eğer önceden kalma tamamlanmamış (bekleyen) bir analiz varsa önce onu temizle (Çöp dosya engelleme)
+    _bekleyen_temizle()
+
     # Dosyayı diske kaydet
     benzersiz = uuid.uuid4().hex[:12]
     guvenli_ad = secure_filename(dosya.filename) or "goruntu"
@@ -425,14 +453,40 @@ def api_analiz():
         return jsonify({"durum": "hata",
                         "mesaj": "Desteklenmeyen format. DICOM (.dcm/.dicom/.dic/.ima) veya PNG/JPG/JPEG yükleyin."}), 400
 
-    # DICOM ise browser-uyumlu PNG önizleme
-    onizleme_yolu = kayit_yolu  # disk full path
+    # Varsayılan olarak (PNG/JPG ise) önizleme yolu orijinal dosyanın kendisidir
+    onizleme_yolu = kayit_yolu
+
+    # DICOM ise hem modalite kontrolü yap hem de browser-uyumlu PNG önizleme üret
     if dicom_dosyasi_mi(kayit_yolu):
+        try:
+            import pydicom
+            # stop_before_pixels=True ile pikselleri yüklemeden sadece başlıkları hızlıca okuyoruz
+            ds = pydicom.dcmread(kayit_yolu, stop_before_pixels=True)
+            modality = str(getattr(ds, "Modality", "")).strip().upper()
+            
+            hata_mesaji = ""
+            if uzman_kodu.startswith("ct_") and modality not in ("CT", ""):
+                hata_mesaji = f"Uyumsuz format! CT seçtiniz ancak DICOM dosyası {modality} modalitesine sahip."
+            elif uzman_kodu.startswith("mri_") and modality not in ("MR", ""):
+                hata_mesaji = f"Uyumsuz format! MRI seçtiniz ancak DICOM dosyası {modality} modalitesine sahip."
+            elif uzman_kodu == "xray" and modality not in ("DX", "CR", "XA", "PX", ""):
+                hata_mesaji = f"Uyumsuz format! X-Ray seçtiniz ancak DICOM dosyası {modality} modalitesine sahip."
+                
+            if hata_mesaji:
+                try: os.remove(kayit_yolu)
+                except OSError: pass
+                return jsonify({"durum": "hata", "mesaj": hata_mesaji}), 400
+        except ImportError:
+            print("UYARI: pydicom yüklü değil, modalite kontrolü atlandı.")
+        except Exception as e:
+            print(f"UYARI: DICOM modalite okunurken hata oluştu: {e}")
+
         try:
             onizleme_yolu = os.path.join(YUKLEME_KLASORU, f"orig_{kayit_adi}.png")
             dicom_onizleme_uret(kayit_yolu, onizleme_yolu)
         except Exception as e:
-            return jsonify({"durum": "hata", "mesaj": f"DICOM önizleme hatası: {e}"}), 500
+            print(f"Hata (DICOM Önizleme): {e}")
+            return jsonify({"durum": "hata", "mesaj": "DICOM dosyası okunurken sistemsel bir hata oluştu."}), 500
 
     # CLAHE + gürültü giderme
     try:
@@ -441,7 +495,8 @@ def api_analiz():
             cikti_yolu=os.path.join(YUKLEME_KLASORU, f"on_{kayit_adi}.png"),
         )
     except Exception as e:
-        return jsonify({"durum": "hata", "mesaj": f"Ön işleme hatası: {e}"}), 500
+        print(f"Hata (Ön işleme): {e}")
+        return jsonify({"durum": "hata", "mesaj": "Görüntü ön işleme sırasında sistemsel bir hata oluştu."}), 500
 
     # AI analizi
     sonuc = ANALIZ_MOTORU.analizi_baslat(islenmis_yolu, uzman_kodu)
@@ -482,6 +537,14 @@ def api_analiz():
         "veri": veri,
         "seviye": seviye,
     })
+
+
+@app.route("/api/iptal", methods=["GET", "POST"])
+@rol_gerekli("doktor", "admin")
+def api_iptal():
+    """Kullanıcı 'Dosyayı Kaldır' dediğinde veya analiz esnasında sayfadan çıktığında oturumdaki bekleyen analizi ve geçici dosyaları siler."""
+    _bekleyen_temizle()
+    return jsonify({"durum": "basarili", "mesaj": "Temizlendi."})
 
 
 @app.route("/analiz/onizleme")
@@ -567,7 +630,8 @@ def _kayit_guncelle(yeni_durum: str):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            return jsonify({"durum": "hata", "mesaj": f"Veritabanına yazılamadı: {e}"}), 500
+            print(f"DB Kayıt Hatası: {e}")
+            return jsonify({"durum": "hata", "mesaj": "Kayıt sırasında veritabanı hatası oluştu."}), 500
 
         session.pop("bekleyen_analiz", None)
         return jsonify({
@@ -591,7 +655,8 @@ def _kayit_guncelle(yeni_durum: str):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        return jsonify({"durum": "hata", "mesaj": f"Güncelleme hatası: {e}"}), 500
+        print(f"DB Güncelleme Hatası: {e}")
+        return jsonify({"durum": "hata", "mesaj": "Güncelleme sırasında sistemsel bir hata oluştu."}), 500
 
     return jsonify({"durum": "basarili", "rapor_id": rapor.id, "yeni_durum": yeni_durum})
 
@@ -680,7 +745,8 @@ def api_rapor_sil(rapor_id):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        return jsonify({"durum": "hata", "mesaj": str(e)}), 500
+        print(f"Silme Hatası: {e}")
+        return jsonify({"durum": "hata", "mesaj": "Kayıt silinirken sistemsel bir hata oluştu."}), 500
     return jsonify({"durum": "basarili"})
 
 
@@ -754,7 +820,8 @@ def profil():
                 mesaj = "Bilgiler başarıyla güncellendi."
             except Exception as e:
                 db.session.rollback()
-                hata = f"Güncelleme hatası: {e}"
+                print(f"Profil Güncelleme Hatası: {e}")
+                hata = "Güncelleme sırasında sistemsel bir hata oluştu."
 
         elif islem == "sifre_degistir":
             mevcut = request.form.get("mevcut_sifre", "")
@@ -774,7 +841,8 @@ def profil():
                     mesaj = "Şifre güncellendi."
                 except Exception as e:
                     db.session.rollback()
-                    hata = f"Güncelleme hatası: {e}"
+                    print(f"Şifre Değiştirme Hatası: {e}")
+                    hata = "Şifre güncellenirken sistemsel bir hata oluştu."
 
     # İstatistikler
     istat = db.session.query(
@@ -870,7 +938,8 @@ def admin_kullanici_ekle():
         flash(f"✓ {yeni.rol_etiketi} kaydı eklendi: {ad_soyad} ({eposta})", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Kayıt hatası: {e}", "danger")
+        print(f"Kullanıcı Ekleme Hatası: {e}")
+        flash("Kayıt işlemi sırasında sistemsel bir hata oluştu.", "danger")
 
     return redirect(url_for("admin_panel"))
 
@@ -959,7 +1028,8 @@ def admin_kullanici_guncelle(kid):
         flash("✓ Bilgiler güncellendi.", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Güncelleme hatası: {e}", "danger")
+        print(f"Kullanıcı Güncelleme Hatası: {e}")
+        flash("Güncelleme işlemi sırasında sistemsel bir hata oluştu.", "danger")
     return redirect(url_for("admin_kullanici_detay", kid=kid))
 
 
@@ -981,7 +1051,8 @@ def admin_kullanici_sifre(kid):
         flash(f"✓ {k.ad_soyad} kullanıcısının şifresi güncellendi.", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Şifre güncelleme hatası: {e}", "danger")
+        print(f"Admin Şifre Güncelleme Hatası: {e}")
+        flash("Şifre güncellenirken sistemsel bir hata oluştu.", "danger")
     return redirect(url_for("admin_kullanici_detay", kid=kid))
 
 
@@ -1013,7 +1084,8 @@ def admin_kullanici_sil(kid):
         flash(f"✓ {k.ad_soyad} silindi.", "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"Silme hatası: {e}", "danger")
+        print(f"Admin Kullanıcı Silme Hatası: {e}")
+        flash("Kullanıcı silinirken sistemsel bir hata oluştu.", "danger")
     return redirect(url_for("admin_panel"))
 
 

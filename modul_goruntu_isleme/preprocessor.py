@@ -109,9 +109,14 @@ def goruntu_oku(dosya_yolu: str) -> np.ndarray:
     # Hem uzantıdan hem magic bytes'tan DICOM tespiti
     if uzanti in DICOM_UZANTILARI or _dicom_mi(dosya_yolu):
         return dicom_oku(dosya_yolu)
-    img = cv2.imread(dosya_yolu, cv2.IMREAD_COLOR)
+    
+    # Türkçe karakter sorununu aşmak için dosyayı ikili okuyup imdecode kullan
+    with open(dosya_yolu, 'rb') as f:
+        bytes_data = f.read()
+    img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+    
     if img is None:
-        raise ValueError(f"Görüntü okunamadı: {dosya_yolu}")
+        raise ValueError(f"Görüntü okunamadı veya format desteklenmiyor: {dosya_yolu}")
     return img
 
 
@@ -121,7 +126,9 @@ def dicom_onizleme_uret(dicom_yolu: str, cikti_yolu: str) -> str:
     CLAHE/gürültü uygulanmaz — sadece tıbbi normalize (HU + Window/Level)."""
     img = dicom_oku(dicom_yolu)
     os.makedirs(os.path.dirname(cikti_yolu) or ".", exist_ok=True)
-    cv2.imwrite(cikti_yolu, img)
+    _, buffer = cv2.imencode(".png", img)
+    with open(cikti_yolu, 'wb') as f:
+        f.write(buffer.tobytes())
     return cikti_yolu
 
 
@@ -153,11 +160,26 @@ def hazirla(dosya_yolu: str, hedef_boyut=(384, 384), cikti_yolu: str | None = No
     img = goruntu_oku(dosya_yolu)
     img = clahe_uygula(img)
     img = gurultu_gider(img)
+
+    # Görüntü geçerliliğini ve boyutlarını boyutlandırma öncesi kontrol et
+    if img is None or img.size == 0 or len(img.shape) < 2 or img.shape[0] == 0 or img.shape[1] == 0:
+        raise ValueError(f"Görüntü geçersiz veya boş, boyutlandırma yapılamaz. Dosya: {dosya_yolu}")
+
+    eski_shape = img.shape
+
     img = cv2.resize(img, hedef_boyut, interpolation=cv2.INTER_AREA)
+
+    yeni_shape = img.shape
+    # cv2.resize (Genislik, Yukseklik) bekler, img.shape ise (Yukseklik, Genislik, Kanal) doner
+    if yeni_shape[0] != hedef_boyut[1] or yeni_shape[1] != hedef_boyut[0]:
+        raise ValueError(f"Boyutlandırma doğrulanamadı! Beklenen (G, Y): {hedef_boyut}, Elde edilen (Y, G): {yeni_shape[:2]}")
 
     if cikti_yolu is None:
         kok, _ = os.path.splitext(dosya_yolu)
         cikti_yolu = kok + "_islenmis.png"
+    
     os.makedirs(os.path.dirname(cikti_yolu) or ".", exist_ok=True)
-    cv2.imwrite(cikti_yolu, img)
+    _, buffer = cv2.imencode(".png", img)
+    with open(cikti_yolu, 'wb') as f:
+        f.write(buffer.tobytes())
     return cikti_yolu

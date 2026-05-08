@@ -102,3 +102,31 @@ document.addEventListener("keydown", (e) => {
     document.getElementById("doktor-toggle")?.classList.remove("acik");
   }
 });
+
+/* ============ OTOMATİK ÇIKIŞ (IDLE TIMEOUT) ============ */
+let idleSure = 0;
+const MAX_IDLE_DK =30 ; // 30 dakika hareketsizlik sınırı
+let yonlendiriliyor = false;
+
+function timerSifirla() {
+  if (!yonlendiriliyor) {
+    idleSure = 0;
+  }
+}
+
+// Sadece giriş yapılmış sayfalarda çalışması için (header'daki profil butonu varsa)
+if (document.getElementById("doktor-toggle")) {
+  window.addEventListener("mousemove", timerSifirla);
+  window.addEventListener("keydown", timerSifirla);
+  window.addEventListener("click", timerSifirla);
+  window.addEventListener("scroll", timerSifirla);
+
+  setInterval(() => {
+    idleSure++;
+    if (idleSure >= MAX_IDLE_DK && !yonlendiriliyor) {
+      yonlendiriliyor = true; // Yonlendirme basladi, bir daha iptal edilemez veya tekrar cagrılamaz
+      toast("Hareketsizlik nedeniyle oturumunuz sonlandırılıyor...", "uyari");
+      setTimeout(() => { window.location.href = "/logout"; }, 2000);
+    }
+  }, 60000); // Her 1 dakikada bir kontrol et
+}

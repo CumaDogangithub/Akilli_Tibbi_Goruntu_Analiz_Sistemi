@@ -29,7 +29,9 @@
     <div class="adim"><div class="yuvarlak">4</div><div class="etiket">Analiz</div></div>
   </div>
 
-  <form id="tarama-form" enctype="multipart/form-data">
+
+  <form id="tarama-form" enctype="multipart/form-data" autocomplete="off">
+
     <input type="hidden" id="uzman_kodu" name="uzman_kodu" value="">
 
     <!-- BÖLÜM 1: ANA TİP -->
@@ -90,17 +92,24 @@
     </div>
     <!-- LABEL kullanılıyor: tek bir click → tek bir dosya dialogu. -->
     <label class="drop-zone" id="drop-zone" for="goruntu-input">
-      <div class="icon">⬆</div>
+      <div class="ikon">⬆</div>
       <p>Görüntüyü buraya sürükleyin veya tıklayarak seçin</p>
       <span class="btn btn-primary" style="pointer-events:none;">Dosya Seç</span>
       <input type="file" id="goruntu-input" name="goruntu"
-             accept=".png,.jpg,.jpeg,.dcm,.dicom,.dic,.ima,application/dicom,*">
+             accept=".png,.jpg,.jpeg,.dcm,.dicom,.dic,.ima,application/dicom,image/*">
       <div class="secili-dosya" id="secili-dosya"></div>
       <div style="font-size:11px; color:var(--metin-sonuk); margin-top:8px;">
         Desteklenen formatlar: DICOM (.dcm/.dicom/.dic/.ima), PNG, JPG, JPEG · Maks 50 MB
       </div>
-      <img id="onizleme" style="display:none; max-width:200px; margin:16px auto 0; border-radius:4px;">
+      <img id="onizleme" alt="Görüntü Önizleme" style="display:none; max-width:200px; margin:16px auto 0; border-radius:4px;">
     </label>
+
+    <!-- Dosyayı Kaldır Butonu Label Dışına Alındı -->
+    <div style="text-align: center; margin-top: -12px; margin-bottom: 24px;">
+      <button type="button" id="dosya-kaldir-btn" class="btn" style="display: none; background-color: var(--kirmizi); color: white; font-size: 13px; padding: 4px 12px; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+        ✕ Dosyayı Kaldır
+      </button>
+    </div>
 
     <!-- BÖLÜM 3: Hasta -->
     <div style="font-size:11px; color:var(--metin-sonuk); margin:24px 0 8px; text-transform:uppercase; letter-spacing:0.5px;">
@@ -109,19 +118,19 @@
     <div class="kart">
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="form-grup">
-          <label>Ad Soyad</label>
+          <label for="hasta_ad_soyad">Ad Soyad</label>
           <input type="text" id="hasta_ad_soyad" name="hasta_ad_soyad" placeholder="Hasta adı ve soyadı" required>
         </div>
         <div class="form-grup">
-          <label>TC Kimlik No</label>
+          <label for="hasta_tc">TC Kimlik No</label>
           <input type="text" id="hasta_tc" name="hasta_tc" placeholder="00000000000" maxlength="11" required>
         </div>
         <div class="form-grup">
-          <label>Doğum Tarihi</label>
-          <input type="date" id="hasta_dogum_tarihi" name="hasta_dogum_tarihi" required>
+          <label for="hasta_dogum_tarihi">Doğum Tarihi</label>
+          <input type="date" id="hasta_dogum_tarihi" name="hasta_dogum_tarihi" min="1900-01-01" required>
         </div>
         <div class="form-grup">
-          <label>Protokol No</label>
+          <label for="protokol_no">Protokol No</label>
           <input type="text" id="protokol_no" name="protokol_no" placeholder="Hastane protokol numarası" required>
         </div>
       </div>
@@ -281,7 +290,7 @@
 
       <!-- Doktor Notu -->
       <div class="form-grup" style="margin-top:20px;">
-        <label>Doktor Notu</label>
+        <label for="doktor-notu">Doktor Notu</label>
         <textarea id="doktor-notu" placeholder="Analiz bulgularınız ve klinik değerlendirmenizi buraya ekleyin...">{{ rapor.doktor_notu or '' }}</textarea>
       </div>
     </div>
@@ -290,11 +299,11 @@
     <div class="kart">
       <h3 style="margin-bottom:12px;">Rapor İşlemleri</h3>
       <div style="display:flex; flex-direction:column; gap:10px;">
-        <button class="btn btn-warning" onclick="taslakKaydet()">💾 Taslak Kaydet</button>
-        <button class="btn btn-success" onclick="raporKaydet()">✓ Raporu Kaydet</button>
+        <button type="button" class="btn btn-warning" onclick="taslakKaydet()">💾 Taslak Kaydet</button>
+        <button type="button" class="btn btn-success" onclick="raporKaydet()">✓ Raporu Kaydet</button>
         <hr style="border-color:var(--kenarlik);">
         {% if onizleme_mi %}
-          <button class="btn" onclick="pdfIndirOnizleme()">📄 PDF Olarak İndir</button>
+          <button type="button" class="btn" onclick="pdfIndirOnizleme()">📄 PDF Olarak İndir</button>
         {% else %}
           <a class="btn" href="{{ url_for('rapor_pdf', rapor_id=rapor.id) }}">📄 PDF Olarak İndir</a>
         {% endif %}
@@ -315,11 +324,15 @@
     </div>
   </div>
 
+  <!-- JS'in okuyabilmesi için Jinja verilerini güvenli HTML veri (data) etiketlerine aktarıyoruz -->
+  <div id="sayfa-verisi" style="display:none;"
+       data-onizleme-mi="{{ 'true' if onizleme_mi else 'false' }}"
+       data-rapor-id="{{ rapor.id if rapor else '' }}"></div>
+
   <script>
-    // mod=detay → mevcut rapor id, mod=onizleme → null (henüz DB'de yok)
-    // const DEĞİL — ilk INSERT sonrası güncelleyebilmek için let
-    let RAPOR_ID = {% if onizleme_mi %}null{% else %}{{ rapor.id }}{% endif %};
-    const ONIZLEME_MI = {{ 'true' if onizleme_mi else 'false' }};
+    const veriDiv = document.getElementById("sayfa-verisi");
+    const ONIZLEME_MI = veriDiv.dataset.onizlemeMi === "true";
+    let RAPOR_ID = veriDiv.dataset.raporId ? parseInt(veriDiv.dataset.raporId) : null;
     let kaydedilmedi = ONIZLEME_MI;
 
     async function taslakKaydet() {

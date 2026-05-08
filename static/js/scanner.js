@@ -10,11 +10,18 @@
   const analizBtn = document.getElementById("analiz-btn");
   const form = document.getElementById("tarama-form");
   const uzmanInput = document.getElementById("uzman_kodu");
+  const dosyaKaldirBtn = document.getElementById("dosya-kaldir-btn");
 
   const anaTipKartlari = document.querySelectorAll(".ana-tip-kart");
   const altUzmanKartlari = document.querySelectorAll(".alt-uzman-kart");
   const altCt = document.getElementById("alt-ct");
   const altMri = document.getElementById("alt-mri");
+
+  // Takvimde bugünden sonraki günlerin seçilmesini engelle
+  const dtInputNode = document.getElementById("hasta_dogum_tarihi");
+  if (dtInputNode) {
+    dtInputNode.max = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  }
 
   // ============================================================
   // 1) HIYERARŞIK TIP SEÇIMI — Ana tip → (CT/MRI ise) alt tip
@@ -75,9 +82,44 @@
   });
   fileInput.addEventListener("change", dosyaSecildi);
 
+  function arayuzuSifirla() {
+    form.reset();
+    fileInput.value = "";
+    seciliDosyaEt.textContent = "Sürükleyip bırakın veya tıklayın";
+    seciliDosyaEt.style.color = "";
+    if (onizleme) {
+      onizleme.src = "";
+      onizleme.style.display = "none";
+    }
+    dropZone.classList.remove("hata");
+    if (dosyaKaldirBtn) dosyaKaldirBtn.style.display = "none";
+    const overlayEl = document.getElementById("analiz-overlay");
+    if (overlayEl) overlayEl.style.display = "none";
+    durumGuncelle();
+  }
+
+  if (dosyaKaldirBtn) {
+    dosyaKaldirBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // Tıklamanın drop-zone'a gidip dosya penceresini tekrar açmasını engeller
+
+      arayuzuSifirla();
+
+      // Sunucu tarafında varsa bekleyen analizi ve dosyaları temizle
+      try {
+        await fetch("/api/iptal", { method: "POST" });
+      } catch (err) {
+        console.error("Temizleme hatası:", err);
+      }
+    });
+  }
+
   function dosyaSecildi() {
     const dosya = fileInput.files[0];
-    if (!dosya) return;
+    if (!dosya) {
+      if (dosyaKaldirBtn) dosyaKaldirBtn.style.display = "none";
+      return;
+    }
 
     // Tarayıcı tarafında sadece açıkça yasak olanları reddet (DICOM uzantısız da olabilir,
     // sunucu magic bytes ile son kararı verir).
@@ -87,16 +129,19 @@
       dropZone.classList.add("hata");
       seciliDosyaEt.textContent = "Bu tip dosya yüklenemez!";
       seciliDosyaEt.style.color = "var(--kirmizi)";
+      if (dosyaKaldirBtn) dosyaKaldirBtn.style.display = "inline-block";
       return;
     }
     if (dosya.size > 50 * 1024 * 1024) {
       dropZone.classList.add("hata");
       seciliDosyaEt.textContent = "Dosya çok büyük (maks 50 MB)";
+      if (dosyaKaldirBtn) dosyaKaldirBtn.style.display = "inline-block";
       return;
     }
     dropZone.classList.remove("hata");
     seciliDosyaEt.textContent = `✓ ${dosya.name} (${(dosya.size / 1024).toFixed(0)} KB)`;
     seciliDosyaEt.style.color = "var(--yesil)";
+    if (dosyaKaldirBtn) dosyaKaldirBtn.style.display = "inline-block";
 
     // DICOM browser'da render edilemez → önizleme sadece resim mime'larında
     if (onizleme && dosya.type.startsWith("image/")) {
@@ -155,11 +200,13 @@
   let mevcutAdim = 0;
   let zamanlayici = null;
   let analizBitti = false;
+  let analizDevamEdiyor = false; // Sayfadan çıkış kontrolü için eklendi
 
   function loaderBaslat() {
     overlay.style.display = "flex";
     mevcutAdim = 0;
     analizBitti = false;
+    analizDevamEdiyor = true;
     adimlar.forEach((li) => li.classList.remove("aktif", "tamam"));
     adimlar[0].classList.add("aktif");
     overlayYuzde.textContent = "0%";
@@ -201,6 +248,7 @@
 
   function loaderBitir(basarili) {
     analizBitti = true;
+    analizDevamEdiyor = false;
     clearInterval(zamanlayici);
     if (basarili) {
       adimlar.forEach((li) => {
@@ -221,6 +269,21 @@
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (analizBtn.disabled) return;
+
+    // DOĞUM TARİHİ DOĞRULAMASI
+    const dtStr = dtInputNode.value;
+    const bugunStr = new Date().toISOString().split("T")[0];
+    
+    if (dtStr > bugunStr) {
+      toast("Doğum tarihi gelecek bir tarih olamaz.", "hata");
+      dtInputNode.focus();
+      return;
+    }
+    if (dtStr < "1900-01-01") {
+      toast("Mantıksız doğum yılı (1900'den eski olamaz).", "hata");
+      dtInputNode.focus();
+      return;
+    }
 
     const fd = new FormData(form);
     analizBtn.disabled = true;
@@ -260,4 +323,49 @@
       document.querySelector(`.alt-uzman-kart[data-uzman="${onSecili}"]`)?.click();
     }
   }
+
+  // ============================================================
+  // 7) SAYFADAN ÇIKIŞ KONTROLÜ (Analiz Devam Ederken)
+  // ============================================================
+  window.addEventListener("pageshow", (e) => {
+    // Kullanıcı tarayıcının geri/ileri tuşuyla bu sayfaya dönerse tüm verileri sıfırla
+    const geridenMiGeldi = e.persisted || (window.performance && window.performance.getEntriesByType && window.performance.getEntriesByType("navigation")[0]?.type === "back_forward");
+    
+    if (geridenMiGeldi) {
+      analizDevamEdiyor = false;
+      arayuzuSifirla();
+      navigator.sendBeacon("/api/iptal");
+    } else {
+      form.reset(); // Normal sayfa yenilemede de form eski verilerini temizle
+    }
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (analizDevamEdiyor) {
+      e.preventDefault();
+      e.returnValue = "Analiz devam ediyor, sayfadan çıkmak istediğinize emin misiniz?";
+      return e.returnValue;
+    }
+  });
+
+  window.addEventListener("unload", () => {
+    if (analizDevamEdiyor) {
+      navigator.sendBeacon("/api/iptal"); // Sayfa kapanırken arka planda temizlik isteği atar
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!analizDevamEdiyor) return;
+    const a = e.target.closest("a");
+    if (!a) return;
+    const href = a.getAttribute("href");
+    if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
+
+    if (!confirm("Analiz devam ediyor, sayfadan çıkmak istediğinize emin misiniz?")) {
+      e.preventDefault();
+    } else {
+      analizDevamEdiyor = false; // Tekrar beforeunload tetiklenmesini engelle
+      navigator.sendBeacon("/api/iptal");
+    }
+  });
 })();
