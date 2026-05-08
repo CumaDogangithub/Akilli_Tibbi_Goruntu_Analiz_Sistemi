@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block baslik %}ATGAS{% endblock %} · Akıllı Tıbbi Görüntü Analiz Sistemi</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block ekstra_head %}{% endblock %}
+</head>
+<body{% block body_attr %}{% endblock %}>
+<!-- Mobil sidebar arka-plan örtüsü -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="sidebarKapat()"></div>
+
+<div class="uygulama">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      {% include "_logo.html" %}
+      <span>ATGAS</span>
+    </div>
+    <nav>
+      {# ROL BAZLI MENÜ — rolüne göre farklı seçenekler gözükür #}
+
+      {# Ana panel: admin → admin paneli, akademisyen → akademik panel, diğerleri → /dashboard #}
+      {% if aktif_rol == 'admin' %}
+        <a href="{{ url_for('admin_panel') }}" class="{% if aktif_sayfa == 'admin' %}aktif{% endif %}">▣ Yönetim Paneli</a>
+      {% elif aktif_rol == 'akademisyen' %}
+        <a href="{{ url_for('akademik_panel') }}" class="{% if aktif_sayfa == 'akademik' %}aktif{% endif %}">▣ Akademik Panel</a>
+      {% else %}
+        <a href="{{ url_for('dashboard') }}" class="{% if aktif_sayfa == 'dashboard' %}aktif{% endif %}">▣ Ana Panel</a>
+      {% endif %}
+
+      {# Yeni tarama — sadece doktor ve admin yapabilir #}
+      {% if aktif_rol in ['doktor', 'admin'] %}
+        <a href="{{ url_for('tarama') }}" class="{% if aktif_sayfa == 'tarama' %}aktif{% endif %}">＋ Yeni Tarama</a>
+      {% endif %}
+
+      {# Akademisyen ekstra link — TensorBoard #}
+      {% if aktif_rol in ['akademisyen', 'admin'] %}
+        <a href="{{ url_for('akademik_panel') }}" class="{% if aktif_sayfa == 'akademik' %}aktif{% endif %}">📈 TensorBoard</a>
+      {% endif %}
+
+      {# Admin ekstra link — yeni kullanıcı #}
+      {% if aktif_rol == 'admin' %}
+        <a href="{{ url_for('admin_panel') }}#kullanici-ekle" style="font-size:12.5px;">➕ Yeni Kullanıcı</a>
+      {% endif %}
+
+      {# Raporlar — admin için EN ALTTA, akademisyen hariç diğerleri için yukarıda mantıklı #}
+      {% if aktif_rol != 'akademisyen' %}
+        <a href="{{ url_for('raporlar') }}" class="{% if aktif_sayfa == 'raporlar' %}aktif{% endif %}">
+          ▤ {% if aktif_rol == 'doktor' %}Raporlarım{% else %}Tüm Raporlar{% endif %}
+        </a>
+      {% endif %}
+
+      {# Son taramalar alt-listesi — aktif rapor highlight'lı #}
+      {% if son_taramalar is defined and son_taramalar is not none and aktif_rol != 'akademisyen' %}
+        {% if son_taramalar %}
+          <ul class="sidebar-alt-liste">
+            {% for r in son_taramalar %}
+              <li class="{% if aktif_rapor_id and r.id == aktif_rapor_id %}aktif{% endif %}">
+                <a href="{{ url_for('rapor_detay', rapor_id=r.id) }}"
+                   class="{% if aktif_rapor_id and r.id == aktif_rapor_id %}aktif{% endif %}"
+                   title="{{ r.tf_tahmin_sonucu }} · {{ r.islem_tarihi | kisa_tarih }}">
+                  <span class="tip-rozet">{{ r.tarama_tipi }}</span>
+                  <span>{{ r.tf_tahmin_sonucu }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="sidebar-alt-bos">Henüz tarama yok</div>
+        {% endif %}
+      {% endif %}
+    </nav>
+    <div class="alt">
+      <nav>
+        <a href="{{ url_for('profil') }}" class="{% if aktif_sayfa == 'profil' %}aktif{% endif %}">◎ Profilim</a>
+        <a href="{{ url_for('logout') }}" style="color: var(--kirmizi);">⎋ Çıkış Yap</a>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="icerik">
+    <div class="header">
+      <div style="display:flex; align-items:center; min-width:0;">
+        <button class="hamburger" type="button" onclick="sidebarToggle()" aria-label="Menüyü aç">≡</button>
+        <div class="marka">
+          {% with boyut='kucuk' %}{% include "_logo.html" %}{% endwith %}
+          <div class="ad-grup">
+            <span>ATGAS</span>
+            <span class="alt">Akıllı Tıbbi Görüntü Analiz Sistemi</span>
+          </div>
+        </div>
+      </div>
+      {% if doktor %}
+      <div class="doktor-menu">
+        <div class="doktor-bilgi" id="doktor-toggle" onclick="doktorMenuToggle(event)">
+          <div style="text-align:right">
+            <div class="ad">{{ doktor.ad_soyad }}</div>
+            <div class="brans">
+              <span class="rozet rozet-mavi" style="font-size:9px; padding:1px 6px;">{{ rol_etiketi or 'Doktor' }}</span>
+              · {{ doktor.brans }}
+            </div>
+          </div>
+          <div class="avatar">{{ doktor.ad_soyad[:2].upper() }}</div>
+          <span class="ok">▼</span>
+        </div>
+
+        <div class="doktor-dropdown" id="doktor-dropdown">
+          <div class="baslik-bolum">
+            <div class="isim">{{ doktor.ad_soyad }}</div>
+            <div class="e">{{ doktor.eposta }}</div>
+          </div>
+          <a href="{{ url_for('profil') }}">
+            <span class="ikon">◎</span> Profilim
+          </a>
+          {% if aktif_rol != 'akademisyen' %}
+          <a href="{{ url_for('raporlar') }}">
+            <span class="ikon">▤</span> {% if aktif_rol == 'doktor' %}Raporlarım{% else %}Tüm Raporlar{% endif %}
+          </a>
+          {% endif %}
+          {% if aktif_rol in ['doktor', 'admin'] %}
+          <a href="{{ url_for('tarama') }}">
+            <span class="ikon">＋</span> Yeni Tarama
+          </a>
+          {% endif %}
+          {% if aktif_rol in ['akademisyen', 'admin'] %}
+          <a href="{{ url_for('akademik_panel') }}">
+            <span class="ikon">📈</span> Akademik Panel
+          </a>
+          {% endif %}
+          {% if aktif_rol == 'admin' %}
+          <a href="{{ url_for('admin_panel') }}">
+            <span class="ikon">⚙</span> Yönetim Paneli
+          </a>
+          {% endif %}
+          <a href="{{ url_for('logout') }}" class="cikis">
+            <span class="ikon">⎋</span> Çıkış Yap
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="sayfa">
+      {% with mesajlar = get_flashed_messages(with_categories=true) %}
+        {% for kategori, msg in mesajlar %}
+          <div class="alert alert-{{ kategori }}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+      {% block icerik %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+{% block ekstra_script %}{% endblock %}
+</body>
+</html>

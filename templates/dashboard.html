@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% set aktif_sayfa = 'dashboard' %}
+{% block baslik %}Ana Panel{% endblock %}
+
+{% block icerik %}
+  <h1>Ana Panel</h1>
+  <div class="alt-baslik">Hoş geldiniz, {{ doktor.ad_soyad }}.</div>
+
+  <!-- İstatistik Kartları -->
+  <div class="stat-grid">
+    <div class="stat-kart">
+      <div class="etiket">Toplam Tarama</div>
+      <div class="deger">{{ istatistikler.toplam }}</div>
+      <div class="alt">Toplam analiz sayısı</div>
+    </div>
+    <div class="stat-kart kirmizi">
+      <div class="etiket">Anomali Tespit</div>
+      <div class="deger">{{ istatistikler.anomali }}</div>
+      <div class="alt">Patolojik bulgu</div>
+    </div>
+    <div class="stat-kart yesil">
+      <div class="etiket">Ort. Doğruluk</div>
+      <div class="deger">%{{ istatistikler.ortalama_dogruluk }}</div>
+      <div class="alt">EfficientNet model</div>
+    </div>
+    <div class="stat-kart sari">
+      <div class="etiket">Bekleyen Taslak</div>
+      <div class="deger">{{ istatistikler.taslak }}</div>
+      <div class="alt">Tamamlanmayı bekliyor</div>
+    </div>
+  </div>
+
+  <!-- Hızlı Yükleme -->
+  <h3 style="margin-bottom:16px;">Hızlı Tarama Başlat</h3>
+  <div class="hizli-grid">
+    <a class="hizli-kart" href="{{ url_for('tarama', tip='mri_tumor') }}">
+      <div class="ikon">◐</div>
+      <div class="baslik">MR Yükle</div>
+      <div class="alt">Manyetik Rezonans Görüntüleme</div>
+    </a>
+    <a class="hizli-kart" href="{{ url_for('tarama', tip='ct_akciger') }}">
+      <div class="ikon">⊛</div>
+      <div class="baslik">CT Yükle</div>
+      <div class="alt">Bilgisayarlı Tomografi</div>
+    </a>
+    <a class="hizli-kart" href="{{ url_for('tarama', tip='xray') }}">
+      <div class="ikon">⌖</div>
+      <div class="baslik">X-Ray Yükle</div>
+      <div class="alt">Dijital Röntgen Görüntüsü</div>
+    </a>
+  </div>
+
+  <!-- Son Analizler -->
+  <div class="tablo-kart">
+    <div class="baslik" style="display:flex; justify-content:space-between;">
+      <span>Son Analizler</span>
+      <a href="{{ url_for('raporlar') }}" style="font-size:12px;">Tümünü Gör →</a>
+    </div>
+    {% if son_analizler %}
+    <table class="atgas">
+      <thead>
+        <tr>
+          <th>Rapor #</th>
+          <th>Tip</th>
+          <th>Tahmin Sonucu</th>
+          <th>Doğruluk</th>
+          <th>Durum</th>
+          <th>Tarih</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in son_analizler %}
+        <tr onclick="location.href='{{ url_for('rapor_detay', rapor_id=r.id) }}'" style="cursor:pointer;">
+          <td><a href="{{ url_for('rapor_detay', rapor_id=r.id) }}">#ATG-{{ '%04d' % r.id }}</a></td>
+          <td><span class="rozet rozet-mavi">{{ r.tarama_tipi }}</span></td>
+          <td>{{ r.tf_tahmin_sonucu }}</td>
+          <td>
+            <div class="progress" style="width:100px; display:inline-block; vertical-align:middle;">
+              <div class="bar {% if r.dogruluk_orani < 70 %}dusuk{% elif r.dogruluk_orani < 85 %}orta{% endif %}"
+                   style="width:{{ r.dogruluk_orani }}%"></div>
+            </div>
+            <span style="font-size:11px; margin-left:6px;">%{{ r.dogruluk_orani }}</span>
+          </td>
+          <td>
+            {% if r.durum == 'Kaydedildi' %}
+              <span class="rozet rozet-yesil">● Kaydedildi</span>
+            {% else %}
+              <span class="rozet rozet-sari">● Taslak</span>
+            {% endif %}
+          </td>
+          <td style="font-size:11px; color:var(--metin-sonuk);">{{ r.islem_tarihi | kisa_tarih }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div style="padding:40px; text-align:center; color:var(--metin-sonuk);">
+      Henüz analiz yapılmadı. <a href="{{ url_for('tarama') }}">İlk taramayı başlat →</a>
+    </div>
+    {% endif %}
+  </div>
+{% endblock %}

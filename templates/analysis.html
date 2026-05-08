@@ -29,7 +29,9 @@
     <div class="adim"><div class="yuvarlak">4</div><div class="etiket">Analiz</div></div>
   </div>
 
+
   <form id="tarama-form" enctype="multipart/form-data" autocomplete="off">
+
     <input type="hidden" id="uzman_kodu" name="uzman_kodu" value="">
 
     <!-- BÖLÜM 1: ANA TİP -->
@@ -323,8 +325,8 @@
   </div>
 
   <!-- JS'in okuyabilmesi için Jinja verilerini güvenli HTML veri (data) etiketlerine aktarıyoruz -->
-  <div id="sayfa-verisi" style="display:none;" 
-       data-onizleme-mi="{{ 'true' if onizleme_mi else 'false' }}" 
+  <div id="sayfa-verisi" style="display:none;"
+       data-onizleme-mi="{{ 'true' if onizleme_mi else 'false' }}"
        data-rapor-id="{{ rapor.id if rapor else '' }}"></div>
 
   <script>

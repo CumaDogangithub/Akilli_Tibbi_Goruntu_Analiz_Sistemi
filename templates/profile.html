@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% set aktif_sayfa = 'profil' %}
+{% block baslik %}Profilim{% endblock %}
+
+{% block icerik %}
+  <h1>Profil / Hesap Ayarları</h1>
+
+  <div class="kart" style="display:flex; align-items:center; gap:18px; margin-bottom:24px;">
+    <div class="avatar" style="width:64px; height:64px; font-size:22px;">{{ doktor.ad_soyad[:2].upper() }}</div>
+    <div>
+      <div style="font-size:18px; font-weight:700;">
+        {{ doktor.ad_soyad }}
+        {% if doktor.rol == 'admin' %}
+          <span class="rozet rozet-kirmizi" style="margin-left:8px;">⚙ Yönetici</span>
+        {% elif doktor.rol == 'akademisyen' %}
+          <span class="rozet rozet-mavi" style="margin-left:8px;">🎓 Akademisyen</span>
+        {% elif doktor.rol == 'radyolog' %}
+          <span class="rozet rozet-sari" style="margin-left:8px;">☢ Radyolog</span>
+        {% else %}
+          <span class="rozet rozet-yesil" style="margin-left:8px;">🩺 Doktor</span>
+        {% endif %}
+        <span class="rozet rozet-gri" style="margin-left:4px;">{{ doktor.brans }}</span>
+      </div>
+      <div style="font-size:12px; color:var(--metin-sonuk);">{{ doktor.eposta }}</div>
+      <div style="font-size:11px; color:var(--metin-sonuk); margin-top:4px;">
+        Hesap oluşturma: {{ doktor.olusturulma_tarihi | kisa_gun }}
+      </div>
+    </div>
+  </div>
+
+  {% if mesaj %}<div class="alert alert-success">✓ {{ mesaj }}</div>{% endif %}
+  {% if hata %}<div class="alert alert-danger">⚠ {{ hata }}</div>{% endif %}
+
+  <div class="tab-menu">
+    <a class="aktif" onclick="sekmeAc('bilgi', this)">Kişisel Bilgiler</a>
+    <a onclick="sekmeAc('sifre', this)">Şifre Değiştir</a>
+    <a onclick="sekmeAc('istat', this)">İstatistiklerim</a>
+  </div>
+
+  <!-- Bilgi sekmesi -->
+  <div class="kart sekme" id="sekme-bilgi">
+    <form method="POST">
+      <input type="hidden" name="islem" value="bilgi_guncelle">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-grup">
+          <label>Ad Soyad</label>
+          <input type="text" name="ad_soyad" value="{{ doktor.ad_soyad }}" required>
+        </div>
+        <div class="form-grup">
+          <label>Branş</label>
+          <input type="text" name="brans" value="{{ doktor.brans }}" required>
+        </div>
+        <div class="form-grup">
+          <label>E-posta</label>
+          <input type="email" name="eposta" value="{{ doktor.eposta }}" required>
+        </div>
+        <div class="form-grup">
+          <label>Unvan</label>
+          <input type="text" name="unvan" value="{{ doktor.unvan or 'Uzman Doktor' }}">
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <button type="submit" class="btn btn-primary">Bilgileri Kaydet</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Şifre sekmesi -->
+  <div class="kart sekme" id="sekme-sifre" style="display:none;">
+    <form method="POST">
+      <input type="hidden" name="islem" value="sifre_degistir">
+      <div class="form-grup">
+        <label>Mevcut Şifre</label>
+        <input type="password" name="mevcut_sifre" required>
+      </div>
+      <div class="form-grup">
+        <label>Yeni Şifre</label>
+        <input type="password" name="yeni_sifre" minlength="6" required>
+      </div>
+      <div class="form-grup">
+        <label>Yeni Şifre (Tekrar)</label>
+        <input type="password" name="yeni_sifre_tekrar" minlength="6" required>
+      </div>
+      <div style="text-align:right;">
+        <button type="submit" class="btn btn-primary">Şifreyi Güncelle</button>
+      </div>
+      <div style="font-size:11px; color:var(--metin-sonuk); margin-top:12px;">
+        💡 En az 6 karakter olmalıdır.
+      </div>
+    </form>
+  </div>
+
+  <!-- İstatistik sekmesi -->
+  <div class="sekme" id="sekme-istat" style="display:none;">
+    <div class="stat-grid">
+      <div class="stat-kart">
+        <div class="etiket">Toplam Taramam</div>
+        <div class="deger">{{ istat.toplam or 0 }}</div>
+      </div>
+      <div class="stat-kart yesil">
+        <div class="etiket">Kaydettiğim Rapor</div>
+        <div class="deger">{{ istat.kayitli or 0 }}</div>
+      </div>
+      <div class="stat-kart kirmizi">
+        <div class="etiket">Tespit Ettiğim Anomali</div>
+        <div class="deger">{{ istat.anomali or 0 }}</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function sekmeAc(ad, link) {
+  document.querySelectorAll(".sekme").forEach(s => s.style.display = "none");
+  document.getElementById("sekme-" + ad).style.display = "block";
+  document.querySelectorAll(".tab-menu a").forEach(a => a.classList.remove("aktif"));
+  link.classList.add("aktif");
+}
+</script>
+{% endblock %}
