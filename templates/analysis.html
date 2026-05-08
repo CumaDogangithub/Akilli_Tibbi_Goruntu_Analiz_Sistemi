@@ -1,0 +1,410 @@
+{% extends "base.html" %}
+{% set aktif_sayfa = 'tarama' if mod == 'yeni' else 'raporlar' %}
+{% block baslik %}{% if mod == 'yeni' %}Yeni Tarama{% else %}Analiz Sonucu{% endif %}{% endblock %}
+
+{% block body_attr %} data-on-secili="{{ on_secili_tip or '' }}"{% endblock %}
+
+{% block icerik %}
+{% if mod == 'yeni' %}
+  <!-- ============================ YENİ TARAMA ============================ -->
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+    <div>
+      <h1>Yeni Tarama</h1>
+      <div class="alt-baslik">Tıbbi görüntüyü yükleyin, AI analiz başlatsın.</div>
+    </div>
+    {# Test aşamasında: doktor + admin örnek görüntüleri indirip sistemi denesin diye #}
+    <a href="{{ url_for('ornek_veriler_indir') }}"
+       class="btn"
+       style="background:var(--mavi); color:#fff; white-space:nowrap;"
+       title="MR/CT/X-Ray örnek görüntüleri zip olarak indirin (test amaçlı)">
+      ⬇ Örnek Verileri İndir
+    </a>
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper">
+    <div class="adim aktif"><div class="yuvarlak">1</div><div class="etiket">Tarama Tipi Seç</div></div>
+    <div class="adim"><div class="yuvarlak">2</div><div class="etiket">Görüntü Yükle</div></div>
+    <div class="adim"><div class="yuvarlak">3</div><div class="etiket">Hasta Bilgileri</div></div>
+    <div class="adim"><div class="yuvarlak">4</div><div class="etiket">Analiz</div></div>
+  </div>
+
+  <form id="tarama-form" enctype="multipart/form-data" autocomplete="off">
+    <input type="hidden" id="uzman_kodu" name="uzman_kodu" value="">
+
+    <!-- BÖLÜM 1: ANA TİP -->
+    <div style="font-size:11px; color:var(--metin-sonuk); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+      Bölüm 1 — Tarama Tipi
+    </div>
+    <div class="hizli-grid">
+      <div class="hizli-kart ana-tip-kart" data-ana-tip="xray" data-uzman="xray">
+        <div class="ikon">⌖</div>
+        <div class="baslik">X-Ray</div>
+        <div class="alt">Akciğer (Covid, Zatürre, Tüberküloz)</div>
+      </div>
+      <div class="hizli-kart ana-tip-kart" data-ana-tip="ct">
+        <div class="ikon">⊛</div>
+        <div class="baslik">CT</div>
+        <div class="alt">Bilgisayarlı Tomografi</div>
+      </div>
+      <div class="hizli-kart ana-tip-kart" data-ana-tip="mri">
+        <div class="ikon">◐</div>
+        <div class="baslik">MRI</div>
+        <div class="alt">Manyetik Rezonans</div>
+      </div>
+    </div>
+
+    <!-- CT alt kategorileri -->
+    <div class="alt-kategori" id="alt-ct" style="display:none;">
+      <div class="alt-baslik-cubuk">⊛ CT — Uzmanlık Alanı Seçin</div>
+      <div class="alt-grid">
+        <div class="alt-uzman-kart" data-uzman="ct_akciger">
+          <div class="ad">Akciğer Nodülü</div>
+          <div class="acik">Hastalıklı / Normal sınıflandırma</div>
+        </div>
+        <div class="alt-uzman-kart" data-uzman="ct_beyin">
+          <div class="ad">Beyin Kanaması</div>
+          <div class="acik">EDH / IPH / IVH / SAH / SDH / Normal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MRI alt kategorileri -->
+    <div class="alt-kategori" id="alt-mri" style="display:none;">
+      <div class="alt-baslik-cubuk">◐ MRI — Uzmanlık Alanı Seçin</div>
+      <div class="alt-grid">
+        <div class="alt-uzman-kart" data-uzman="mri_tumor">
+          <div class="ad">Meningioma (Beyin Tümörü)</div>
+          <div class="acik">Hastalıklı / Normal sınıflandırma</div>
+        </div>
+        <div class="alt-uzman-kart" data-uzman="mri_fitik">
+          <div class="ad">Lomber Disk Hernisi</div>
+          <div class="acik">Bel Fıtığı tespiti</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BÖLÜM 2: Görüntü -->
+    <div style="font-size:11px; color:var(--metin-sonuk); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">
+      Bölüm 2 — Görüntü Yükle
+    </div>
+    <!-- LABEL kullanılıyor: tek bir click → tek bir dosya dialogu. -->
+    <label class="drop-zone" id="drop-zone" for="goruntu-input">
+      <div class="ikon">⬆</div>
+      <p>Görüntüyü buraya sürükleyin veya tıklayarak seçin</p>
+      <span class="btn btn-primary" style="pointer-events:none;">Dosya Seç</span>
+      <input type="file" id="goruntu-input" name="goruntu"
+             accept=".png,.jpg,.jpeg,.dcm,.dicom,.dic,.ima,application/dicom,image/*">
+      <div class="secili-dosya" id="secili-dosya"></div>
+      <div style="font-size:11px; color:var(--metin-sonuk); margin-top:8px;">
+        Desteklenen formatlar: DICOM (.dcm/.dicom/.dic/.ima), PNG, JPG, JPEG · Maks 50 MB
+      </div>
+      <img id="onizleme" alt="Görüntü Önizleme" style="display:none; max-width:200px; margin:16px auto 0; border-radius:4px;">
+    </label>
+
+    <!-- Dosyayı Kaldır Butonu Label Dışına Alındı -->
+    <div style="text-align: center; margin-top: -12px; margin-bottom: 24px;">
+      <button type="button" id="dosya-kaldir-btn" class="btn" style="display: none; background-color: var(--kirmizi); color: white; font-size: 13px; padding: 4px 12px; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+        ✕ Dosyayı Kaldır
+      </button>
+    </div>
+
+    <!-- BÖLÜM 3: Hasta -->
+    <div style="font-size:11px; color:var(--metin-sonuk); margin:24px 0 8px; text-transform:uppercase; letter-spacing:0.5px;">
+      Bölüm 3 — Hasta Bilgileri
+    </div>
+    <div class="kart">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-grup">
+          <label for="hasta_ad_soyad">Ad Soyad</label>
+          <input type="text" id="hasta_ad_soyad" name="hasta_ad_soyad" placeholder="Hasta adı ve soyadı" required>
+        </div>
+        <div class="form-grup">
+          <label for="hasta_tc">TC Kimlik No</label>
+          <input type="text" id="hasta_tc" name="hasta_tc" placeholder="00000000000" maxlength="11" required>
+        </div>
+        <div class="form-grup">
+          <label for="hasta_dogum_tarihi">Doğum Tarihi</label>
+          <input type="date" id="hasta_dogum_tarihi" name="hasta_dogum_tarihi" min="1900-01-01" required>
+        </div>
+        <div class="form-grup">
+          <label for="protokol_no">Protokol No</label>
+          <input type="text" id="protokol_no" name="protokol_no" placeholder="Hastane protokol numarası" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analizi Başlat -->
+    <div style="margin-top:24px; text-align:right;">
+      <button type="submit" id="analiz-btn" class="btn btn-primary" disabled>🔬 Analizi Başlat</button>
+    </div>
+  </form>
+
+  <!-- ====== AŞAMALI LOADER OVERLAY ====== -->
+  <div class="overlay" id="analiz-overlay" style="display:none;">
+    <div class="overlay-kart">
+      <h2>🔬 Analiz Yapılıyor</h2>
+      <div class="alt">Lütfen bekleyin, görüntü AI modelinden geçiyor...</div>
+
+      <div class="yuzde" id="overlay-yuzde">0%</div>
+      <div class="progress-buyuk"><div class="bar" id="overlay-bar" style="width:0%;"></div></div>
+
+      <ul class="adim-listesi" id="overlay-adimlar">
+        <li data-adim="0"><span class="nokta"></span><span>Görüntü sunucuya yükleniyor...</span></li>
+        <li data-adim="1"><span class="nokta"></span><span>CLAHE kontrast iyileştirme + gürültü giderme</span></li>
+        <li data-adim="2"><span class="nokta"></span><span>TensorFlow modeli belleğe yükleniyor</span></li>
+        <li data-adim="3"><span class="nokta"></span><span>CNN katmanları işleniyor (anomali tespiti)</span></li>
+        <li data-adim="4"><span class="nokta"></span><span>Grad-CAM ısı haritası oluşturuluyor</span></li>
+        <li data-adim="5"><span class="nokta"></span><span>Sonuç veritabanına kaydediliyor (Taslak)</span></li>
+      </ul>
+    </div>
+  </div>
+
+{% else %}
+  <!-- ============================ ANALİZ DETAY / ONİZLEME ============================ -->
+  {% set seviye = (rapor.seviye or 'Orta') %}
+  {% set rozet = 'rozet-yesil' if seviye == 'Temiz' else ('rozet-kirmizi' if seviye == 'Kritik' else 'rozet-sari') %}
+  {% set onizleme_mi = (mod == 'onizleme') %}
+  <h1>
+    Analiz Sonucu
+    <span style="font-size:14px; color:var(--metin-sonuk); font-weight:normal;">
+      {% if onizleme_mi %}
+        &nbsp;ÖNİZLEME — Henüz Kaydedilmedi
+      {% else %}
+        &nbsp;TRK-{{ '%06d' % rapor.id }}
+      {% endif %}
+    </span>
+    {% if rapor.ham_sinif != 'Normal' %}
+      <span class="rozet rozet-kirmizi" style="margin-left:12px;">⚠ Anomali Tespit Edildi</span>
+    {% else %}
+      <span class="rozet rozet-yesil" style="margin-left:12px;">✓ Temiz</span>
+    {% endif %}
+    {% if onizleme_mi %}
+      <span class="rozet rozet-sari" style="margin-left:8px;">⏳ Kaydedilmedi</span>
+    {% endif %}
+  </h1>
+  <div class="alt-baslik">
+    <span class="rozet rozet-mavi">{{ rapor.tarama_tipi }}</span>
+    &nbsp; İşlem Tarihi:
+    {% if onizleme_mi %}{{ rapor.olusturulma }}{% else %}{{ rapor.islem_tarihi | kisa_tarih }}{% endif %}
+  </div>
+
+  {% if onizleme_mi %}
+  <div class="alert alert-warning">
+    ⚠ Bu analiz <b>henüz veritabanına kaydedilmedi</b>. Çıkmadan önce
+    <b>Taslak Kaydet</b> veya <b>Raporu Kaydet</b> butonunu kullanın.
+  </div>
+  {% endif %}
+
+  <!-- HASTA BİLGİLERİ KARTI - belirgin, dikkat çekici -->
+  <div class="hasta-kart">
+    <div class="hasta-kart-baslik">
+      <span class="ikon-yuvarlak">👤</span>
+      <div>
+        <div class="hasta-kart-ust">HASTA BİLGİLERİ</div>
+        <div class="hasta-kart-isim">{{ rapor.hasta_ad_soyad }}</div>
+      </div>
+    </div>
+    <div class="hasta-kart-grid">
+      <div class="hasta-bilgi-blok">
+        <div class="etiket">TC Kimlik No</div>
+        <div class="deger">{{ rapor.hasta_tc }}</div>
+      </div>
+      <div class="hasta-bilgi-blok">
+        <div class="etiket">Doğum Tarihi</div>
+        <div class="deger">{{ rapor.hasta_dogum_tarihi }}</div>
+      </div>
+      <div class="hasta-bilgi-blok">
+        <div class="etiket">Protokol No</div>
+        <div class="deger">{{ rapor.protokol_no }}</div>
+      </div>
+      <div class="hasta-bilgi-blok">
+        <div class="etiket">Tarama Tipi</div>
+        <div class="deger">{{ rapor.tarama_tipi }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Görüntü karşılaştırma — EŞİT BOYUTTA 1:1 ÇERÇEVELER -->
+  {# DB'de sadece dosya adı saklanır → URL inşası direkt
+     | dosya_adi filter'ı eski absolute path'li kayıtlara karşı defansif. #}
+  <div class="karsilastir">
+    <div class="gor-panel">
+      <div class="baslik">● ORİJİNAL GÖRÜNTÜ</div>
+      <div class="resim-cerceve">
+        <img src="{{ url_for('yuklenen_dosya', dosya=rapor.goruntu_dosya_yolu | dosya_adi) }}"
+             alt="orijinal" onerror="this.style.opacity=0.3">
+      </div>
+    </div>
+    <div class="gor-panel tf">
+      <div class="baslik">● TENSORFLOW ANALİZ ÇIKTISI</div>
+      <div class="resim-cerceve">
+        <img src="{{ url_for('static', filename='img/analiz_sonuclari/' + (rapor.isaretli_goruntu_yolu | dosya_adi)) }}"
+             alt="ai">
+      </div>
+    </div>
+  </div>
+
+  <div class="analiz-grid">
+    <!-- AI Analiz Raporu -->
+    <div class="kart">
+      <h3 style="margin-bottom:12px;">Yapay Zeka Analiz Raporu</h3>
+
+      <dl class="ai-detay">
+        <div class="satir">
+          <dt>Hastalık Tespiti</dt>
+          <dd>
+            <span class="vurgu" style="color:{% if seviye=='Kritik' %}var(--kirmizi){% elif seviye=='Temiz' %}var(--yesil){% else %}var(--sari){% endif %};">
+              {{ rapor.tf_tahmin_sonucu }}
+            </span>
+          </dd>
+        </div>
+        <div class="satir">
+          <dt>Doğruluk Skoru</dt>
+          <dd>
+            <b>%{{ rapor.dogruluk_orani }}</b>
+            <div class="progress dogruluk-bar">
+              <div class="bar {% if rapor.dogruluk_orani < 70 %}dusuk{% elif rapor.dogruluk_orani < 85 %}orta{% endif %}"
+                   style="width:{{ rapor.dogruluk_orani }}%"></div>
+            </div>
+          </dd>
+        </div>
+        <div class="satir"><dt>Tarama Tipi</dt><dd>{{ rapor.tarama_tipi }}</dd></div>
+        <div class="satir"><dt>Ham Sınıf</dt><dd>{{ rapor.ham_sinif }}</dd></div>
+        <div class="satir">
+          <dt>Seviye</dt>
+          <dd><span class="rozet {{ rozet }}">{{ seviye }}</span></dd>
+        </div>
+        <div class="satir">
+          <dt>Model</dt>
+          <dd class="kucuk">EfficientNetV2-M · uzman: {{ rapor.uzman_kodu }}</dd>
+        </div>
+      </dl>
+
+      <div class="yz-yorum-kutu">
+        <b style="color:var(--mavi);">YZ Yorumu:</b><br>
+        {{ rapor.yapay_zeka_yorumu }}
+      </div>
+
+      <!-- Doktor Notu -->
+      <div class="form-grup" style="margin-top:20px;">
+        <label for="doktor-notu">Doktor Notu</label>
+        <textarea id="doktor-notu" placeholder="Analiz bulgularınız ve klinik değerlendirmenizi buraya ekleyin...">{{ rapor.doktor_notu or '' }}</textarea>
+      </div>
+    </div>
+
+    <!-- Rapor İşlemleri -->
+    <div class="kart">
+      <h3 style="margin-bottom:12px;">Rapor İşlemleri</h3>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button type="button" class="btn btn-warning" onclick="taslakKaydet()">💾 Taslak Kaydet</button>
+        <button type="button" class="btn btn-success" onclick="raporKaydet()">✓ Raporu Kaydet</button>
+        <hr style="border-color:var(--kenarlik);">
+        {% if onizleme_mi %}
+          <button type="button" class="btn" onclick="pdfIndirOnizleme()">📄 PDF Olarak İndir</button>
+        {% else %}
+          <a class="btn" href="{{ url_for('rapor_pdf', rapor_id=rapor.id) }}">📄 PDF Olarak İndir</a>
+        {% endif %}
+        <hr style="border-color:var(--kenarlik);">
+        <a class="btn btn-primary" href="{{ url_for('tarama') }}" id="yeni-tarama-link">＋ Yeni Tarama Başlat</a>
+      </div>
+
+      <div style="margin-top:24px; padding:12px; background:var(--yuzey); border-radius:6px;">
+        <div style="font-size:11px; color:var(--metin-sonuk); margin-bottom:6px;">DURUM</div>
+        {% if onizleme_mi %}
+          <span class="rozet rozet-sari">⏳ Henüz Kaydedilmedi</span>
+        {% elif rapor.durum == 'Kaydedildi' %}
+          <span class="rozet rozet-yesil">● Kaydedildi</span>
+        {% else %}
+          <span class="rozet rozet-sari">● Taslak</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- JS'in okuyabilmesi için Jinja verilerini güvenli HTML veri (data) etiketlerine aktarıyoruz -->
+  <div id="sayfa-verisi" style="display:none;" 
+       data-onizleme-mi="{{ 'true' if onizleme_mi else 'false' }}" 
+       data-rapor-id="{{ rapor.id if rapor else '' }}"></div>
+
+  <script>
+    const veriDiv = document.getElementById("sayfa-verisi");
+    const ONIZLEME_MI = veriDiv.dataset.onizlemeMi === "true";
+    let RAPOR_ID = veriDiv.dataset.raporId ? parseInt(veriDiv.dataset.raporId) : null;
+    let kaydedilmedi = ONIZLEME_MI;
+
+    async function taslakKaydet() {
+      const not = document.getElementById("doktor-notu").value;
+      const v = await jsonPOST("/api/save_draft", { rapor_id: RAPOR_ID, doktor_notu: not });
+      if (v.durum === "basarili") {
+        kaydedilmedi = false;
+        // Onizleme'den ilk INSERT geldi → artık DB'de var, sonraki çağrılar UPDATE olsun
+        if (v.rapor_id) RAPOR_ID = v.rapor_id;
+        toast("Taslak olarak kaydedildi.");
+        if (v.yeni_url) history.replaceState(null, "", v.yeni_url);
+      } else {
+        toast(v.mesaj || "Hata", "hata");
+      }
+    }
+
+    async function raporKaydet() {
+      if (!confirm("Rapor kalıcı olarak kaydedilecek. Onaylıyor musunuz?")) return;
+      const not = document.getElementById("doktor-notu").value;
+      const v = await jsonPOST("/api/save_report", { rapor_id: RAPOR_ID, doktor_notu: not });
+      if (v.durum === "basarili") {
+        kaydedilmedi = false;
+        if (v.rapor_id) RAPOR_ID = v.rapor_id;
+        toast("Rapor başarıyla kaydedildi.");
+        setTimeout(() => (location.href = "/raporlar"), 1000);
+      } else {
+        toast(v.mesaj || "Hata", "hata");
+      }
+    }
+
+    async function pdfIndirOnizleme() {
+      if (!confirm("PDF indirmek için rapor önce TASLAK olarak kaydedilecek. Devam edelim mi?")) return;
+      const not = document.getElementById("doktor-notu").value;
+      const v = await jsonPOST("/api/save_draft", { rapor_id: RAPOR_ID, doktor_notu: not });
+      if (v.durum !== "basarili") {
+        toast(v.mesaj || "Kaydetme hatası", "hata");
+        return;
+      }
+      kaydedilmedi = false;
+      if (v.rapor_id) RAPOR_ID = v.rapor_id;
+      toast("Taslak kaydedildi, PDF indiriliyor…");
+      if (v.yeni_url) history.replaceState(null, "", v.yeni_url);
+      window.open("/raporlar/" + v.rapor_id + "/pdf", "_blank");
+    }
+
+    // ============ Sayfadan ÇIKIŞ UYARISI (kaydedilmemiş analizler için) ============
+    window.addEventListener("beforeunload", (e) => {
+      if (kaydedilmedi) {
+        // Modern tarayıcılar mesaj metnini görmezden gelir, sadece dialog gösterir
+        e.preventDefault();
+        e.returnValue = "Analiz sonucunuz henüz kaydedilmedi. Çıkarsanız kaybolacak.";
+        return e.returnValue;
+      }
+    });
+
+    // Sidebar/header linklerine tıklarken in-app gezinme: önce JS-onayı
+    document.addEventListener("click", (e) => {
+      if (!kaydedilmedi) return;
+      const a = e.target.closest("a");
+      if (!a) return;
+      const href = a.getAttribute("href");
+      // Aynı sayfadaki anchor veya javascript: → ihmal
+      if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
+      // Onay
+      if (!confirm("Analiz sonucunuz henüz kaydedilmedi. Çıkmak istediğinize emin misiniz?")) {
+        e.preventDefault();
+      }
+    });
+  </script>
+{% endif %}
+{% endblock %}
+
+{% block ekstra_script %}
+{% if mod == 'yeni' %}
+<script src="{{ url_for('static', filename='js/scanner.js') }}"></script>
+{% endif %}
+{% endblock %}
