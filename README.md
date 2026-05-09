@@ -80,15 +80,13 @@ Web arayüzünde ve dış entegrasyonlarda kullanılmak üzere tasarlanan uç no
 
 ### POST /api/save_report
 *   **İşlev:** Onaylanan analizi kalıcı veritabanına rapor olarak kaydeder.
-*   **Dönüş Değeri:** Başarı durumu ve ilişkili 
-apor_id değerini içeren JSON objesi.
+*   **Dönüş Değeri:** Başarı durumu ve ilişkili `rapor_id` değerini içeren JSON objesi.
 
 ### POST /api/iptal (veya GET)
 *   **İşlev:** Arka planda fazla uzun süren veya gereksiz analiz sürecini durdurmak için asenkron istektir.
 
 ### DELETE /api/raporlar/<int:rapor_id>
-*   **İşlev:** Belirtilen kimliğe (
-apor_id) sahip raporu sistemden veritabanı uçlarında kalıcı olarak siler.
+*   **İşlev:** Belirtilen kimliğe (`rapor_id`) sahip raporu sistemden veritabanı uçlarında kalıcı olarak siler.
 
 ### GET /raporlar/<int:rapor_id>/pdf
 *   **İşlev:** İlgili raporun özetini, hasta formlarını ve yapay zekanın işaretlendiği görseli içeren hazır **PDF dokümanı** döndürür (File Download).
