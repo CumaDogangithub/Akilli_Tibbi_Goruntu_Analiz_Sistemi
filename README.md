@@ -4,12 +4,14 @@ Yapay zeka destekli tıbbi görüntü analiz platformu. X-ray, MRI ve CT taramal
 
 ## 🚀 Projenin Tüm Aşamaları
 
-1. **Gereksinim Analizi ve Kapsam Belirleme:** Geleneksel teşhis süreçlerinde karşılaşılan zaman baskısı, insan kaynaklı hatalar ve karmaşık DICOM verilerinin analiz edilmesinin çözümü olarak tasarlandı. %90+ doğruluk oranı ve 5 saniyeden düşük analiz süresi hedeflendi.
-2. **Veri Toplama ve Ön İşleme:** Çeşitli görüntü formatları (DICOM, JPG, PNG) entegre edildi. Ham veriler dengesiz olduğu için Data Augmentation (Yatay Çevirme, Döndürme vb.) yöntemleriyle iyileştirildi. 
-3. **Görüntü İşleme (Image Preprocessing):** Görüntüler, modele gönderilmeden önce (384x384) çözünürlüğüne getirildi. Tıbbi detayları (kemik, doku vb.) en iyi şekilde vurgulamak için LAB uzayında **CLAHE** (Contrast Limited Adaptive Histogram Equalization) uygulandı ve Min-Max Normalizasyonu ile değerler (0.0 - 1.0) aralığına çekildi. (float32 tipinde).
-4. **Model Seçimi ve Eğitimi:** PyTorch yerine entegrasyonu ve üretim(production) kolaylığı sebebiyle TensorFlow/Keras Kütüphaneleri seçildi. 
-5. **Backend ve Entegrasyon:** Python ve Flask kullanılarak modeller için gelişmiş bir REST API altyapısı geliştirildi. 
-6. **Arayüz (UI) ve PDF Raporlama:** Doktorların pratik şekilde görüntü yükleyip anomalileri görebileceği UI ile değerlendirme sonuçlarını PDF olarak indirmelerini sağlayan raporlama modülü tamamlandı.
+Proje, Agile/Scrum prensiplerine göre haftalık (Sprint) döngüler şeklinde planlanmış ve yürütülmüştür:
+
+*   **Hafta 1 (Proje Hazırlığı ve Planlama):** Proje kapsamı, gereksinim analizi ve hedefler belirlendi. Veri setleri incelenip ilk ön işleme kararları alındı, teknoloji yığını seçimi (TensorFlow, OpenCV, Flask vs.) yapılarak geliştirme ortamları kuruldu.
+*   **Hafta 2 (Temel Tasarım ve Araştırma):** Hastalık tespit algoritmaları araştırıldı. Görüntü ön işleme teknik analizleri çıkarılırken veritabanı entegrasyon planı, kullanıcı arayüzü (UI) ve raporlama gereksinimleri için prototip tasarımları planlandı.
+*   **Hafta 3 (Mimari Tasarım ve Şablonlar):** Veritabanı şeması, raporlama sistemi ve görüntü ön işleme modül tasarımları oluşturuldu. Web arayüzü temel şablonları, hastalık tespit algoritma entegrasyonuna hazır hale getirildi. 
+*   **Hafta 4 (Çekirdek Geliştirme ve Testler):** Akciğer Nodülü tespiti bağlamında temel hastalık algoritması geliştirildi ve DICOM okuma/ön işleme entegrasyonları hazırlandı. Bu aşamada ön işleme modülü birim (unit) testlerden geçirildi. Arayüz görüntü yükleme fonksiyonelliği kodlandı.
+*   **Hafta 5 (Optimizasyon ve Ara Değerlendirme):** Modeller eğitildi, performans metrikleri (kesinlik, vb.) değerlendirilip optimize edildi. Veri seti ön işleme adımları ve loglamaları tamamlanarak kullanıcı arayüzüne entegrasyon başlatıldı. Ara raporlar sunuldu.
+*   **Hafta 6 (Final Entegrasyon, Test ve Kapanış):** Site içi kullanıcı rolleri eklendi, arayüz UX iyileştirmeleri tamamlandı. Modellerin tam teşekküllü test edilmesi ve entegrasyonu sağlandıktan sonra, API dokümantasyonu ve sistem bitiş belgeleri yazılarak final sunumu provaları gerçekleştirildi.
 
 ---
 
@@ -64,8 +66,12 @@ Web arayüzünde ve dış entegrasyonlarda kullanılmak üzere tasarlanan uç no
 ### POST /api/analiz
 *   **İşlev:** Yüklenen görüntünün analiz sürecini başlatır ve yapay zeka modelini çalıştırır.
 *   **İstek Yapısı (FormData):** 
-    *   ile: Tıbbi görüntü dosyası (DCM, JPG, PNG)
-    *   uzmanlik: Gerekli analiz türevi (örn: xray, ct_beyin)
+    *   `goruntu`: Tıbbi görüntü dosyası (DCM, JPG, PNG)
+    *   `uzman_kodu`: Gerekli analiz türevi (örn: `xray`, `ct_beyin`)
+    *   `hasta_ad_soyad`: Hasta Adı Soyadı
+    *   `hasta_tc`: Hasta TC Kimlik No
+    *   `hasta_dogum_tarihi`: Hasta Doğum Tarihi
+    *   `protokol_no`: Hastane Protokol Numarası
 *   **Dönüş Değeri:** Tahmin edilen hastalık, güven yüzdesi listesi ve tespit görsel yolunu (URL) içeren JSON veri kümesi.
 
 ### POST /api/save_draft
@@ -74,13 +80,15 @@ Web arayüzünde ve dış entegrasyonlarda kullanılmak üzere tasarlanan uç no
 
 ### POST /api/save_report
 *   **İşlev:** Onaylanan analizi kalıcı veritabanına rapor olarak kaydeder.
-*   **Dönüş Değeri:** Başarı durumu ve ilişkili apor_id değerini içeren JSON objesi.
+*   **Dönüş Değeri:** Başarı durumu ve ilişkili 
+apor_id değerini içeren JSON objesi.
 
 ### POST /api/iptal (veya GET)
 *   **İşlev:** Arka planda fazla uzun süren veya gereksiz analiz sürecini durdurmak için asenkron istektir.
 
 ### DELETE /api/raporlar/<int:rapor_id>
-*   **İşlev:** Belirtilen kimliğe (apor_id) sahip raporu sistemden veritabanı uçlarında kalıcı olarak siler.
+*   **İşlev:** Belirtilen kimliğe (
+apor_id) sahip raporu sistemden veritabanı uçlarında kalıcı olarak siler.
 
 ### GET /raporlar/<int:rapor_id>/pdf
 *   **İşlev:** İlgili raporun özetini, hasta formlarını ve yapay zekanın işaretlendiği görseli içeren hazır **PDF dokümanı** döndürür (File Download).
