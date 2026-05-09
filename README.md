@@ -15,6 +15,37 @@ Proje, Agile/Scrum prensiplerine göre haftalık (Sprint) döngüler şeklinde p
 
 ---
 
+## 🏛 Sistem Mimarisi
+
+Uygulamanın mimari yapısı yüksek erişilebilirlik ve güvenlik üzerine kurulmuştur. İstek ve veri akışı aşağıdaki katmanlardan oluşmaktadır:
+**Cloudflare → Nginx → Docker → Flask → Supabase**
+
+![Sistem Mimarisi](docs/ATGAS_Sistem_Mimarisi.png)
+![Veritabanı Şeması](docs/ATGAS_DB_Semasi.png)
+
+---
+
+## 🔐 Kullanıcı Rolleri ve Yetkilendirme
+
+Sistem içerisinde güvenliği ve özel verilerin korunmasını sağlamak amacıyla dört temel kullanıcı rolü tanımlanmıştır. API ve arayüz üzerindeki yetki kısıtlamaları alt yapıda tasarlanan `@rol_gerekli` dekoratörü ile güvence altına alınmıştır:
+*   **Admin:** Tüm sistemin, kullanıcı tanımlamalarının (doktor, radyolog vb.) yönetimi ve ayarlarından sorumludur.
+*   **Doktor:** Analiz sonuçlarını inceler, tıbbi verileri değerlendirir ve asıl teşhis/raporlama süreçlerini onaylar.
+*   **Radyolog:** Hastaların tarama görüntülerini (DICOM, JPG, PNG) sisteme yükler ve ilk yapay zeka analiz zincirini başlatabilir.
+*   **Akademisyen:** Geliştirilen AI modelinin istatistiksel metriklerini (başarı oranı vb.) kişisel veriye erişmeden sadece izleme düzeyinde görüntüleyebilir.
+
+---
+
+## 🛠 Teknoloji Yığını ve Deployment (Production)
+
+Projenin modüler çalışma ve production ortamındaki teknoloji stack dağılımı:
+*   **Yapay Zeka & Görüntü İşleme:** TensorFlow, Keras, TensorBoard, OpenCV, pydicom
+*   **Backend & Veritabanı:** Python, Flask, Supabase (PostgreSQL), SQLAlchemy, pg8000
+*   **Production Server Altyapısı:** Docker, Nginx, Cloudflare, Git LFS
+*   **Raporlama Modülü:** reportlab
+*   **Desteklenen Tıbbi Formatlar:** DICOM (`.dcm`), JPG, PNG
+
+---
+
 ## 🛠 Kullanılan Algoritmalar
 
 - **Görüntü İşleme ve Ön İşleme Algoritmaları:** 
