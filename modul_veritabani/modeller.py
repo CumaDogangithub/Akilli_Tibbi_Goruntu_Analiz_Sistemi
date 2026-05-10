@@ -96,8 +96,15 @@ class AnalizRaporu(db.Model):
     # Hasta bilgileri
     hasta_ad_soyad = db.Column(db.String(200), nullable=False)
     hasta_dogum_tarihi = db.Column(db.Date, nullable=False)
-    hasta_tc = db.Column(db.String(11), nullable=False)
-    protokol_no = db.Column(db.String(200), nullable=False)
+    # NOT: TC alanı UNIQUE değil — aynı hasta birden fazla rapor sahibi olabilir.
+    # Mükerrer kayıt (aynı TC + farklı kişi) kontrolü uygulama katmanında yapılır
+    # (_hasta_kimlik_tutarli_mi). Index ise her analizde TC sorgusu için lazım.
+    hasta_tc = db.Column(db.String(11), nullable=False, index=True)
+    # NOT: Protokol no da UNIQUE değil — gerçek HBYS'de bir protokol numarası
+    # bir vaka/ziyareti temsil eder; aynı vakada birden fazla görüntüleme
+    # (CT + MR vb.) yapılabilir, hep aynı hastaya. "Aynı protokol farklı hasta"
+    # kontrolü _protokol_hasta_tutarli_mi'de yapılır. Index sorgu hızı için.
+    protokol_no = db.Column(db.String(200), nullable=False, index=True)
 
     islem_tarihi = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
 
