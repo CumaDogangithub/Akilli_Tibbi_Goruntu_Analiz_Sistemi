@@ -76,6 +76,119 @@ def sonuc_yolu(yol_veya_dosya_adi: str) -> str:
     f = _basename_norm(yol_veya_dosya_adi)
     return os.path.join(ISLENMIS_KLASORU, f) if f else ""
 
+def _tckn_dogrula(tc: str) -> tuple[bool, str]:
+    """Türkiye T.C. Kimlik Numarası algoritma doğrulaması.
+    Resmî kural: https://www.nvi.gov.tr/
+
+    Doğrulama:
+      1) Tam 11 hane olmalı
+      2) Tüm karakterler sayı olmalı
+      3) İlk hane 0 olamaz
+      4) 10. hane = ((1+3+5+7+9.) * 7 - (2+4+6+8.)) mod 10
+      5) 11. hane = (1..10. hane toplamı) mod 10
+    """
+    tc = (tc or "").strip()
+    if len(tc) != 11:
+        return False, "TC Kimlik 11 haneli olmalıdır."
+    if not tc.isdigit():
+        return False, "TC Kimlik yalnızca rakam içermelidir."
+    if tc[0] == "0":
+        return False, "TC Kimlik 0 ile başlayamaz."
+    rakamlar = [int(c) for c in tc]
+    tek_toplam = sum(rakamlar[i] for i in (0, 2, 4, 6, 8))
+    cift_toplam = sum(rakamlar[i] for i in (1, 3, 5, 7))
+    h10 = (tek_toplam * 7 - cift_toplam) % 10
+    h11 = sum(rakamlar[:10]) % 10
+    if h10 != rakamlar[9] or h11 != rakamlar[10]:
+        return False, "Geçersiz TC Kimlik Numarası (algoritma doğrulaması başarısız)."
+    return True, ""
+
+
+def _ad_soyad_dogrula(ad: str) -> tuple[bool, str]:
+    """Ad-soyad: en az 3 karakter, harf+boşluk dışında karakter olmamalı."""
+    ad = (ad or "").strip()
+    if len(ad) < 3:
+        return False, "Hasta ad-soyad en az 3 karakter olmalıdır."
+    if len(ad) > 200:
+        return False, "Hasta ad-soyad çok uzun (maks 200 karakter)."
+    # Türkçe harfler dahil — rakam/özel karakter engelle
+    if not all(c.isalpha() or c.isspace() or c in "'-." for c in ad):
+        return False, "Ad-soyad yalnızca harf ve boşluk içerebilir."
+    if " " not in ad:
+        return False, "Ad-soyad en az iki kelime olmalıdır (ad ve soyad)."
+    return True, ""
+
+
+def _protokol_dogrula(protokol: str) -> tuple[bool, str]:
+    """Protokol no: alfanumerik + tire + slash, 1-200 karakter."""
+    protokol = (protokol or "").strip()
+    if not protokol:
+        return False, "Protokol numarası zorunludur."
+    if len(protokol) > 200:
+        return False, "Protokol numarası çok uzun (maks 200 karakter)."
+    if not all(c.isalnum() or c in "-/_" for c in protokol):
+        return False, "Protokol numarası yalnızca harf, rakam, '-', '/' içerebilir."
+    return True, ""
+
+
+def _protokol_hasta_tutarli_mi(protokol_no: str, tc: str) -> tuple[bool, str]:
+    """Gerçek HBYS mantığı: bir protokol numarası tek bir hasta ziyaretini
+    temsil eder. Aynı protokol no ile birden fazla görüntüleme (CT + MR vb.)
+    yapılabilir AMA hepsi aynı hastaya ait olmalıdır.
+
+    Kural: Bu protokol_no ile DB'de zaten bir kayıt varsa, hasta_tc'sinin
+    gönderilen tc ile aynı olduğunu doğrula. Aksi halde başka bir hastanın
+    protokol numarası kullanılmış demektir → veri bütünlüğü ihlali.
+
+    Returns: (tutarli_mi, hata_mesaji)
+    """
+    onceki = (AnalizRaporu.query
+              .filter_by(protokol_no=protokol_no)
+              .order_by(AnalizRaporu.islem_tarihi.desc())
+              .first())
+    if onceki is None:
+        return True, ""  # Bu protokol no ilk kez kullanılıyor — yeni vaka
+
+    if onceki.hasta_tc != tc:
+        # Maskeli TC göster — KVKK
+        maskeli = onceki.hasta_tc[:3] + "*****" + onceki.hasta_tc[-2:]
+        return False, (
+            f"Bu protokol numarası başka bir hastaya ({maskeli}) kayıtlı. "
+            f"Aynı protokol numarası farklı hastaya verilemez."
+        )
+    return True, ""
+
+
+def _hasta_kimlik_tutarli_mi(tc: str, ad_soyad: str, dogum: date) -> tuple[bool, str]:
+    """Aynı TC ile DB'de daha önce kayıtlı bir hasta varsa, ad-soyad ve doğum
+    tarihinin tutarlı olduğunu kontrol eder. Mükerrer kayıt riskini engeller —
+    aynı TC ile farklı kişi bilgileri kabul edilmez.
+
+    Returns: (uyumlu_mu, hata_mesaji)
+    """
+    onceki = (AnalizRaporu.query
+              .filter_by(hasta_tc=tc)
+              .order_by(AnalizRaporu.islem_tarihi.desc())
+              .first())
+    if onceki is None:
+        return True, ""  # Bu TC ile ilk kayıt — sorun yok
+
+    # Karşılaştırma case-insensitive ve boşluk-tolerantlı
+    norm = lambda s: " ".join((s or "").strip().split()).lower()
+    if norm(onceki.hasta_ad_soyad) != norm(ad_soyad):
+        return False, (
+            f"Bu TC Kimlik No daha önce farklı bir kişi adıyla "
+            f"({onceki.hasta_ad_soyad}) kayıtlı. Bilgileri kontrol edin."
+        )
+    if onceki.hasta_dogum_tarihi != dogum:
+        return False, (
+            f"Bu TC Kimlik No daha önce farklı bir doğum tarihiyle "
+            f"({onceki.hasta_dogum_tarihi.strftime('%d.%m.%Y')}) kayıtlı. "
+            f"Bilgileri kontrol edin."
+        )
+    return True, ""
+
+
 def _bekleyen_temizle():
     """Oturumdaki bekleyen analizi ve ilişkili geçici dosyaları diskten siler."""
     bekleyen = session.pop("bekleyen_analiz", None)
@@ -422,20 +535,49 @@ def api_analiz():
     hasta_dogum = request.form.get("hasta_dogum_tarihi", "").strip()
     protokol = request.form.get("protokol_no", "").strip()
 
+    # ---- Zorunlu alanlar ----
     if not all([uzman_kodu, hasta_ad, hasta_tc, hasta_dogum, protokol]):
-        return jsonify({"durum": "hata", "mesaj": "Tüm hasta bilgileri ve uzman kodu zorunludur."}), 400
-    if len(hasta_tc) != 11 or not hasta_tc.isdigit():
-        return jsonify({"durum": "hata", "mesaj": "TC Kimlik 11 haneli rakam olmalıdır."}), 400
+        return jsonify({"durum": "hata",
+                        "mesaj": "Tüm hasta bilgileri ve uzman kodu zorunludur."}), 400
 
-    # Doğum Tarihi Doğrulaması
+    # ---- TCKN tam algoritma doğrulaması (sadece 11 hane değil!) ----
+    ok, mesaj = _tckn_dogrula(hasta_tc)
+    if not ok:
+        return jsonify({"durum": "hata", "mesaj": mesaj}), 400
+
+    # ---- Ad-soyad: harf+boşluk, en az 2 kelime ----
+    ok, mesaj = _ad_soyad_dogrula(hasta_ad)
+    if not ok:
+        return jsonify({"durum": "hata", "mesaj": mesaj}), 400
+
+    # ---- Protokol no: alfanumerik + tire/slash ----
+    ok, mesaj = _protokol_dogrula(protokol)
+    if not ok:
+        return jsonify({"durum": "hata", "mesaj": mesaj}), 400
+
+    # ---- Doğum tarihi doğrulaması ----
     try:
         dogum_obj = datetime.strptime(hasta_dogum, "%Y-%m-%d").date()
         if dogum_obj > date.today():
-            return jsonify({"durum": "hata", "mesaj": "Doğum tarihi gelecek bir tarih olamaz."}), 400
+            return jsonify({"durum": "hata",
+                            "mesaj": "Doğum tarihi gelecek bir tarih olamaz."}), 400
         if dogum_obj.year < 1900:
-            return jsonify({"durum": "hata", "mesaj": "Mantıksız doğum yılı (1900'den eski olamaz)."}), 400
+            return jsonify({"durum": "hata",
+                            "mesaj": "Mantıksız doğum yılı (1900'den eski olamaz)."}), 400
     except ValueError:
-        return jsonify({"durum": "hata", "mesaj": "Geçersiz doğum tarihi formatı."}), 400
+        return jsonify({"durum": "hata",
+                        "mesaj": "Geçersiz doğum tarihi formatı."}), 400
+
+    # ---- MÜKERRER KAYIT KONTROLLERİ (HBYS standardı) ----
+    # 1) Aynı TC ile farklı kişi bilgisi engelleme:
+    ok, mesaj = _hasta_kimlik_tutarli_mi(hasta_tc, hasta_ad, dogum_obj)
+    if not ok:
+        return jsonify({"durum": "hata", "mesaj": mesaj}), 409  # 409 Conflict
+    # 2) Aynı protokol no farklı hastaya verilmesi engelleme:
+    #    (Aynı protokol + aynı hasta = aynı vakada birden fazla görüntü → OK)
+    ok, mesaj = _protokol_hasta_tutarli_mi(protokol, hasta_tc)
+    if not ok:
+        return jsonify({"durum": "hata", "mesaj": mesaj}), 409
 
     # Eğer önceden kalma tamamlanmamış (bekleyen) bir analiz varsa önce onu temizle (Çöp dosya engelleme)
     _bekleyen_temizle()

@@ -7,6 +7,10 @@ tensorflow>=2.15.0      # Keras 3 mimarisini ve Derin Öğrenme motorunu içerir
 tensorboard>=2.15.0     # Model değerlendirme metriklerini görselleştirme (TF 2.16+ ayrı paket)
 numpy>=1.24.3           # Matris ve dizi işlemleri (Görüntüleri sayılara çevirmek için)
 scikit-learn>=1.3.0     # Confusion Matrix ve Performans raporları için
+# protobuf: TF 2.21 gencode 6.31.1 ile derlenmiştir; runtime aynı veya daha yeni
+# olmalı. Pin'lemek başka projelerin (google-ai, grpcio) eski sürüm zorlamasını
+# engeller. Eğer 7.x bozulursa "protobuf>=6.31.1,<7" şeklinde aralık daraltın.
+protobuf>=6.31.1        # TF runtime <-> gencode uyumu için
 
 # 2. GÖRÜNTÜ İŞLEME VE GÖRSELLEŞTİRME (Nihal ve Elif'in Modülü)
 opencv-python-headless>=4.8.0   # Resim okuma, yeniden boyutlandırma, maskeleme ve ısı haritası (server: GUI'siz)
