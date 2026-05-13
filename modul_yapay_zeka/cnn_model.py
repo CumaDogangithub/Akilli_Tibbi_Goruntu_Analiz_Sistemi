@@ -167,7 +167,13 @@ class AtgasAnalizMotoru:
 
             isi_haritasi_matrisi = self._isi_haritasi_cikar(img_array, model)
 
-            orijinal_cv2 = cv2.imread(resim_yolu)
+            # Türkçe karakter içeren dosya yolları için byte okuma
+            with open(resim_yolu, 'rb') as f:
+                bytes_data = f.read()
+            orijinal_cv2 = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+            if orijinal_cv2 is None:
+                raise ValueError(f"Isı haritası için orijinal görüntü okunamadı: {resim_yolu}")
+
             orijinal_cv2 = cv2.resize(orijinal_cv2, self.img_size)
             
             isi_haritasi_cv2 = cv2.resize(isi_haritasi_matrisi, self.img_size)
@@ -182,7 +188,10 @@ class AtgasAnalizMotoru:
             os.makedirs(self.CIKTI_KLASORU, exist_ok=True)
             dosya_adi = f"sonuc_{os.path.basename(resim_yolu)}"
             kayit_yolu = os.path.join(self.CIKTI_KLASORU, dosya_adi)
-            cv2.imwrite(kayit_yolu, birlestirilmis_resim)
+            
+            _, buffer = cv2.imencode(".png", birlestirilmis_resim)
+            with open(kayit_yolu, 'wb') as f:
+                f.write(buffer.tobytes())
 
             # Yorumu üret
             yapay_zeka_yorumu = self._yorum_uret(ham_teshis, hastalik_gercek_ismi, guven_orani)
@@ -200,5 +209,5 @@ class AtgasAnalizMotoru:
             }
 
         except Exception as e:
-            return {"durum": "hata", "mesaj": str(e)}
-
+            print(f"AI Motoru Hatası: {e}")
+            return {"durum": "hata", "mesaj": "Analiz sırasında yapay zeka motorunda bir hata oluştu."}

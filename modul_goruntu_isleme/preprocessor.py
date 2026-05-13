@@ -1,226 +1,185 @@
+"""
+ATGAS Görüntü Ön İşleme Modülü
+- DICOM (uzantı + magic bytes), PNG, JPG, JPEG desteği
+- CLAHE ile kontrast iyileştirme
+- Gürültü giderme
+- Yeniden boyutlandırma
+"""
+
+import os
 import cv2
 import numpy as np
-import os
-import io
 
 try:
     import pydicom
-    PYDICOM_AVAILABLE = True
+    DICOM_DESTEKLI = True
 except ImportError:
-    PYDICOM_AVAILABLE = False
-    print("[UYARI] pydicom kurulu değil. 'pip install pydicom' komutunu çalıştır.")
+    DICOM_DESTEKLI = False
 
-# ─── Sabitler ─────────────────────────────────────────────────────────────────
-TARGET_SIZE    = (384, 384)   # EfficientNetV2-M giriş boyutu (güncel)
-CLAHE_CLIP    = 2.0
-CLAHE_GRID    = (8, 8)
-SUPPORTED_EXT  = {".dcm", ".png", ".jpg", ".jpeg", ".nifti"}
+# Bilinen DICOM uzantıları (uzantısız dosyalar magic bytes ile yakalanır)
+DICOM_UZANTILARI = {".dcm", ".dicom", ".dic", ".ima"}
+RESIM_UZANTILARI = {".png", ".jpg", ".jpeg"}
+DESTEKLENEN_FORMATLAR = RESIM_UZANTILARI | DICOM_UZANTILARI
 
 
-class ImagePreprocessor:
+def _dicom_mi(dosya_yolu: str) -> bool:
+    """DICOM dosyalarının ilk 132 byte'ında 128 byte preamble + 'DICM' imzası vardır.
+    Uzantısız veya alışılmadık uzantılı dosyaları da yakalar."""
+    try:
+        with open(dosya_yolu, "rb") as f:
+            f.seek(128)
+            return f.read(4) == b"DICM"
+    except (OSError, IOError):
+        return False
+
+
+def format_kontrol_et(dosya_yolu: str) -> bool:
+    """Önce uzantıya bak, bilinen değilse magic bytes ile DICOM olup olmadığını kontrol et."""
+    uzanti = os.path.splitext(dosya_yolu)[1].lower()
+    if uzanti in DESTEKLENEN_FORMATLAR:
+        return True
+    # Disk'te dosya var mı? Varsa magic bytes kontrolü
+    if os.path.exists(dosya_yolu) and _dicom_mi(dosya_yolu):
+        return True
+    return False
+
+
+def dicom_dosyasi_mi(dosya_yolu: str) -> bool:
+    """Dosya bir DICOM mı? Hem uzantıyı hem magic bytes'i kontrol eder.
+    `.dcm`, `.dicom`, `.dic`, `.ima` veya uzantısız ama içeriği DICOM olan dosyaları yakalar."""
+    uzanti = os.path.splitext(dosya_yolu)[1].lower()
+    if uzanti in DICOM_UZANTILARI:
+        return True
+    return os.path.exists(dosya_yolu) and _dicom_mi(dosya_yolu)
+
+
+def dicom_oku(dosya_yolu: str) -> np.ndarray:
+    """DICOM dosyasını numpy BGR (uint8 0-255) görüntüsüne çevirir.
+    HU (RescaleSlope/Intercept), Window/Level, MONOCHROME1 inversiyon ve
+    multi-frame (orta slice) desteklenir."""
+    if not DICOM_DESTEKLI:
+        raise RuntimeError("pydicom yüklü değil. 'pip install pydicom' ile kurun.")
+
+    ds = pydicom.dcmread(dosya_yolu, force=True)
+    arr = ds.pixel_array.astype(np.float32)
+
+    # Multi-frame ise orta slice'ı al (3D CT/MR)
+    if arr.ndim == 3 and arr.shape[-1] not in (3, 4):
+        arr = arr[arr.shape[0] // 2]
+
+    # 1) HU dönüşümü (CT için kritik)
+    slope = float(getattr(ds, "RescaleSlope", 1) or 1)
+    intercept = float(getattr(ds, "RescaleIntercept", 0) or 0)
+    if slope != 1 or intercept != 0:
+        arr = arr * slope + intercept
+
+    # 2) Window / Level (tıbbi kontrast)
+    wc = getattr(ds, "WindowCenter", None)
+    ww = getattr(ds, "WindowWidth", None)
+    if wc is not None and ww is not None:
+        wc = float(wc[0] if hasattr(wc, "__iter__") and not isinstance(wc, str) else wc)
+        ww = float(ww[0] if hasattr(ww, "__iter__") and not isinstance(ww, str) else ww)
+        alt = wc - ww / 2
+        ust = wc + ww / 2
+        arr = np.clip(arr, alt, ust)
+
+    # 3) Min-max normalize → 0..255
+    arr_min, arr_max = arr.min(), arr.max()
+    if arr_max - arr_min > 0:
+        arr = (arr - arr_min) / (arr_max - arr_min) * 255.0
+    arr = arr.astype(np.uint8)
+
+    # 4) MONOCHROME1 ise renk tersle (X-ray bazılarında ters çıkar)
+    if getattr(ds, "PhotometricInterpretation", "") == "MONOCHROME1":
+        arr = 255 - arr
+
+    # 5) Gri ise BGR'a çevir (OpenCV downstream BGR bekler)
+    if arr.ndim == 2:
+        arr = cv2.cvtColor(arr, cv2.COLOR_GRAY2BGR)
+    elif arr.ndim == 3 and arr.shape[2] == 1:
+        arr = cv2.cvtColor(arr.squeeze(-1), cv2.COLOR_GRAY2BGR)
+
+    return arr
+
+
+def goruntu_oku(dosya_yolu: str) -> np.ndarray:
+    if not os.path.exists(dosya_yolu):
+        raise FileNotFoundError(f"Görüntü bulunamadı: {dosya_yolu}")
+    uzanti = os.path.splitext(dosya_yolu)[1].lower()
+    # Hem uzantıdan hem magic bytes'tan DICOM tespiti
+    if uzanti in DICOM_UZANTILARI or _dicom_mi(dosya_yolu):
+        return dicom_oku(dosya_yolu)
+    
+    # Türkçe karakter sorununu aşmak için dosyayı ikili okuyup imdecode kullan
+    with open(dosya_yolu, 'rb') as f:
+        bytes_data = f.read()
+    img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+    
+    if img is None:
+        raise ValueError(f"Görüntü okunamadı veya format desteklenmiyor: {dosya_yolu}")
+    return img
+
+
+def dicom_onizleme_uret(dicom_yolu: str, cikti_yolu: str) -> str:
+    """DICOM'u browser-uyumlu PNG'ye çevirip diske yazar.
+    Orijinal görüntü panelinde gösterilecek olan ham önizleme.
+    CLAHE/gürültü uygulanmaz — sadece tıbbi normalize (HU + Window/Level)."""
+    img = dicom_oku(dicom_yolu)
+    os.makedirs(os.path.dirname(cikti_yolu) or ".", exist_ok=True)
+    _, buffer = cv2.imencode(".png", img)
+    with open(cikti_yolu, 'wb') as f:
+        f.write(buffer.tobytes())
+    return cikti_yolu
+
+
+def clahe_uygula(img: np.ndarray, clip_limit: float = 2.0, tile_grid_size=(8, 8)) -> np.ndarray:
+    """Kontrast iyileştirme — düşük kaliteli tıbbi görüntüler için."""
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+    clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+    l = clahe.apply(l)
+    return cv2.cvtColor(cv2.merge((l, a, b)), cv2.COLOR_LAB2BGR)
+
+
+def gurultu_gider(img: np.ndarray) -> np.ndarray:
+    return cv2.fastNlMeansDenoisingColored(img, None, 5, 5, 7, 21)
+
+
+def hazirla(dosya_yolu: str, hedef_boyut=(384, 384), cikti_yolu: str | None = None) -> str:
     """
-    ATGAS - Görüntü Ön İşleme Modülü
-    ─────────────────────────────────
-    Desteklenen formatlar : .dcm, .png, .jpg, .jpeg
-    Pipeline (DICOM)      : Okuma → Resize → CLAHE → Gray→RGB → Normalizasyon
-    Pipeline (PNG/JPG)    : Okuma(RGB) → Resize → CLAHE(LAB) → Normalizasyon
-    Çıktı                 : np.ndarray, shape=(384,384,3), dtype=float32, [0,1]
+    Tıbbi görüntüyü modele girmeye hazırlar:
+      1. Format dönüştürme (DICOM → PNG)
+      2. CLAHE kontrast iyileştirme
+      3. Hafif gürültü giderme
+      4. Boyutlandırma
+    Diske kaydedilen normalize PNG'nin yolunu döner.
     """
+    if not format_kontrol_et(dosya_yolu):
+        raise ValueError(f"Desteklenmeyen format: {dosya_yolu}")
 
-    def __init__(self, target_size: tuple = TARGET_SIZE):
-        self.target_size = target_size
-        # DICOM için CLAHE
-        self.clahe = cv2.createCLAHE(
-            clipLimit=CLAHE_CLIP,
-            tileGridSize=CLAHE_GRID
-        )
+    img = goruntu_oku(dosya_yolu)
+    img = clahe_uygula(img)
+    img = gurultu_gider(img)
 
-    # ─── Okuma ────────────────────────────────────────────────────────────────
+    # Görüntü geçerliliğini ve boyutlarını boyutlandırma öncesi kontrol et
+    if img is None or img.size == 0 or len(img.shape) < 2 or img.shape[0] == 0 or img.shape[1] == 0:
+        raise ValueError(f"Görüntü geçersiz veya boş, boyutlandırma yapılamaz. Dosya: {dosya_yolu}")
 
-    def _read_dicom(self, file_path: str) -> np.ndarray:
-        """DICOM dosyasını okur → uint8 grayscale array döndürür."""
-        if not PYDICOM_AVAILABLE:
-            raise ImportError("pydicom kurulu değil: pip install pydicom")
+    eski_shape = img.shape
 
-        ds     = pydicom.dcmread(file_path)
-        pixels = ds.pixel_array.astype(np.float32)
+    img = cv2.resize(img, hedef_boyut, interpolation=cv2.INTER_AREA)
 
-        # 3D MRI stack ise orta dilimi al
-        if pixels.ndim == 3:
-            pixels = pixels[pixels.shape[0] // 2]
+    yeni_shape = img.shape
+    # cv2.resize (Genislik, Yukseklik) bekler, img.shape ise (Yukseklik, Genislik, Kanal) doner
+    if yeni_shape[0] != hedef_boyut[1] or yeni_shape[1] != hedef_boyut[0]:
+        raise ValueError(f"Boyutlandırma doğrulanamadı! Beklenen (G, Y): {hedef_boyut}, Elde edilen (Y, G): {yeni_shape[:2]}")
 
-        # DICOM piksel değerlerini 0-255 aralığına normalize et
-        lo, hi = pixels.min(), pixels.max()
-        if hi > lo:
-            pixels = (pixels - lo) / (hi - lo) * 255.0
-
-        return pixels.astype(np.uint8)
-
-    def _read_dicom_bytes(self, file_bytes: bytes) -> np.ndarray:
-        """Flask'tan gelen DICOM byte stream'ini okur."""
-        if not PYDICOM_AVAILABLE:
-            raise ImportError("pydicom kurulu değil: pip install pydicom")
-
-        ds     = pydicom.dcmread(io.BytesIO(file_bytes))
-        pixels = ds.pixel_array.astype(np.float32)
-
-        if pixels.ndim == 3:
-            pixels = pixels[pixels.shape[0] // 2]
-
-        lo, hi = pixels.min(), pixels.max()
-        if hi > lo:
-            pixels = (pixels - lo) / (hi - lo) * 255.0
-
-        return pixels.astype(np.uint8)
-
-    def _read_standard(self, file_path: str) -> np.ndarray:
-        """PNG / JPG → BGR oku, RGB'ye çevir."""
-        img = cv2.imread(file_path, cv2.IMREAD_COLOR)
-        if img is None:
-            raise FileNotFoundError(f"Görüntü okunamadı: {file_path}")
-        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    # ─── Pipeline adımları ────────────────────────────────────────────────────
-
-    def _resize(self, img: np.ndarray) -> np.ndarray:
-        return cv2.resize(img, self.target_size, interpolation=cv2.INTER_AREA)
-
-    def _apply_clahe_gray(self, img: np.ndarray) -> np.ndarray:
-        """DICOM (grayscale) görüntüye CLAHE uygular."""
-        return self.clahe.apply(img)
-
-    def _apply_clahe_rgb(self, img: np.ndarray) -> np.ndarray:
-        """
-        Renkli (RGB) görüntüye CLAHE uygular.
-        LAB renk uzayında sadece L kanalına uygulanır;
-        renk bilgisi bozulmaz.
-        """
-        lab            = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
-        l, a, b        = cv2.split(lab)
-        l_clahe        = self.clahe.apply(l)
-        lab_clahe      = cv2.merge([l_clahe, a, b])
-        return cv2.cvtColor(lab_clahe, cv2.COLOR_LAB2RGB)
-
-    def _normalize(self, img: np.ndarray) -> np.ndarray:
-        return img.astype(np.float32) / 255.0
-
-    # ─── DICOM pipeline ───────────────────────────────────────────────────────
-    def _run_pipeline_dicom(self, img_gray: np.ndarray) -> np.ndarray:
-        """
-        DICOM'a özel pipeline:
-        resize → CLAHE(gray) → Gray→RGB → normalize
-        """
-        img = self._resize(img_gray)
-        img = self._apply_clahe_gray(img)
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-        img = self._normalize(img)
-        return img
-
-    # ─── PNG/JPG pipeline ─────────────────────────────────────────────────────
-    def _run_pipeline_rgb(self, img_rgb: np.ndarray) -> np.ndarray:
-        """
-        Standart görüntü pipeline'ı (grayscale yok):
-        resize → CLAHE(LAB) → normalize
-        """
-        img = self._resize(img_rgb)
-        img = self._apply_clahe_rgb(img)
-        img = self._normalize(img)
-        return img
-
-    # ─── Dışa açık fonksiyonlar ───────────────────────────────────────────────
-
-    def preprocess(self, file_path: str) -> np.ndarray:
-        """
-        Dosya yolundan görüntüyü işler.
-
-        Kullanım:
-            preprocessor = ImagePreprocessor()
-            img = preprocessor.preprocess("scan.dcm")   # (384, 384, 3) float32
-            img = preprocessor.preprocess("xray.jpg")   # (384, 384, 3) float32
-        """
-        ext = os.path.splitext(file_path)[1].lower()
-
-        if ext == ".dcm":
-            img_gray = self._read_dicom(file_path)
-            return self._run_pipeline_dicom(img_gray)
-        elif ext in SUPPORTED_EXT:
-            img_rgb = self._read_standard(file_path)
-            return self._run_pipeline_rgb(img_rgb)
-        else:
-            raise ValueError(
-                f"Desteklenmeyen format: '{ext}'. "
-                f"Desteklenen: {SUPPORTED_EXT}"
-            )
-
-    def preprocess_from_bytes(
-        self, file_bytes: bytes, filename: str = "upload.png"
-    ) -> np.ndarray:
-        """
-        Flask route'larından byte olarak gelen görüntüyü işler.
-
-        Kullanım (app.py içinde):
-            raw = request.files['image'].read()
-            img = preprocessor.preprocess_from_bytes(raw, "scan.dcm")
-        """
-        ext = os.path.splitext(filename)[1].lower()
-
-        if ext == ".dcm":
-            img_gray = self._read_dicom_bytes(file_bytes)
-            return self._run_pipeline_dicom(img_gray)
-        else:
-            np_arr  = np.frombuffer(file_bytes, np.uint8)
-            img_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-            if img_bgr is None:
-                raise ValueError(f"Görüntü decode edilemedi: {filename}")
-            img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-            return self._run_pipeline_rgb(img_rgb)
-
-    def preprocess_batch(self, file_paths: list) -> np.ndarray:
-        """
-        Çok sayıda dosyayı toplu işler.
-        Döndürür: np.ndarray shape=(N, 384, 384, 3)
-        """
-        batch, errors = [], []
-
-        for path in file_paths:
-            try:
-                batch.append(self.preprocess(path))
-            except Exception as e:
-                errors.append({"dosya": path, "hata": str(e)})
-
-        if errors:
-            print(f"[UYARI] {len(errors)} dosya işlenemedi:")
-            for err in errors:
-                print(f"  ✗ {err['dosya']}: {err['hata']}")
-
-        return np.array(batch, dtype=np.float32)
-
-
-# ─── Singleton & kısa kullanım fonksiyonları ──────────────────────────────────
-
-_instance: ImagePreprocessor | None = None
-
-
-def get_preprocessor() -> ImagePreprocessor:
-    global _instance
-    if _instance is None:
-        _instance = ImagePreprocessor()
-    return _instance
-
-
-def preprocess_image(file_path: str) -> np.ndarray:
-    """
-    Diğer modüllerin kullandığı kısa yol.
-
-    Import örneği (modul_yapay_zeka/cnn_model.py içinde):
-        from modul_goruntu_isleme.preprocessor import preprocess_image
-        tensor = preprocess_image("hasta.dcm")  # → (384, 384, 3)
-    """
-    return get_preprocessor().preprocess(file_path)
-
-
-def preprocess_from_bytes(file_bytes: bytes, filename: str = "upload.png") -> np.ndarray:
-    """
-    app.py içinde Flask route'larından direkt çağrılır.
-    """
-    return get_preprocessor().preprocess_from_bytes(file_bytes, filename)
+    if cikti_yolu is None:
+        kok, _ = os.path.splitext(dosya_yolu)
+        cikti_yolu = kok + "_islenmis.png"
+    
+    os.makedirs(os.path.dirname(cikti_yolu) or ".", exist_ok=True)
+    _, buffer = cv2.imencode(".png", img)
+    with open(cikti_yolu, 'wb') as f:
+        f.write(buffer.tobytes())
+    return cikti_yolu

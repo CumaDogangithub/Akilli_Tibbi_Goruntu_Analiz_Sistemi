@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% set aktif_sayfa = 'akademik' %}
+{% block baslik %}Akademik Panel · TensorBoard{% endblock %}
+
+{% block ekstra_head %}
+<style>
+  .tb-cerceve {
+    background: var(--panel);
+    border: 1px solid var(--kenarlik);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 16px;
+    height: 720px;
+    position: relative;
+  }
+  .tb-cerceve iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #fff;
+  }
+  .tb-bos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    flex-direction: column;
+    gap: 12px;
+    color: var(--metin-sonuk);
+    text-align: center;
+    padding: 32px;
+  }
+  .log-listesi { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .log-kart {
+    background: var(--yuzey);
+    border: 1px solid var(--kenarlik);
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 12px;
+  }
+  .log-kart .ad { font-weight: 700; color: var(--mavi); margin-bottom: 6px; }
+  .log-kart .ozet-key { color: var(--metin-sonuk); font-size: 11px; }
+</style>
+{% endblock %}
+
+{% block icerik %}
+  <h1>🎓 Akademik Panel</h1>
+  <div class="alt-baslik">
+    Hoş geldiniz, {{ doktor.ad_soyad }}.
+    Model performans metriklerini ve eğitim grafiklerini bu panelden inceleyebilirsiniz.
+  </div>
+
+  <!-- Sistem AI Metrikleri -->
+  <div class="stat-grid">
+    <div class="stat-kart">
+      <div class="etiket">Toplam Analiz</div>
+      <div class="deger">{{ metrikler.toplam }}</div>
+      <div class="alt">Sisteme yüklenen görüntü</div>
+    </div>
+    <div class="stat-kart yesil">
+      <div class="etiket">Ort. Güven Skoru</div>
+      <div class="deger">%{{ metrikler.ort_dogruluk }}</div>
+      <div class="alt">EfficientNetV2-M ortalaması</div>
+    </div>
+    <div class="stat-kart kirmizi">
+      <div class="etiket">Anomali Tespit</div>
+      <div class="deger">{{ metrikler.anomali }}</div>
+      <div class="alt">Patolojik bulgu</div>
+    </div>
+    <div class="stat-kart sari">
+      <div class="etiket">Normal Bulgu</div>
+      <div class="deger">{{ metrikler.normal }}</div>
+      <div class="alt">Temiz görüntü</div>
+    </div>
+  </div>
+
+  <!-- TensorBoard Bölümü -->
+  <div class="tablo-kart">
+    <div class="baslik" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>📈 TensorBoard — Model Performans Görselleştirmesi</span>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+        <span id="tb-durum" class="rozet {% if tensorboard_calisiyor %}rozet-yesil{% else %}rozet-sari{% endif %}">
+          {% if tensorboard_calisiyor %}● Çalışıyor{% else %}● Durduruldu{% endif %}
+        </span>
+        <button id="uretim-log-btn" type="button" class="btn"
+                style="background:var(--mavi); color:#fff;"
+                onclick="uretimLogUret()"
+                title="DB'deki canlı analizlerden TensorBoard'a yeni veri noktası ekler">
+          🔬 Üretim Logu Üret
+        </button>
+        <button id="tb-baslat-btn" type="button" class="btn btn-primary" onclick="tensorboardBaslat()"
+                {% if tensorboard_calisiyor %}style="display:none;"{% endif %}>
+          🚀 TensorBoard'u Başlat
+        </button>
+        <button id="tb-durdur-btn" type="button" class="btn btn-danger" onclick="tensorboardDurdur()"
+                {% if not tensorboard_calisiyor %}style="display:none;"{% endif %}>
+          ⏹ Durdur
+        </button>
+        <a id="tb-yeni-sekme" href="{{ tensorboard_url }}" target="_blank" class="btn"
+           style="{% if not tensorboard_calisiyor %}display:none;{% endif %}">
+          ↗ Yeni Sekmede Aç
+        </a>
+      </div>
+    </div>
+
+    <div class="tb-cerceve" id="tb-cerceve">
+      {% if tensorboard_calisiyor %}
+        <iframe id="tb-iframe" src="{{ tensorboard_url }}" title="TensorBoard"></iframe>
+      {% else %}
+        <div class="tb-bos" id="tb-bos-mesaj">
+          <div style="font-size:48px;">📈</div>
+          <div style="font-size:16px; font-weight:600; color:var(--metin);">TensorBoard henüz başlatılmadı</div>
+          <div style="max-width:480px;">
+            ROC eğrisi, Confusion Matrix, accuracy/loss grafikleri ve eğitim metriklerini
+            görmek için yukarıdaki <b>"TensorBoard'u Başlat"</b> butonuna tıklayın.
+          </div>
+          <div style="font-size:11px;">
+            Log klasörü: <code>{{ ('modul_yapay_zeka/logs') }}</code>
+            · Port: <code>{{ tensorboard_url }}</code>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Log Klasörleri Özeti -->
+  {% if log_kayitlari %}
+  <div class="tablo-kart" style="margin-top:24px;">
+    <div class="baslik">📂 Eğitim Log Klasörleri ({{ log_kayitlari|length }} adet)</div>
+    <div style="padding:14px;">
+      <div class="log-listesi">
+        {% for log in log_kayitlari %}
+          <div class="log-kart">
+            <div class="ad">{{ log.ad }}</div>
+            {% if log.ozet %}
+              {% for k, v in log.ozet.items() %}
+                <div><span class="ozet-key">{{ k }}:</span> <b>{{ v }}</b></div>
+              {% endfor %}
+            {% else %}
+              <div style="color:var(--metin-sonuk); font-style:italic;">Özet metrik dosyası boş.</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="alert alert-info" style="margin-top:18px;">
+    💡 TensorBoard, modelin eğitim sürecindeki <b>accuracy</b>, <b>loss</b>, <b>confusion matrix</b>,
+    <b>ROC eğrisi</b> gibi metrikleri görsel olarak sunar. ATGAS'ın eğitilmiş 5 uzman modeli
+    (X-Ray, CT Akciğer, CT Beyin, MRI Tümör, MRI Fıtık) için kaydedilmiş loglar burada incelenebilir.
+  </div>
+
+<script>
+const TB_DURUM_URL = "{{ url_for('akademik_tb_durum') }}";
+
+function tbDurumGuncelle(calisiyor) {
+  const rozet  = document.getElementById("tb-durum");
+  const baslat = document.getElementById("tb-baslat-btn");
+  const durdur = document.getElementById("tb-durdur-btn");
+  const yeni   = document.getElementById("tb-yeni-sekme");
+  if (calisiyor) {
+    rozet.className = "rozet rozet-yesil";
+    rozet.innerText = "● Çalışıyor";
+    if (baslat) baslat.style.display = "none";
+    if (durdur) durdur.style.display = "";
+    if (yeni)   yeni.style.display   = "";
+  } else {
+    rozet.className = "rozet rozet-sari";
+    rozet.innerText = "● Durduruldu";
+    if (baslat) { baslat.style.display = ""; baslat.disabled = false; baslat.innerText = "🚀 TensorBoard'u Başlat"; }
+    if (durdur) durdur.style.display = "none";
+    if (yeni)   yeni.style.display   = "none";
+  }
+}
+
+function tbIframeYukle(url) {
+  const cerceve = document.getElementById("tb-cerceve");
+  cerceve.innerHTML = `<iframe id="tb-iframe" src="${url}" title="TensorBoard"></iframe>`;
+}
+
+// TB hazır olana kadar (port açılana kadar) periyodik yokla
+async function tbHazirOlanaKadarBekle(url, maksDeneme = 25) {
+  for (let i = 0; i < maksDeneme; i++) {
+    try {
+      const r = await fetch(TB_DURUM_URL, { cache: "no-store" });
+      const v = await r.json();
+      if (v.port_acik) return true;
+    } catch (e) {}
+    await new Promise(rs => setTimeout(rs, 800));  // 0.8 sn bekle
+  }
+  return false;
+}
+
+async function tensorboardBaslat() {
+  const btn = document.getElementById("tb-baslat-btn");
+  btn.disabled = true;
+  btn.innerText = "⏳ Başlatılıyor...";
+
+  const v = await jsonPOST("{{ url_for('akademik_tb_baslat') }}", {});
+  if (v.durum !== "basarili") {
+    const m = v.mesaj || "TensorBoard başlatma hatası.";
+    console.error("TB hata:", m);
+    toast("TB hatası: " + m.slice(0, 100), "hata", 8000);
+    alert("TensorBoard başlatılamadı:\n\n" + m);
+    btn.disabled = false;
+    btn.innerText = "🚀 TensorBoard'u Başlat";
+    return;
+  }
+
+  toast(v.mesaj || "TensorBoard başlatıldı.");
+
+  // Port hazır olana kadar bekle (henüz açılmadıysa)
+  if (!v.port_acik) {
+    btn.innerText = "⏳ TB hazırlanıyor (logs yükleniyor)...";
+    const hazir = await tbHazirOlanaKadarBekle(v.url);
+    if (!hazir) {
+      toast("TensorBoard ayağa kalkamadı (timeout). Sayfayı manuel yenileyin.", "uyari", 6000);
+      btn.disabled = false;
+      btn.innerText = "🚀 TensorBoard'u Başlat";
+      return;
+    }
+  }
+
+  // TB ayakta — HTML render'ı tam hazır olması için ek kısa bekleme,
+  // sonra sayfayı yenile. Yenileme; iframe'i sunucu-render edilmiş hâliyle
+  // doğru şekilde gömer (JS injection sırasında bazen blank kalıyordu).
+  btn.innerText = "✓ Hazırlandı, sayfa yenileniyor...";
+  await new Promise(rs => setTimeout(rs, 800));
+  location.reload();
+}
+
+async function uretimLogUret() {
+  const btn = document.getElementById("uretim-log-btn");
+  const eskiMetin = btn.innerText;
+  btn.disabled = true;
+  btn.innerText = "⏳ Üretim verisi işleniyor...";
+
+  try {
+    const v = await jsonPOST("{{ url_for('akademik_uretim_log_uret') }}", {});
+    const tip = v.durum === "basarili" ? "basarili" : (v.durum === "uyari" ? "uyari" : "hata");
+    toast(v.mesaj || "Tamamlandı.", tip, 6000);
+
+    // TB iframe yenile (yeni veri noktası geldi → grafikler güncellensin)
+    if (v.durum === "basarili") {
+      const iframe = document.getElementById("tb-iframe");
+      if (iframe) {
+        // TB reload_interval=5sn olduğu için biraz bekle, sonra reload
+        setTimeout(() => { iframe.src = iframe.src; }, 1500);
+      }
+    }
+  } catch (e) {
+    toast("Üretim log hatası: " + e.message, "hata", 8000);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = eskiMetin;
+  }
+}
+
+async function tensorboardDurdur() {
+  if (!confirm("TensorBoard sunucusu durdurulacak. Devam edelim mi?")) return;
+  const btn = document.getElementById("tb-durdur-btn");
+  btn.disabled = true;
+  btn.innerText = "⏳ Durduruluyor...";
+
+  const v = await jsonPOST("{{ url_for('akademik_tb_durdur') }}", {});
+  toast(v.mesaj || "Durduruldu.", v.durum === "basarili" ? "basarili" : "hata", 4500);
+
+  // Port'un gerçekten kapandığından emin olana kadar 3 saniye boyunca yokla
+  let kapandi = !v.calisiyor;
+  for (let i = 0; i < 4 && !kapandi; i++) {
+    await new Promise(rs => setTimeout(rs, 700));
+    try {
+      const r = await fetch(TB_DURUM_URL, { cache: "no-store" });
+      const j = await r.json();
+      kapandi = !j.port_acik;
+    } catch (e) {}
+  }
+
+  if (kapandi) {
+    // Iframe'i temizle ve "durduruldu" görünümüne döndür
+    const cerceve = document.getElementById("tb-cerceve");
+    cerceve.innerHTML = `
+      <div class="tb-bos">
+        <div style="font-size:48px;">📈</div>
+        <div style="font-size:16px; font-weight:600; color:var(--metin);">TensorBoard durduruldu</div>
+        <div>Yeniden başlatmak için yukarıdaki butonu kullanın.</div>
+      </div>`;
+    tbDurumGuncelle(false);
+  } else {
+    btn.disabled = false;
+    btn.innerText = "⏹ Durdur";
+    toast("Port hâlâ açık görünüyor — manuel kapatmanız gerekebilir.", "uyari", 6000);
+  }
+}
+</script>
+{% endblock %}
